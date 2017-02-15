@@ -11,9 +11,10 @@
     <name>Mapping service Parent Project</name>
 
     <modules>
-        <module>runner</module>
-        <module>template-property-equals</module>
         <module>utils</module>
+        <module>template-property-equals</module>
+        <module>dbpedia-mapping-helper</module>
+        <module>runner</module>
     </modules>
 
     <properties>
