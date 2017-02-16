@@ -18,4 +18,6 @@ data class TemplatePropertyMapping(
         var faProperty: String? = null,
         @Index(name = "tpm_en_property")
         @Column(name = "en_property")
-        var enProperty: String? = null)
+        var enProperty: String? = null,
+        @Column(name = "not_translated")
+        var notTranslated: Boolean? = null)

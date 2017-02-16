@@ -5,6 +5,7 @@ import ir.ac.iust.dml.kg.templateequalities.access.entities.TemplatePropertyMapp
 import ir.ac.iust.dml.kg.templateequalities.logic.wiki.InfoboxTemplateReader
 import ir.ac.iust.dml.kg.templateequalities.logic.wiki.MappingDiscoveryListener
 import ir.ac.iust.dml.kg.utils.ConfigReader
+import ir.ac.iust.dml.kg.utils.LanguageChecker
 import ir.ac.iust.dml.kg.utils.dump.WikiArticle
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,7 +34,8 @@ class Loader {
                 val name = article.title!!.substringAfter("الگو:").trim().substringAfter("Infobox").trim()
                 for ((key, value) in mappings) {
                     if (value.length < 20 && key.length < 20)
-                        dao.save(TemplatePropertyMapping(type = name, enProperty = value, faProperty = key))
+                        dao.save(TemplatePropertyMapping(type = name, enProperty = value, faProperty = key,
+                                notTranslated = LanguageChecker.isEnglish(key)))
                 }
                 println("${article.title}: ${mappings.size} mappings")
             }

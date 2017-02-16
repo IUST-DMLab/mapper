@@ -2,7 +2,7 @@ package ir.ac.iust.dml.kg.templateequalities.logic.export
 
 import javax.xml.bind.annotation.XmlRootElement
 
-data class PropertyMap(var fa: String? = null, var en: String? = null)
+data class PropertyMap(var fa: String? = null, var en: String? = null, var translated: Boolean? = null)
 
 data class InfoboxMaps(var maps: MutableList<PropertyMap> = mutableListOf())
 

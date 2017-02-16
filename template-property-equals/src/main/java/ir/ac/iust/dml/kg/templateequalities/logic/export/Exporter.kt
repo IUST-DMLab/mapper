@@ -45,9 +45,9 @@ class Exporter {
         do {
             val list = dao.list(page = page++)
             logger.trace("I have read page " + page)
-            for ((id, type, faProperty, enProperty) in list.data) {
+            for ((id, type, faProperty, enProperty, notTranslated) in list.data) {
                 val infoboxMap = toWrite.infoxboxes.getOrPut(type!!, { InfoboxMaps() })
-                infoboxMap.maps.add(PropertyMap(fa = faProperty, en = enProperty))
+                infoboxMap.maps.add(PropertyMap(fa = faProperty, en = enProperty, translated = !notTranslated!!))
             }
         } while (!list.data.isEmpty())
         return toWrite
