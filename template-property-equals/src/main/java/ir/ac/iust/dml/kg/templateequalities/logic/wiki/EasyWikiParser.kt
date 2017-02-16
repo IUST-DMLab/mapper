@@ -40,7 +40,7 @@ object EasyWikiParser {
 
     val linkAndTitleRegex = Regex("([^\\[]*)\\[+([^|]+)\\|([^\\]]+)\\]+([^\\]]*)")
     val linkRegex = Regex("([^\\[]*)\\[+([^\\]]+)\\]+([^\\]]*)")
-    val textAndColon = Regex("([^:]*)\\s+:")
+    val textAndColon = Regex("([^:]*)\\s*:")
     val elementOpenRegex = Regex("([^<]*)<[^>]+>([^>]*)")
     val elementCloseRegex = Regex("([^<]*)</[^>]+>([^>]*)")
     val escapedRegex = Regex("([^&]*)&[^;]+;([^;]*)")

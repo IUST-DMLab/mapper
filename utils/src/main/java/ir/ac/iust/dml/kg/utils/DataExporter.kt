@@ -6,6 +6,7 @@ import java.io.BufferedWriter
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.io.OutputStreamWriter
+import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Path
 import javax.xml.bind.JAXBContext
@@ -37,14 +38,13 @@ object DataExporter {
 
     @Throws(Exception::class)
     fun <T> export(type: ExportTypes, data: Any, stream: OutputStream, clazz: Class<T>) {
-        BufferedWriter(OutputStreamWriter(stream, "UTF-8")).use { writer ->
-            if (type == ExportTypes.json)
-                gson.toJson(data, writer)
-            else {
+        if (type == ExportTypes.json)
+            stream.write(gson.toJson(data).toByteArray(Charset.forName("UTF-8")))
+        else
+            BufferedWriter(OutputStreamWriter(stream, "UTF-8")).use { writer ->
                 val jaxbMarshaller = JAXBContext.newInstance(clazz).createMarshaller()
                 jaxbMarshaller.marshal(data, writer)
+                writer.newLine()
             }
-            writer.newLine()
-        }
     }
 }

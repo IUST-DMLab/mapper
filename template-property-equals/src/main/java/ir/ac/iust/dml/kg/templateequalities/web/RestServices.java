@@ -2,8 +2,9 @@ package ir.ac.iust.dml.kg.templateequalities.web;
 
 import ir.ac.iust.dml.kg.templateequalities.access.dao.TemplatePropertyMappingDao;
 import ir.ac.iust.dml.kg.templateequalities.access.entities.TemplatePropertyMapping;
-import ir.ac.iust.dml.kg.templateequalities.logic.Exporter;
 import ir.ac.iust.dml.kg.templateequalities.logic.Loader;
+import ir.ac.iust.dml.kg.templateequalities.logic.export.ExportData;
+import ir.ac.iust.dml.kg.templateequalities.logic.export.Exporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,10 +27,15 @@ public class RestServices {
         return "Loaded!";
     }
 
-    @RequestMapping("/export/{type}")
-    public void export(@PathVariable String type, HttpServletResponse response) throws Exception {
-        if (type.equals("json")) exporter.exportJson(response);
-        else exporter.exportXml(response);
+    @RequestMapping("/export/xml")
+    public void exportXml(HttpServletResponse response) throws Exception {
+        exporter.exportXml(response);
+    }
+
+    @RequestMapping(value = "/export/json", produces = "application/json")
+    @ResponseBody
+    public ExportData exportJson(HttpServletResponse response) throws Exception {
+        return exporter.exportJson(response);
     }
 
     @RequestMapping("/rest/v1/mapping/{lang}/{title}")
