@@ -8,14 +8,19 @@ import org.sweble.wikitext.parser.nodes.WtValue
 import java.nio.file.Path
 
 object InfoboxTemplateReader {
+
+    val INVALID_ARTICLE_REGEX = Regex("\\\\|/")
+
     fun read(path: Path, listener: MappingDiscoveryListener) {
         WikiDumpReader(path).use {
             reader ->
             while (reader.hasNext()) {
                 val article = reader.next()
                 if (article.ns == 10
+                        && article.title != null
                         && (/*article.title!!.startsWith("الگو:جعبه") || */article.title!!.startsWith("الگو:Infobox"))
-                        && article.revision!!.text!!.contains("data1")) {
+                        && article.revision!!.text!!.contains("data1")
+                        && !article.title!!.contains(INVALID_ARTICLE_REGEX)) {
                     val page = EasyWikiParser.parse(article.revision!!.text!!)
                     val templates = mutableListOf<WtTemplateArgument>()
                     EasyWikiParser.getAllNode(WtTemplateArgument::class.java, page, templates)

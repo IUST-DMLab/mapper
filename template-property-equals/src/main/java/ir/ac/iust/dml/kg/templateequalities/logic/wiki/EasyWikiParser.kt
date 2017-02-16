@@ -38,8 +38,9 @@ object EasyWikiParser {
         return builder.toString()
     }
 
-    val linkAndTitleRegex = Regex("([^\\[]*)\\[+([^|]+)\\|([^|]+)\\]+([^\\]]*)")
+    val linkAndTitleRegex = Regex("([^\\[]*)\\[+([^|]+)\\|([^\\]]+)\\]+([^\\]]*)")
     val linkRegex = Regex("([^\\[]*)\\[+([^\\]]+)\\]+([^\\]]*)")
+    val textAndColon = Regex("([^:]*)\\s+:")
     val elementOpenRegex = Regex("([^<]*)<[^>]+>([^>]*)")
     val elementCloseRegex = Regex("([^<]*)</[^>]+>([^>]*)")
     val escapedRegex = Regex("([^&]*)&[^;]+;([^;]*)")
@@ -72,6 +73,8 @@ object EasyWikiParser {
             return groups(text, linkRegex, 1, 2, 3)
         if (text.matches(sharpIfRegex))
             return groups(text, sharpIfRegex, 1, 3)
+        if (text.matches(textAndColon))
+            return groups(text, textAndColon, 1)
         return text.trim()
     }
 }

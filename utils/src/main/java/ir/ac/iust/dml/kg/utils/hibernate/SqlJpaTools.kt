@@ -24,7 +24,8 @@ object SqlJpaTools {
         for (criterion in criteria) c.add(criterion)
         c.setFirstResult(page * pageSize).setMaxResults(pageSize)
         val data = c.list() as MutableList<T>
-        val count = c.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
+        val count = c.setFirstResult(0).setMaxResults(1)
+                .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
                 .setProjection(Projections.rowCount()).uniqueResult() as Long
         return PagedData(data, page, pageSize, count / pageSize.toLong(), count)
     }
