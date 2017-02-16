@@ -11,6 +11,7 @@ import org.springframework.context.annotation.ImportResource;
 @SpringBootApplication
 @ImportResource(value = {
         "classpath:template-equals-context.xml",
+        "classpath:dbpedia-helper-context.xml",
         "classpath:mysql.xml"
 })
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class,

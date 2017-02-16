@@ -12,6 +12,7 @@ public class WelcomeController {
                 "<br/>" +
                 "Select one of these options:" +
                 "<br/>" +
-                "<a href='/template'>Cross-lingual Template Equalities</a>";
+                "<a href='/template'>Cross-lingual Template Equalities</a><br/>" +
+                "<a href='/helper'>DBpedia Mapping Helper</a>";
     }
 }

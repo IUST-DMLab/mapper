@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/template")
-public class RestServices {
+public class TemplateRestServices {
     @Autowired
     private Loader loader;
     @Autowired
