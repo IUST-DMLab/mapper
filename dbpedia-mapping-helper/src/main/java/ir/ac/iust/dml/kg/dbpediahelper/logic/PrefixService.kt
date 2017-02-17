@@ -31,4 +31,12 @@ class PrefixService {
         }
         logger.trace("${prefixNames.size} prefixes has been loaded.")
     }
+
+    fun replacePrefixes(text: String): String {
+        var result = text
+        prefixAddresses.keys.asSequence()
+                .filter { result.contains(it) }
+                .forEach { result = result.replace(it, prefixAddresses[it]!! + ":") }
+        return result
+    }
 }

@@ -11,7 +11,8 @@ public class MappingHelperUIController {
     public String index() {
         return "Greetings from Spring Boot! " +
                 "<br/>" +
-                "Put the dbpedia english mapping dump file in ~/pkg/dbpedia_mapping.owl and load data <a href='helper/load'>here</a>" +
+                "Put the dbpedia english mapping dump file in ~/pkg/dbpedia_mapping.owl " +
+                "and load data <a href='helper/load'>here</a>" +
                 "<br/>" +
                 "Reload prefixes by clicking <a href='helper/prefixes'>here</a>" +
                 "<br/>" +

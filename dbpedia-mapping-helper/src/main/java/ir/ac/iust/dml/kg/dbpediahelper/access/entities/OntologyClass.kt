@@ -1,10 +1,9 @@
 package ir.ac.iust.dml.kg.dbpediahelper.access.entities
 
-import javax.persistence.Column
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
+import javax.persistence.*
 
+@Entity
+@Table(name = "ontology_class")
 data class OntologyClass(
         @Id
         @Column(name = "id")

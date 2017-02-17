@@ -9,11 +9,11 @@ data class TriplesMap(
         @Column(name = "id")
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long? = null,
-        @Column var title: String//,
-//        @ManyToOne
-//        @JoinColumn(name = "logical_source_id", referencedColumnName = "id", nullable = false)
-//        @Column var logicalSource: LogicalSource,
-//        @ManyToOne
-//        @JoinColumn(name = "subject_map_id", referencedColumnName = "id", nullable = false)
-//        @Column var subjectMap: SubjectMap
+        @Column var title: String,
+        @ManyToOne
+        @JoinColumn(name = "logical_source_id", referencedColumnName = "id", nullable = false)
+        var logicalSource: LogicalSource,
+        @ManyToOne
+        @JoinColumn(name = "subject_map_id", referencedColumnName = "id", nullable = false)
+        var subjectMap: SubjectMap
 )
