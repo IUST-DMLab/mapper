@@ -84,6 +84,19 @@ class DbpediaHelperLoader {
                             ontologyProperty = dbpediaEnglishMapping[0].ontologyProperty)
                     logger.info("persian mapping found: $persianMapping")
                     dao.save(persianMapping)
+                } else {
+                    dbpediaEnglishMapping.addAll(dao.read(language = "en",
+                            templateProperty = enProperty))
+                    for (mapping in dbpediaEnglishMapping) {
+                        val persianMapping = DBpediaPropertyMapping(
+                                language = "fa",
+                                type = mapping.type,
+                                clazz = null,
+                                templateProperty = faProperty,
+                                ontologyProperty = mapping.ontologyProperty)
+                        logger.info("not accurate persian mapping found: $persianMapping")
+                        dao.save(persianMapping)
+                    }
                 }
             }
         } while (list.data.isNotEmpty())

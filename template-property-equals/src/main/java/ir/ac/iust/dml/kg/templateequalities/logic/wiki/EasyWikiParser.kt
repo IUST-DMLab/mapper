@@ -75,6 +75,10 @@ object EasyWikiParser {
             return groups(text, sharpIfRegex, 1, 3)
         if (text.matches(textAndColon))
             return groups(text, textAndColon, 1)
+        if (text.contains("Longitem")) return text.replace("Longitem", "").trim()
+        if (text.contains("longitem")) return text.replace("longitem", "").trim()
+        if (text.contains("longitem Mean")) return text.replace("longitem Mean", "").trim()
+        if (text.contains("Nowrap")) return text.replace("Nowrap", "").trim()
         return text.trim()
     }
 }
