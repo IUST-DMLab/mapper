@@ -72,8 +72,11 @@ class DbpediaHelperLoader {
             val list = dao.listTemplatePropertyMapping(page = page++)
             for ((id, type, faProperty, enProperty, notTranslated) in list.data) {
                 if (notTranslated!!) continue
-                val dbpediaEnglishMapping = dao.read(language = "en",
-                        type = type, templateProperty = enProperty)
+                val dbpediaEnglishMapping = dao.read(language = "en", type = type,
+                        templateProperty = enProperty!!)
+                if (dbpediaEnglishMapping.isEmpty())
+                    dbpediaEnglishMapping.addAll(dao.read(language = "en", type = type,
+                            templateProperty = enProperty.replace('_', ' ')))
                 if (dbpediaEnglishMapping.isNotEmpty()) {
                     val persianMapping = DBpediaPropertyMapping(language = "fa",
                             type = type, clazz = dbpediaEnglishMapping[0].clazz,
