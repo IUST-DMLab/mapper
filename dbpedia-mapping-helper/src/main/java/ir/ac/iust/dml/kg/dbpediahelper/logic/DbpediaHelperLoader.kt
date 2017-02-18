@@ -1,5 +1,7 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic
 
+import ir.ac.iust.dml.kg.dbpediahelper.access.dao.DBpediaPropertyMappingDao
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.DBpediaPropertyMapping
 import ir.ac.iust.dml.kg.dbpediahelper.logic.dump.OwlDumpReader
 import ir.ac.iust.dml.kg.utils.ConfigReader
 import org.apache.log4j.Logger
@@ -10,8 +12,8 @@ import java.nio.file.Files
 @Service
 class DbpediaHelperLoader {
 
-    //    @Autowired
-//    lateinit var dao: TemplatePropertyMappingDao
+    @Autowired
+    lateinit var dao: DBpediaPropertyMappingDao
     @Autowired
     lateinit var prefixService: PrefixService
     val logger = Logger.getLogger(this.javaClass)!!
@@ -29,13 +31,36 @@ class DbpediaHelperLoader {
         prefixService.reload()
         OwlDumpReader(path).use {
             owlDumpReader ->
+            var ontologyClass: String? = null
+            var infoboxType: String? = null
+            var ontologyProperty: String? = null
+            var templateProperty: String? = null
             while (owlDumpReader.hasNext()) {
                 val triples = owlDumpReader.next()
                 for (triple in triples) {
                     triple.subject = prefixService.replacePrefixes(triple.subject)
                     triple.predicate = prefixService.replacePrefixes(triple.predicate)
                     triple.objekt = prefixService.replacePrefixes(triple.objekt)
-                    logger.info(triple)
+                    if (triple.objekt == "rr:TriplesMap" && triple.subject.startsWith("<dboeni:"))
+                        infoboxType = triple.subject.substringAfter(":").substringBeforeLast(">")
+                    if (triple.predicate == "rr:class" && triple.objekt.startsWith("<"))
+                        ontologyClass = triple.objekt.substringAfterLast("<").substringBeforeLast(">")
+                    if (triple.predicate == "rr:predicate" && triple.objekt.startsWith("<"))
+                        ontologyProperty = triple.objekt.substringAfter("<").substringBeforeLast(">")
+                    if (triple.predicate == "rml:reference")
+                        templateProperty = triple.objekt
+//                    println("$infoboxType $ontologyClass $ontologyProperty $templateProperty")
+                    if (infoboxType != null && ontologyClass != null
+                            && ontologyProperty != null && templateProperty != null) {
+                        println("found: $infoboxType $templateProperty $ontologyClass $ontologyProperty")
+                        dao.save(DBpediaPropertyMapping(language = "en",
+                                type = infoboxType,
+                                clazz = ontologyClass,
+                                templateProperty = templateProperty,
+                                ontologyProperty = ontologyProperty))
+                        templateProperty = null
+                        ontologyProperty = null
+                    }
                 }
             }
         }
