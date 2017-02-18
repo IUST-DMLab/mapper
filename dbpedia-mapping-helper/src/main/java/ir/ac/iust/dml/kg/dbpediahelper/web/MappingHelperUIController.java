@@ -14,8 +14,10 @@ public class MappingHelperUIController {
                 "Put the dbpedia english mapping dump file in ~/pkg/dbpedia_mapping.owl " +
                 "and load data <a href='helper/load'>here</a>" +
                 "<br/>" +
-                "Reload prefixes by clicking <a href='helper/prefixes'>here</a>" +
+                "To Generate Persian mapping, click <a href='generate'>here</a>" +
                 "<br/>" +
+//                "Reload prefixes by clicking <a href='helper/prefixes'>here</a>" +
+//                "<br/>" +
                 "You can export data in <a href='helper/export/json'>json</a> or " +
                 "<a href='helper/export/xml'>xml</a>." +
                 "<br/>" +

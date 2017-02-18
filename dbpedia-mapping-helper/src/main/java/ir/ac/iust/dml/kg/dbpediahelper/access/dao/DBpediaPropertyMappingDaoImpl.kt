@@ -54,4 +54,12 @@ open class DBpediaPropertyMappingDaoImpl : DBpediaPropertyMappingDao {
         session.close()
         return list
     }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun listTemplatePropertyMapping(pageSize: Int, page: Int): PagedData<TemplatePropertyMapping> {
+        val session = this.sessionFactory.openSession()
+        val list = SqlJpaTools.page(TemplatePropertyMapping::class.java, page, pageSize, session)
+        session.close()
+        return list
+    }
 }

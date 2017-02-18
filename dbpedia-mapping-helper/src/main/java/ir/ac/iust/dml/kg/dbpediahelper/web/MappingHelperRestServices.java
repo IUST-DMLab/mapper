@@ -25,4 +25,10 @@ public class MappingHelperRestServices {
         helperLoader.load();
         return "Loaded!";
     }
+
+    @RequestMapping("/generate")
+    public String generate() throws Exception {
+        helperLoader.generatePersian();
+        return "Generated!";
+    }
 }

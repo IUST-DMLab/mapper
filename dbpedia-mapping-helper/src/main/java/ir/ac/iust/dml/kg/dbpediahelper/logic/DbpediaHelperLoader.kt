@@ -52,7 +52,7 @@ class DbpediaHelperLoader {
 //                    println("$infoboxType $ontologyClass $ontologyProperty $templateProperty")
                     if (infoboxType != null && ontologyClass != null
                             && ontologyProperty != null && templateProperty != null) {
-                        println("found: $infoboxType $templateProperty $ontologyClass $ontologyProperty")
+                        logger.info("found: $infoboxType $templateProperty $ontologyClass $ontologyProperty")
                         dao.save(DBpediaPropertyMapping(language = "en",
                                 type = infoboxType,
                                 clazz = ontologyClass,
@@ -64,6 +64,26 @@ class DbpediaHelperLoader {
                 }
             }
         }
+    }
+
+    fun generatePersian() {
+        var page = 0
+        do {
+            val list = dao.listTemplatePropertyMapping(page = page++)
+            for ((id, type, faProperty, enProperty, notTranslated) in list.data) {
+                if (notTranslated!!) continue
+                val dbpediaEnglishMapping = dao.read(language = "en",
+                        type = type, templateProperty = enProperty)
+                if (dbpediaEnglishMapping.isNotEmpty()) {
+                    val persianMapping = DBpediaPropertyMapping(language = "fa",
+                            type = type, clazz = dbpediaEnglishMapping[0].clazz,
+                            templateProperty = faProperty,
+                            ontologyProperty = dbpediaEnglishMapping[0].ontologyProperty)
+                    logger.info("persian mapping found: $persianMapping")
+                    dao.save(persianMapping)
+                }
+            }
+        } while (list.data.isNotEmpty())
     }
 
 }
