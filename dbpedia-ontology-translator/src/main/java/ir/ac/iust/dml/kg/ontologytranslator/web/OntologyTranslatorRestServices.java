@@ -6,10 +6,7 @@ import ir.ac.iust.dml.kg.ontologytranslator.logic.export.ExportData;
 import ir.ac.iust.dml.kg.ontologytranslator.logic.export.OntologyClassTranslationData;
 import ir.ac.iust.dml.kg.ontologytranslator.logic.export.OntologyTranslatorExporter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -57,5 +54,21 @@ public class OntologyTranslatorRestServices {
   @ResponseBody
   public List<OntologyClassTranslationData> getChildren(@PathVariable String name) throws Exception {
     return translator.getChildren(name);
+  }
+
+  @RequestMapping(value = "/rest/v1/translate", method = RequestMethod.GET)
+  @ResponseBody
+  public Boolean translateGet(@RequestParam String name,
+                              @RequestParam String faLabel,
+                              @RequestParam String faOtherLabels,
+                              @RequestParam String note) throws Exception {
+    return translator.translate(new OntologyClassTranslationData(name, null, null,
+            faLabel, faOtherLabels, note));
+  }
+
+  @RequestMapping(value = "/rest/v1/translate", method = RequestMethod.POST)
+  @ResponseBody
+  public Boolean translatePost(@RequestBody OntologyClassTranslationData data) throws Exception {
+    return translator.translate(data);
   }
 }

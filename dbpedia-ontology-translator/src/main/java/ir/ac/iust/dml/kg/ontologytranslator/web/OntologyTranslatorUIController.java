@@ -31,6 +31,21 @@ public class OntologyTranslatorUIController {
             "http://localhost:8080/translator/rest/v1/root<br/>" +
             "http://localhost:8080/translator/rest/v1/node/Thing<br/>" +
             "http://localhost:8080/translator/rest/v1/children/Thing<br/>" +
-            "http://localhost:8080/translator/rest/v1/parent/Athlete";
+            "http://localhost:8080/translator/rest/v1/parent/Athlete</br>" +
+            "for change translation call GET:<br/>" +
+            "translator/rest/v1/translate?name={ontology title}&faLabel={persian label}" +
+            "&faOtherLabels={other persian labels}&note={any notes}<br/>" +
+            "Like this:<br/>" +
+            "http://localhost:8080/translator/rest/v1/translate?name=Athlete" +
+            "&faLabel=ورزشکار&faOtherLabels=بازیکن&amp;note=هنوز%20مطمئن%20نیستم<br/>" +
+            "Check it out to ensure changes have effected<br/>" +
+            "http://localhost:8080/translator/rest/v1/node/Athlete<br/>" +
+            "or POST: translator/rest/v1/translate with this request body:<br/>" +
+            "{<br/>" +
+            "  \"name\" : \"ontology title\"<br/>" +
+            "  \"faLabel\" : \"persian label\"<br/>" +
+            "  \"faOtherLabels\" : \"other persian labels\"<br/>" +
+            "  \"note\" : \"any notes\"<br/>" +
+            "}";
   }
 }
