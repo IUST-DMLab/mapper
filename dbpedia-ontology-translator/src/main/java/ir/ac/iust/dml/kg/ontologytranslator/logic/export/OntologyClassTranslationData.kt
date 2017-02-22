@@ -6,4 +6,5 @@ data class OntologyClassTranslationData(
       var enLabel: String? = null,
       var faLabel: String? = null,
       var faOtherLabels: String? = null,
-      var note: String? = null)
+      var note: String? = null,
+      var approved: Boolean? = null)

@@ -23,4 +23,6 @@ data class OntologyClassTranslation(
       @Column(name = "fa_other_labels")
       var faOtherLabels: String? = null,
       @Column(name = "note")
-      var note: String? = null)
+      var note: String? = null,
+      @Column(name = "approved")
+      var approved: Boolean? = null)

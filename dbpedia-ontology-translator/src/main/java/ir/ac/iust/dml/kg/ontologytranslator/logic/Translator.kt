@@ -20,7 +20,8 @@ class Translator {
             enLabel = translation.enLabel,
             faLabel = translation.faLabel,
             faOtherLabels = translation.faOtherLabels,
-            note = translation.note
+            note = translation.note,
+            approved = translation.approved
       )
    }
 
@@ -50,6 +51,7 @@ class Translator {
       translation.faLabel = data.faLabel
       translation.faOtherLabels = data.faOtherLabels
       translation.note = data.note
+      translation.approved = data.approved
       try {
          dao.save(translation)
          return true

@@ -33,10 +33,10 @@ public class OntologyTranslatorUIController {
             "http://localhost:8080/translator/rest/v1/children/Thing<br/>" +
             "http://localhost:8080/translator/rest/v1/parent/Athlete</br>" +
             "for change translation call GET:<br/>" +
-            "translator/rest/v1/translate?name={ontology title}&faLabel={persian label}" +
-            "&faOtherLabels={other persian labels}&note={any notes}<br/>" +
+            "translator/rest/v1/translate?name={ontology title}&faLabel={persian label}&approved={approved}" +
+            "&faOtherLabels={other persian labels}&amp;note={any notes}<br/>" +
             "Like this:<br/>" +
-            "http://localhost:8080/translator/rest/v1/translate?name=Athlete" +
+            "http://localhost:8080/translator/rest/v1/translate?name=Athlete&approved=true&" +
             "&faLabel=ورزشکار&faOtherLabels=بازیکن&amp;note=هنوز%20مطمئن%20نیستم<br/>" +
             "Check it out to ensure changes have effected<br/>" +
             "http://localhost:8080/translator/rest/v1/node/Athlete<br/>" +
@@ -46,6 +46,7 @@ public class OntologyTranslatorUIController {
             "  \"faLabel\" : \"persian label\"<br/>" +
             "  \"faOtherLabels\" : \"other persian labels\"<br/>" +
             "  \"note\" : \"any notes\"<br/>" +
+            "  \"approved\" : \"approved\"<br/>" +
             "}";
   }
 }

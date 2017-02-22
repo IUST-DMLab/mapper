@@ -61,9 +61,10 @@ public class OntologyTranslatorRestServices {
   public Boolean translateGet(@RequestParam String name,
                               @RequestParam String faLabel,
                               @RequestParam String faOtherLabels,
-                              @RequestParam String note) throws Exception {
+                              @RequestParam String note,
+                              @RequestParam boolean approved) throws Exception {
     return translator.translate(new OntologyClassTranslationData(name, null, null,
-            faLabel, faOtherLabels, note));
+            faLabel, faOtherLabels, note, approved));
   }
 
   @RequestMapping(value = "/rest/v1/translate", method = RequestMethod.POST)
