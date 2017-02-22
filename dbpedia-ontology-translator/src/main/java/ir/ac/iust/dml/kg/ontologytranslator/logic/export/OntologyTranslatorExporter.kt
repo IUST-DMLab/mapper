@@ -1,6 +1,7 @@
 package ir.ac.iust.dml.kg.ontologytranslator.logic.export
 
 import ir.ac.iust.dml.kg.ontologytranslator.access.dao.OntologyClassTranslationDao
+import ir.ac.iust.dml.kg.ontologytranslator.logic.Translator
 import ir.ac.iust.dml.kg.utils.DataExporter
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,6 +13,8 @@ class OntologyTranslatorExporter {
 
    @Autowired
    lateinit var dao: OntologyClassTranslationDao
+   @Autowired
+   lateinit var translator: Translator
    val logger = Logger.getLogger(this.javaClass)!!
 
    @Throws(Exception::class)
@@ -44,16 +47,8 @@ class OntologyTranslatorExporter {
       do {
          val list = dao.search(page = page++, pageSize = 20)
          logger.trace("I have read page " + page)
-         for (translation in list.data) {
-            toWrite.list.add(OntologyClassTranslation(
-                  ontologyClass = translation.name,
-                  parentOntologyClass = if (translation.parentId == null) null else dao.read(translation.parentId)!!.name,
-                  enLabel = translation.enLabel,
-                  faLabel = translation.faLabel,
-                  faOtherLabels = translation.faOtherLabels,
-                  note = translation.note
-            ))
-         }
+         for (translation in list.data)
+            toWrite.list.add(translator.sync(translation)!!)
       } while (!list.data.isEmpty())
       return toWrite
    }

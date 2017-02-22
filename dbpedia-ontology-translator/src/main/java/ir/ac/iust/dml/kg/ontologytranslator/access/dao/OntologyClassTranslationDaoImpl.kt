@@ -41,6 +41,15 @@ open class OntologyClassTranslationDaoImpl : OntologyClassTranslationDao {
       return mapping
    }
 
+   override fun readRoot(): OntologyClassTranslation? {
+      val session = this.sessionFactory.openSession()
+      val criteria = session.createCriteria(OntologyClassTranslation::class.java)
+      criteria.add(Restrictions.isNull("parentId"))
+      val mapping = criteria.uniqueResult() as? OntologyClassTranslation
+      session.close()
+      return mapping
+   }
+
    override fun search(name: String?, parentId: Long?, like: Boolean, pageSize: Int, page: Int): PagedData<OntologyClassTranslation> {
       val session = this.sessionFactory.openSession()
       val criteria = SqlJpaTools.condtionalCriteria(
@@ -51,6 +60,16 @@ open class OntologyClassTranslationDaoImpl : OntologyClassTranslationDao {
       val list = SqlJpaTools.page(OntologyClassTranslation::class.java, page, pageSize, session, *criteria)
       session.close()
       return list
+   }
+
+   @Suppress("UNCHECKED_CAST")
+   override fun getChildren(id: Long): List<OntologyClassTranslation> {
+      val session = this.sessionFactory.openSession()
+      val criteria = session.createCriteria(OntologyClassTranslation::class.java)
+      criteria.add(Restrictions.eq("parentId", id))
+      val mapping = criteria.list() as MutableList<OntologyClassTranslation>
+      session.close()
+      return mapping
    }
 
 }

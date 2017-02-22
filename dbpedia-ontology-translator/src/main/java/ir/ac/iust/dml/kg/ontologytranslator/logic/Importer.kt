@@ -22,18 +22,23 @@ class Importer {
       } while (paged.data.isNotEmpty())
    }
 
+   //TODO can we remove this?
+   fun fixName(name: String) = if (name.startsWith("owl#")) name.substring(4) else name
+
    fun createNode(clazz: DBpediaOntologyClass): OntologyClassTranslation {
       val parentTranslation: OntologyClassTranslation?
       if (clazz.parentId != null && clazz.parentId != clazz.id) {
          val parent = sourceDao.read(clazz.parentId!!)!!
-         val translatedParent = translationDao.read(parent.name!!, null)
+         val translatedParent = translationDao.read(fixName(parent.name!!), null)
          if (translatedParent == null) parentTranslation = createNode(parent)
          else parentTranslation = translatedParent
       } else parentTranslation = null
 
       var translated = translationDao.read(clazz.name!!, parentTranslation?.id)
       if (translated == null) {
-         translated = OntologyClassTranslation(name = clazz.name, enLabel = clazz.enLabel,
+         translated = OntologyClassTranslation(
+               name = fixName(clazz.name!!),
+               enLabel = clazz.enLabel,
                parentId = parentTranslation?.id)
       } else {
          translated.parentId = parentTranslation?.id
