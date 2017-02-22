@@ -21,12 +21,12 @@
                 <prop key="cache.use_second_level_cache">true</prop>
                 <prop key="hibernate.connection.driver_class">com.mysql.jdbc.Driver</prop>
                 <prop key="hibernate.connection.url">
-                    jdbc:mysql://localhost:3306/pkg?createDatabaseIfNotExist=true&amp;useUnicode=true&amp;characterEncoding=utf8
+                  jdbc:mysql://localhost:3306/knowledge_graph?createDatabaseIfNotExist=true&amp;useUnicode=true&amp;characterEncoding=utf8
                 </prop>
                 <prop key="hibernate.connection.CharSet">utf8</prop>
                 <prop key="hibernate.connection.characterEncoding">utf8</prop>
                 <prop key="hibernate.connection.useUnicode">true</prop>
-                <prop key="hibernate.default_schema">pkg</prop>
+              <prop key="hibernate.default_schema">knowledge_graph</prop>
                 <prop key="hibernate.hbm2ddl.auto">update</prop>
                 <prop key="hibernate.connection.username">root</prop>
                 <prop key="hibernate.connection.password">root</prop>

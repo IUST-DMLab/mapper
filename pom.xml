@@ -14,6 +14,7 @@
         <module>utils</module>
         <module>template-property-equals</module>
         <module>dbpedia-mapping-helper</module>
+      <module>dbpedia-ontology-translator</module>
         <module>runner</module>
     </modules>
 
