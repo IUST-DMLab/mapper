@@ -12,7 +12,8 @@ interface OntologyClassTranslationDao {
 
    fun readRoot(): OntologyClassTranslation?
 
-   fun search(name: String? = null, parentId: Long? = null, like: Boolean = false, pageSize: Int = 20, page: Int = 0):
+   fun search(name: String? = null, parentId: Long? = null, like: Boolean = false, approved: Boolean? = null,
+              pageSize: Int = 20, page: Int = 0):
          PagedData<OntologyClassTranslation>
 
    fun getChildren(id: Long): List<OntologyClassTranslation>

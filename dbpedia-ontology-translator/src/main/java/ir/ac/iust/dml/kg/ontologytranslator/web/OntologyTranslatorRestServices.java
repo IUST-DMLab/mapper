@@ -5,6 +5,7 @@ import ir.ac.iust.dml.kg.ontologytranslator.logic.Translator;
 import ir.ac.iust.dml.kg.ontologytranslator.logic.export.ExportData;
 import ir.ac.iust.dml.kg.ontologytranslator.logic.export.OntologyClassTranslationData;
 import ir.ac.iust.dml.kg.ontologytranslator.logic.export.OntologyTranslatorExporter;
+import ir.ac.iust.dml.kg.utils.PagedData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,6 +55,18 @@ public class OntologyTranslatorRestServices {
   @ResponseBody
   public List<OntologyClassTranslationData> getChildren(@PathVariable String name) throws Exception {
     return translator.getChildren(name);
+  }
+
+  @RequestMapping(value = "/rest/v1/search", method = RequestMethod.GET)
+  @ResponseBody
+  public PagedData<OntologyClassTranslationData> search(@RequestParam(required = false) String name,
+                                                        @RequestParam(required = false) String parent,
+                                                        @RequestParam(required = false, defaultValue = "false") Boolean like,
+                                                        @RequestParam(required = false) Boolean approved,
+                                                        @RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "20") int pageSize)
+          throws Exception {
+    return translator.search(name, parent, like, approved, pageSize, page);
   }
 
   @RequestMapping(value = "/rest/v1/translate", method = RequestMethod.GET)

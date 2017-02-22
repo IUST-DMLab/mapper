@@ -3,6 +3,7 @@ package ir.ac.iust.dml.kg.ontologytranslator.logic
 import ir.ac.iust.dml.kg.ontologytranslator.access.dao.OntologyClassTranslationDao
 import ir.ac.iust.dml.kg.ontologytranslator.access.entities.OntologyClassTranslation
 import ir.ac.iust.dml.kg.ontologytranslator.logic.export.OntologyClassTranslationData
+import ir.ac.iust.dml.kg.utils.PagedData
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -44,6 +45,15 @@ class Translator {
       val data = mutableListOf<OntologyClassTranslationData>()
       children.forEach { data.add(sync(it)!!) }
       return data
+   }
+
+   fun search(name: String?, parent: String?, like: Boolean, approved: Boolean?,
+              pageSize: Int, page: Int): PagedData<OntologyClassTranslationData> {
+      val parentId = if (parent == null) null else dao.read(name = parent)?.id
+      val paged = dao.search(name, parentId, like, approved, pageSize, page)
+      val data = mutableListOf<OntologyClassTranslationData>()
+      paged.data.forEach { data.add(sync(it)!!) }
+      return PagedData(data, paged.page, paged.pageSize, paged.pageCount, paged.rowCount)
    }
 
    fun translate(data: OntologyClassTranslationData): Boolean {
