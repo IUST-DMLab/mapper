@@ -13,8 +13,8 @@ public class OntologyTranslatorUIController {
             "<br/>" +
             "reload data from dbpedia_ontology_classes table <a href='translator/import'>here</a>" +
             "<br/>" +
-            "You can export data in <a href='translator/export/json'>json</a> or " +
-            "<a href='translator/export/xml'>xml</a>.<br/>" +
+            "You can export data in <a href='translator/export.json'>json</a> or " +
+            "<a href='translator/export.xml'>xml</a>.<br/>" +
             "<br/>" +
             "Search:" +
             "<form action='template/rest/v1/mapping'>" +

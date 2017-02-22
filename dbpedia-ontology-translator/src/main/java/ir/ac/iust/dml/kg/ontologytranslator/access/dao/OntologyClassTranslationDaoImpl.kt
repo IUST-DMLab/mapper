@@ -22,6 +22,15 @@ open class OntologyClassTranslationDaoImpl : OntologyClassTranslationDao {
       session.close()
    }
 
+   override fun read(id: Long?): OntologyClassTranslation? {
+      val session = this.sessionFactory.openSession()
+      val criteria = session.createCriteria(OntologyClassTranslation::class.java)
+      criteria.add(Restrictions.eq("id", id))
+      val mapping = criteria.uniqueResult() as? OntologyClassTranslation
+      session.close()
+      return mapping
+   }
+
    override fun read(name: String, parentId: Long?): OntologyClassTranslation? {
       val session = this.sessionFactory.openSession()
       val criteria = session.createCriteria(OntologyClassTranslation::class.java)
