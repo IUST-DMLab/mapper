@@ -13,8 +13,8 @@ public class TemplateUIController {
                 "<br/>" +
                 "Put the dump file in ~/pkg/wikipedia_dump.txt and load data <a href='template/load'>here</a>" +
                 "<br/>" +
-                "You can export data in <a href='template/export/json'>json</a> or " +
-                "<a href='template/export/xml'>xml</a>." +
+                "You can export data in <a href='template/export.json'>json</a> or " +
+                "<a href='template/export.xml'>xml</a>." +
                 "<br/>" +
                 "Search:" +
                 "<form action='template/rest/v1/mapping'>" +
