@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
-
 @RestController
 @RequestMapping("/helper")
 public class MappingHelperRestServices {
@@ -40,16 +38,9 @@ public class MappingHelperRestServices {
         return "Generated!";
     }
 
-    @RequestMapping("/export/xml")
-    public void exportXml(@RequestParam(required = false) String language,
-                          HttpServletResponse response) throws Exception {
-        helperExporter.exportXml(language, response);
-    }
-
-    @RequestMapping(value = "/export/json", produces = "application/json")
+    @RequestMapping("/export")
     @ResponseBody
-    public ExportData exportJson(@RequestParam(required = false) String language,
-                                 HttpServletResponse response) throws Exception {
-        return helperExporter.exportJson(language, response);
+    public ExportData exportXml(@RequestParam(required = false) String language) throws Exception {
+        return helperExporter.export(language);
     }
 }

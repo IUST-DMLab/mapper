@@ -18,11 +18,11 @@ public class MappingHelperUIController {
                 "<br/>" +
 //                "Reload prefixes by clicking <a href='helper/prefixes'>here</a>" +
 //                "<br/>" +
-                "You can export data in <a href='helper/export/json'>json</a> or " +
-                "<a href='helper/export/xml'>xml</a>.<br/>" +
+                "You can export data in <a href='helper/export.json'>json</a> or " +
+                "<a href='helper/export.xml'>xml</a>.<br/>" +
                 "You can export data in a specific language by sending language parameters to above services:<br/>" +
-                "<a href='helper/export/json?language=fa'>json</a> or " +
-                "<a href='helper/export/xml?language=fa'>xml</a>." +
+                "<a href='helper/export.json?language=fa'>json</a> or " +
+                "<a href='helper/export.xml?language=fa'>xml</a>." +
                 "<br/>" +
                 "Search:" +
                 "<form action='template/rest/v1/mapping'>" +
