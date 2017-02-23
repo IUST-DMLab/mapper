@@ -47,10 +47,10 @@ class Translator {
       return data
    }
 
-   fun search(name: String?, parent: String?, like: Boolean, approved: Boolean?,
+   fun search(name: String?, parent: String?, like: Boolean, approved: Boolean?, hasFarsi: Boolean?,
               pageSize: Int, page: Int): PagedData<OntologyClassTranslationData> {
       val parentId = if (parent == null) null else dao.read(name = parent)?.id
-      val paged = dao.search(name, parentId, like, approved, pageSize, page)
+      val paged = dao.search(name, parentId, like, approved, hasFarsi, pageSize, page)
       val data = mutableListOf<OntologyClassTranslationData>()
       paged.data.forEach { data.add(sync(it)!!) }
       return PagedData(data, paged.page, paged.pageSize, paged.pageCount, paged.rowCount)

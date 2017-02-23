@@ -29,26 +29,27 @@ public class OntologyTranslatorUIController {
             "translator/rest/v1/children/{title} <br/>" +
             "translator/rest/v1/parent/{title} <br/>" +
             "for example:<br/>" +
-            "http://localhost:8080/translator/rest/v1/root<br/>" +
-            "http://localhost:8080/translator/rest/v1/node/Thing<br/>" +
-            "http://localhost:8080/translator/rest/v1/children/Thing<br/>" +
-            "http://localhost:8080/translator/rest/v1/parent/Athlete</br>" +
+            "http://localhost:8090/translator/rest/v1/root<br/>" +
+            "http://localhost:8090/translator/rest/v1/node/Thing<br/>" +
+            "http://localhost:8090/translator/rest/v1/children/Thing<br/>" +
+            "http://localhost:8090/translator/rest/v1/parent/Athlete</br>" +
             "<hr/>" +
             "You can get data in pages. Every parameters are optional:<br/>" +
             "translator/rest/v1/search?page={page}&pageSize={pageSize}name={name}" +
-            "&parent={parent}&like={searches more deeper}&approved={approved}<br/>" +
+            "&parent={parent}&like={searches more deeper}&approved={approved}&hasFarsi={hasFarsi}<br/>" +
             "like:<br/>" +
-            "http://localhost:8080/translator/rest/v1/search?page=0&pageSize=20&name=Ath&parent=Person&like=true&approved=</br>" +
+            "http://localhost:8090/translator/rest/v1/search?page=0&pageSize=20&name=Ath" +
+            "&parent=Person&like=true&approved=&hasFarsi=</br>" +
             "<hr/>" +
             "for change translation call GET:<br/>" +
             "translator/rest/v1/translate?name={ontology title}&faLabel={persian label}&approved={approved}" +
             "&faOtherLabels={other persian labels}&amp;note={any notes}<br/>" +
             "Like this:<br/>" +
-            "http://localhost:8080/translator/rest/v1/translate?name=Athlete&approved=true&" +
+            "http://localhost:8090/translator/rest/v1/translate?name=Athlete&approved=true&" +
             "&faLabel=ورزشکار&faOtherLabels=بازیکن&amp;note=هنوز%20مطمئن%20نیستم<br/>" +
             "<hr/>" +
             "Check it out to ensure changes have effected<br/>" +
-            "http://localhost:8080/translator/rest/v1/node/Athlete<br/>" +
+            "http://localhost:8090/translator/rest/v1/node/Athlete<br/>" +
             "<hr/>" +
             "or POST: translator/rest/v1/translate with this request body:<br/>" +
             "{<br/>" +

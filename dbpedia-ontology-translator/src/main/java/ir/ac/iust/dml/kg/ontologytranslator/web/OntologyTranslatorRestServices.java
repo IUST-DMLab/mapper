@@ -63,10 +63,11 @@ public class OntologyTranslatorRestServices {
                                                         @RequestParam(required = false) String parent,
                                                         @RequestParam(required = false, defaultValue = "false") Boolean like,
                                                         @RequestParam(required = false) Boolean approved,
+                                                        @RequestParam(required = false) Boolean hasFarsi,
                                                         @RequestParam(defaultValue = "0") int page,
                                                         @RequestParam(defaultValue = "20") int pageSize)
           throws Exception {
-    return translator.search(name, parent, like, approved, pageSize, page);
+    return translator.search(name, parent, like, approved, hasFarsi, pageSize, page);
   }
 
   @RequestMapping(value = "/rest/v1/translate", method = RequestMethod.GET)

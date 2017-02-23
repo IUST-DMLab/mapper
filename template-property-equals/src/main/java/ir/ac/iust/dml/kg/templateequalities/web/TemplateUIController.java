@@ -28,8 +28,8 @@ public class TemplateUIController {
                 "template/rest/v1/mapping/{lang}/{title} <br/>" +
                 "template/rest/v1/mapping/{lang}/{infobox_type}/{title} <br/>" +
                 "for example:<br/>" +
-                "http://localhost:8080/template/rest/v1/mapping/fa/birth_place<br/>" +
-                "http://localhost:8080/template/rest/v1/mapping/fa/rail%20line/نام دیگر<br/>" +
-                "http://localhost:8080/template/rest/v1/mapping/en/rail%20line/other_name";
+                "http://localhost:8090/template/rest/v1/mapping/fa/birth_place<br/>" +
+                "http://localhost:8090/template/rest/v1/mapping/fa/rail%20line/نام دیگر<br/>" +
+                "http://localhost:8090/template/rest/v1/mapping/en/rail%20line/other_name";
     }
 }
