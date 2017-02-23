@@ -27,7 +27,7 @@ class OntologyTranslatorExporter {
       val toWrite = data()
       DataExporter.export(DataExporter.ExportTypes.json,
             "dbpedia.ontology.translator.export.json",
-            "~/pkg/data/dbpedia_ontology_translator.json",
+            "~/.pkg/data/dbpedia_ontology_translator.json",
             toWrite, ExportData::class.java)
       return toWrite
    }
@@ -37,7 +37,7 @@ class OntologyTranslatorExporter {
       val toWrite = data()
       DataExporter.export(DataExporter.ExportTypes.xml,
             "dbpedia.ontology.translator.export.xml",
-            "~/pkg/data/dbpedia_ontology_translator.xml",
+            "~/.pkg/data/dbpedia_ontology_translator.xml",
             toWrite, ExportData::class.java)
    }
 

@@ -11,7 +11,7 @@ public class MappingHelperUIController {
     public String index() {
         return "Greetings from Spring Boot! " +
                 "<br/>" +
-                "Put the dbpedia english mapping dump file in ~/pkg/dbpedia_mapping.owl " +
+                "Put the dbpedia english mapping dump file in ~/.pkg/dbpedia_mapping.owl " +
                 "and load data <a href='helper/load'>here</a>" +
                 "<br/>" +
                 "To Generate Persian mapping, click <a href='helper/generate'>here</a>" +

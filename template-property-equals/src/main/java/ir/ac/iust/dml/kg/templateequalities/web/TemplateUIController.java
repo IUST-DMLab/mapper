@@ -11,7 +11,7 @@ public class TemplateUIController {
     public String index() {
         return "Greetings from Spring Boot! " +
                 "<br/>" +
-                "Put the dump file in ~/pkg/wikipedia_dump.txt and load data <a href='template/load'>here</a>" +
+                "Put the dump file in ~/.pkg/wikipedia_dump.txt and load data <a href='template/load'>here</a>" +
                 "<br/>" +
                 "You can export data in <a href='template/export.json'>json</a> or " +
                 "<a href='template/export.xml'>xml</a>." +

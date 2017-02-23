@@ -24,7 +24,7 @@ class DbpediaHelperExporter {
       val toWrite = data(filterLanguage)
       DataExporter.export(DataExporter.ExportTypes.json,
             "dbpedia.mapping.helper.export.json",
-            "~/pkg/data/dbpedia_mappings.json",
+            "~/.pkg/data/dbpedia_mappings.json",
             toWrite, ExportData::class.java)
       return toWrite
    }
@@ -34,7 +34,7 @@ class DbpediaHelperExporter {
       val toWrite = data(filterLanguage)
       DataExporter.export(DataExporter.ExportTypes.xml,
             "dbpedia.mapping.helper.export.xml",
-            "~/pkg/data/dbpedia_mappings.xml",
+            "~/.pkg/data/dbpedia_mappings.xml",
             toWrite, ExportData::class.java)
    }
 

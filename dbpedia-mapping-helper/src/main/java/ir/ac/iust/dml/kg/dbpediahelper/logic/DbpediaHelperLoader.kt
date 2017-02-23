@@ -21,7 +21,7 @@ class DbpediaHelperLoader {
     @Throws(Exception::class)
     fun load() {
         val ONTOLOGY_DUMP = "ontology.dump.en"
-        val config = ConfigReader.getConfig(mapOf(ONTOLOGY_DUMP to "~/pkg/data/dbpedia_mapping.owl"))
+        val config = ConfigReader.getConfig(mapOf(ONTOLOGY_DUMP to "~/.pkg/data/dbpedia_mapping.owl"))
         val path = ConfigReader.getPath(config[ONTOLOGY_DUMP]!! as String)
         Files.createDirectories(path.parent)
         if (!Files.exists(path)) {

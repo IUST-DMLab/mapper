@@ -20,7 +20,7 @@ class PrefixService {
 
     fun reload() {
         val DBPEDIA_PREFIXES = "dbpedia.prefixes"
-        val config = ConfigReader.getConfig(mapOf(DBPEDIA_PREFIXES to "~/pkg/data/prefixes.properties"))
+       val config = ConfigReader.getConfig(mapOf(DBPEDIA_PREFIXES to "~/.pkg/data/prefixes.properties"))
         val path = ConfigReader.getPath(config[DBPEDIA_PREFIXES]!! as String)
         if (!Files.exists(path)) Files.copy(this.javaClass.getResourceAsStream("/prefixes.properties"), path)
         val prefixServices = Properties()

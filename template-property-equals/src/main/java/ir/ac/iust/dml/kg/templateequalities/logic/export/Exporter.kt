@@ -25,7 +25,7 @@ class Exporter {
       val toWrite = data()
       DataExporter.export(DataExporter.ExportTypes.json,
             "template.property.mapping.export.json",
-            "~/pkg/data/template_equalities.json",
+            "~/.pkg/data/template_equalities.json",
             toWrite, ExportData::class.java)
       return toWrite
    }
@@ -35,7 +35,7 @@ class Exporter {
       val toWrite = data()
       DataExporter.export(DataExporter.ExportTypes.xml,
             "template.property.mapping.export.xml",
-            "~/pkg/data/template_equalities.xml",
+            "~/.pkg/data/template_equalities.xml",
             toWrite, ExportData::class.java)
    }
 

@@ -9,7 +9,7 @@ import java.nio.file.Files
 fun main(args: Array<String>) {
 
     val WIKI_DUMP_ARTICLE = "wiki.template.dump.article"
-    val config = ConfigReader.getConfig(mapOf(WIKI_DUMP_ARTICLE to "~/pkg/data/just_templates.xml"))
+   val config = ConfigReader.getConfig(mapOf(WIKI_DUMP_ARTICLE to "~/.pkg/data/just_templates.xml"))
     val path = ConfigReader.getPath(config[WIKI_DUMP_ARTICLE]!! as String)
     Files.createDirectories(path.parent)
     if (!Files.exists(path)) {

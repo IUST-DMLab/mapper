@@ -22,7 +22,7 @@ class Loader {
     @Throws(Exception::class)
     fun load() {
         val WIKI_DUMP_ARTICLE = "wiki.dump.article"
-        val config = ConfigReader.getConfig(mapOf(WIKI_DUMP_ARTICLE to "~/pkg/data/fawiki-latest-pages-articles.xml"))
+       val config = ConfigReader.getConfig(mapOf(WIKI_DUMP_ARTICLE to "~/.pkg/data/fawiki-latest-pages-articles.xml"))
         val path = ConfigReader.getPath(config[WIKI_DUMP_ARTICLE]!! as String)
         Files.createDirectories(path.parent)
         if (!Files.exists(path)) {
