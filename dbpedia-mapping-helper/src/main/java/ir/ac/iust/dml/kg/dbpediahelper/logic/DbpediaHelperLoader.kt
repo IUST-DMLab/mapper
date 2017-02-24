@@ -108,7 +108,7 @@ class DbpediaHelperLoader {
                else {
                   val persianMapping = DBpediaPropertyMapping(language = "fa", type = type,
                         clazz = null, templateProperty = faProperty,
-                        ontologyProperty = "dbt:" + enProperty,
+                        ontologyProperty = "dbpe:" + enProperty,
                         status = MappingStatus.Translated)
                   dao.save(persianMapping)
                }

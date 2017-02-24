@@ -44,14 +44,14 @@ class DbpediaHelperExporter {
       do {
          val list = dao.list(page = page++)
          logger.trace("I have read page " + page)
-         for ((id, language, type, clazz, templateProperty, ontologyProperty) in list.data) {
+         for ((id, language, type, clazz, templateProperty, ontologyProperty, status) in list.data) {
             if (filterLanguage != null && language != filterLanguage) continue
-            if (clazz == null) continue
             toWrite.list.add(TemplateToOntologyMap(language = language,
                   infoboxType = type,
                   ontologyClass = clazz,
                   infoboxTemplateProperty = templateProperty,
-                  ontologyProperty = ontologyProperty))
+                  ontologyProperty = ontologyProperty,
+                  status = status))
          }
       } while (!list.data.isEmpty())
       return toWrite
