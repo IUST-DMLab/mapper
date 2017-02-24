@@ -1,0 +1,16 @@
+[
+  {
+    "source": "http://www.wikipedia.org/Majid_Asgari",
+    "infoboxType": "Person",
+    "subject": "http://www.wikipedia.org/Majid_Asgari",
+    "predicate": "http://www.wikipedia.org/property/birth_date",
+    "object": "http://www.wikipedia.org/Tehran"
+  },
+  {
+    "source": "http://www.wikipedia.org/Majid_Asgari",
+    "infoboxType": "شخص",
+    "subject": "http://www.wikipedia.org/مجید_عسگری",
+    "predicate": "http://www.wikipedia.org/property/محل_تولد",
+    "object": "http://www.wikipedia.org/تهران"
+  }
+]

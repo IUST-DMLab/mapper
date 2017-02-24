@@ -4,6 +4,7 @@ import ir.ac.iust.dml.kg.dbpediahelper.logic.DbpediaHelperLoader;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.PrefixService;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.DbpediaHelperExporter;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.ExportData;
+import ir.ac.iust.dml.kg.dbpediahelper.logic.triple.TripleImporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +19,8 @@ public class MappingHelperRestServices {
     @Autowired
     private DbpediaHelperLoader helperLoader;
     @Autowired
+    private TripleImporter tripleImporter;
+    @Autowired
     private DbpediaHelperExporter helperExporter;
 
     @RequestMapping("/prefixes")
@@ -30,6 +33,12 @@ public class MappingHelperRestServices {
     public String load() throws Exception {
         helperLoader.load();
         return "Loaded!";
+    }
+
+    @RequestMapping("/triples")
+    public String triples() throws Exception {
+        tripleImporter.traverse();
+        return "Imported!";
     }
 
     @RequestMapping("/generate")
