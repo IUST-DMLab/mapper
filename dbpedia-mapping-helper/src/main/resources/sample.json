@@ -1,16 +1,16 @@
 [
   {
-    "source": "http://www.wikipedia.org/Majid_Asgari",
+    "source": "http://en.wikipedia.org/wiki/Majid_Asgari",
     "infoboxType": "Person",
-    "subject": "http://www.wikipedia.org/Majid_Asgari",
-    "predicate": "http://www.wikipedia.org/property/birth_date",
-    "object": "http://www.wikipedia.org/Tehran"
+    "subject": "http://en.wikipedia.org/wiki/Majid_Asgari",
+    "predicate": "http://fa.wikipedia.org/property/birth_date",
+    "object": "http://en.wikipedia.org/wiki/Tehran"
   },
   {
-    "source": "http://www.wikipedia.org/Majid_Asgari",
+    "source": "http://fa.wikipedia.org/wiki/Majid_Asgari",
     "infoboxType": "شخص",
-    "subject": "http://www.wikipedia.org/مجید_عسگری",
-    "predicate": "http://www.wikipedia.org/property/محل_تولد",
-    "object": "http://www.wikipedia.org/تهران"
+    "subject": "http://fa.wikipedia.org/wiki/مجید_عسگری",
+    "predicate": "http://fa.wikipedia.org/property/محل_تولد",
+    "object": "http://fa.wikipedia.org/wiki/تهران"
   }
 ]

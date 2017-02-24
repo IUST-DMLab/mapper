@@ -7,8 +7,10 @@ import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
 import org.hibernate.SessionFactory
 import org.hibernate.criterion.Restrictions
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Repository
 
-class KnowledgeBaseTripleDaoImpl : KnowledgeBaseTripleDao {
+@Repository
+open class KnowledgeBaseTripleDaoImpl : KnowledgeBaseTripleDao {
 
    @Autowired
    lateinit var sessionFactory: SessionFactory

@@ -15,5 +15,9 @@ interface DBpediaPropertyMappingDao {
             hasClass: Boolean = false, templateProperty: String? = null, ontologyProperty: String? = null):
          MutableList<DBpediaPropertyMapping>
 
+   fun readOntologyProperty(templateProperty: String): List<String>
+
+   fun readByEnTitle(type: String? = null, enProperty: String): MutableList<TemplatePropertyMapping>
+
    fun listTemplatePropertyMapping(pageSize: Int = 20, page: Int = 10): PagedData<TemplatePropertyMapping>
 }
