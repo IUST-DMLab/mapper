@@ -49,6 +49,13 @@ open class DBpediaPropertyMappingDaoImpl : DBpediaPropertyMappingDao {
       session.close()
    }
 
+   override fun deleteAll() {
+      val session = this.sessionFactory.openSession()
+      val q = session.createQuery("delete from DBpediaPropertyMapping")
+      q.executeUpdate()
+      session.close()
+   }
+
    @Suppress("UNCHECKED_CAST")
    override fun list(pageSize: Int, page: Int, hasClass: Boolean): PagedData<DBpediaPropertyMapping> {
       val session = this.sessionFactory.openSession()

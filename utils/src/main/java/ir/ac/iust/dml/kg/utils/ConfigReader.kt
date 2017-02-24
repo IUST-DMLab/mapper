@@ -11,7 +11,7 @@ import java.util.*
 object ConfigReader {
     fun getConfig(keyValues: Map<String, Any>): Properties {
         val logger = Logger.getLogger(this.javaClass)!!
-        val configPath = Paths.get(System.getProperty("user.home")).resolve("pkg").resolve("config.properties")
+       val configPath = Paths.get(System.getProperty("user.home")).resolve(".pkg").resolve("config.properties")
 
         Files.createDirectories(configPath.parent)
 
