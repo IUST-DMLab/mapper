@@ -60,7 +60,7 @@ class DbpediaHelperLoader {
                         clazz = ontologyClass,
                         templateProperty = templateProperty,
                         ontologyProperty = ontologyProperty,
-                        status = MappingStatus.Approved))
+                        status = MappingStatus.NearlyApproved))
                   templateProperty = null
                   ontologyProperty = null
                }

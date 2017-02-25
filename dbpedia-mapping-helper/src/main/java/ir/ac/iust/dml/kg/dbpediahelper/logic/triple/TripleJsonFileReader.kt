@@ -26,8 +26,13 @@ class TripleJsonFileReader(path: Path) : Iterator<TripleData>, Closeable {
          val line = reader.readLine() ?: break
          if (line.trim().startsWith("{")) started = true
          else {
-            if (started && line.contains("}"))
-               return gson.fromJson("{" + buffer.toString() + "}", TripleData::class.java)
+            if (started && line.contains("}")) {
+               try {
+                  return gson.fromJson("{" + buffer.toString() + "}", TripleData::class.java)
+               } catch (e: Throwable) {
+                  return TripleData(templateType = "incomplete")
+               }
+            }
             else if (started) buffer.append(line)
          }
       }

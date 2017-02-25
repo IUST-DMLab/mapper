@@ -35,11 +35,18 @@ class TripleImporter {
       }
 
       tripleDao.deleteAll()
-      val result = PathWalker.getPath(path, Regex("infobox\\.json"))
+      val result = PathWalker.getPath(path, Regex("\\d+\\.json"))
       for (p in result) {
+         var lineNumber = 0
          TripleJsonFileReader(p).use { reader ->
             while (reader.hasNext()) {
                val data = reader.next()
+               lineNumber++
+               if (data.templateType == null) continue
+               if (data.templateType != "infobox"/* && !data.templateType!!.startsWith("جعبه")*/) continue
+               if (lineNumber % 10000 == 0)
+                  logger.trace("line number is $lineNumber")
+               val rawProperty = data.predicate!!
                data.subject = prefixService.replacePrefixes(data.subject!!)
                data.predicate = prefixService.replacePrefixes(data.predicate!!)
                data.objekt = prefixService.replacePrefixes(data.objekt!!)
@@ -49,6 +56,9 @@ class TripleImporter {
                   templatePredicate = data.predicate!!.substringAfter(':')
                else templatePredicate = data.predicate!!
 
+               data.predicate = targetProperty(data.predicate!!)
+               templatePredicate = targetProperty(templatePredicate)
+
                val notTranslatedTemplatePredicate: String
                val templateMapping = mappingDao.readByEnTitle(data.infoboxType, templatePredicate)
                if (templateMapping.isNotEmpty()) {
@@ -56,58 +66,91 @@ class TripleImporter {
                   templatePredicate = templateMapping[0].faProperty!!
                } else notTranslatedTemplatePredicate = templatePredicate
 
-               if (!findMap("fa", data, templatePredicate))
-                  if (!findMap("en", data, notTranslatedTemplatePredicate))
-                     if (!checkCountAndAdd(data, notTranslatedTemplatePredicate))
-                        if (!checkCountAndAdd(data, templatePredicate))
-                           createTriple(data, null, MappingStatus.NotMapped)
+               if (!findMap(rawProperty, "fa", data, templatePredicate))
+                  if (!findMap(rawProperty, "en", data, notTranslatedTemplatePredicate))
+                     if (!checkCountAndAdd(rawProperty, data, notTranslatedTemplatePredicate))
+                        if (!checkCountAndAdd(rawProperty, data, templatePredicate))
+                           createTriple(rawProperty, data, null, MappingStatus.NotMapped)
 
             }
          }
       }
    }
 
-   fun checkCountAndAdd(data: TripleData, templateProperty: String): Boolean {
-      val list = mappingDao.readOntologyProperty(templateProperty.replace("_", " "))
+   val DIGIT_END_REGEX = Regex("(\\w+)\\d+")
+   fun targetProperty(property: String): String {
+      var result = property.replace("_", " ")
+      if (DIGIT_END_REGEX.matches(result))
+         result = DIGIT_END_REGEX.matchEntire(result)!!.groups[1]!!.value
+      return result
+   }
+
+   fun checkCountAndAdd(rawProperty: String, data: TripleData, templateProperty: String): Boolean {
+      val list = mappingDao.readOntologyProperty(templateProperty)
       if (list.isNotEmpty() && list.size <= 2) {
-         for (string in list) {
-            data.predicate = string
-            createTriple(data, null, MappingStatus.NotApproved)
-         }
+         if (list.contains("dbo:" + rawProperty)) {
+            data.predicate = "dbo:" + rawProperty
+            createTriple(rawProperty, data, null, MappingStatus.NotApproved)
+         } else
+            for (string in list) {
+               data.predicate = string
+               createTriple(rawProperty, data, null, MappingStatus.Multiple)
+            }
          return true
       }
       return false
    }
 
-   fun findMap(language: String, data: TripleData, templatePredicate: String): Boolean {
+   fun findMap(rawProperty: String, language: String, data: TripleData, templatePredicate: String): Boolean {
       var map = mappingDao.read(language = language, type = data.infoboxType,
             templateProperty = templatePredicate)
       if (map.isNotEmpty()) {
+         if (map.size > 2) return false
          if (map.size > 1)
             logger.info("multiple mapping for $language/${data.infoboxType}/${data.predicate}")
-         for (m in map) createTriple(data, m, null)
+         val writtenMap = mutableSetOf<String>()
+         for (m in map) {
+            if (writtenMap.contains(m.ontologyProperty)) continue
+            createTriple(rawProperty, data, m, null)
+            writtenMap.add(m.ontologyProperty!!)
+         }
          return true
       } else {
          map = mappingDao.read(language = language, templateProperty = templatePredicate)
          if (map.isNotEmpty()) {
-            for (m in map) createTriple(data, m, MappingStatus.NotApproved)
+            if (map.size > 2) return false
+            val writtenMap = mutableSetOf<String>()
+            for (m in map) {
+               if (writtenMap.contains(m.ontologyProperty)) continue
+               createTriple(rawProperty, data, m, MappingStatus.Multiple)
+               writtenMap.add(m.ontologyProperty!!)
+            }
             return true
          }
       }
       return false
    }
 
-   fun createTriple(data: TripleData, mapping: DBpediaPropertyMapping?,
+   fun createTriple(rawProperty: String, data: TripleData, mapping: DBpediaPropertyMapping?,
                     status: MappingStatus?) {
-      val predicate =
+      var predicate =
             if (mapping != null && mapping.ontologyProperty != null)
                mapping.ontologyProperty
             else data.predicate
-      tripleDao.save(
-            KnowledgeBaseTriple(
-                  source = data.source,
-                  subject = data.subject, predicate = predicate, objekt = data.objekt,
-                  status = status ?: mapping!!.status
-            ))
+      if (!predicate!!.contains(":") && !predicate.contains("//"))
+         predicate = "dbp:" + targetProperty(predicate)
+
+      try {
+         tripleDao.save(
+               KnowledgeBaseTriple(
+                     source = data.source,
+                     subject = data.subject, predicate = predicate, objekt = data.objekt,
+                     status = status ?: mapping!!.status, templateType = data.infoboxType,
+                     rawProperty = rawProperty,
+                     language = if (data.templateType == "infobox") "en" else "fa"
+               ))
+      } catch (e: Throwable) {
+         logger.error("error create triple $data:", e)
+      }
    }
 }

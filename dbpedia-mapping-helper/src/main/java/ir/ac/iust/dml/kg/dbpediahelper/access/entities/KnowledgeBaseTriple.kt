@@ -22,8 +22,15 @@ class KnowledgeBaseTriple(
       @Index(name = "t_object")
       @Column(name = "object")
       var objekt: String? = null,
+      @Column(name = "template_type")
+      var templateType: String? = null,
+      @Column(name = "raw_property")
+      var rawProperty: String? = null,
       @Index(name = "t_status")
       @Enumerated
       @Column(name = "status")
-      var status: MappingStatus? = null
+      var status: MappingStatus? = null,
+      @Index(name = "t_language")
+      @Column(name = "language")
+      var language: String? = null
 )
