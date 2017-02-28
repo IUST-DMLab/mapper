@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html ng-app='kgui'>
+
+<head>
+  <title>Knowledge Graph - Ontology Translation UI</title>
+  <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.css">
+  <link rel="stylesheet" href="../node_modules/angular-ui-bootstrap/dist/ui-bootstrap-csp.css">
+  <link rel="stylesheet" href="../styles/main.css">
+  <script type="text/javascript" src="../node_modules/jquery/dist/jquery.js"></script>
+  <script type="text/javascript" src="../node_modules/bootstrap/dist/js/bootstrap.js"></script>
+  <script type="text/javascript" src="../node_modules/angular/angular.min.js"></script>
+  <script type="text/javascript" src="../node_modules/angular-ui-bootstrap/dist/ui-bootstrap.js"></script>
+  <script type="text/javascript" src="../node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js"></script>
+  <script type="text/javascript" src="../scripts/app/app.js"></script>
+  <script type="text/javascript" src="../scripts/app/service/rest.js"></script>
+  <script type="text/javascript" src="../scripts/app/controller/main.js"></script>
+</head>
+
+<body ng-controller="MainController">
+<div ng-if="data" class="container">
+  <br/>
+  <div class="text-center">
+    <form class="form-inline">
+      <label>Search</label>
+      <input type="text" class="input" ng-model="search" placeholder="Search"/>
+      <label><input type="checkbox" class="input-small" ng-model="approved">Approved</label>
+      <label><input type="checkbox" class="input-small" ng-model="hasFarsi">Has Farsi</label>
+      <button class="btn btn-success" ng-click="go(0, search, approved, hasFarsi)">Go</button>
+    </form>
+    <ul class="pagination">
+      <li ng-repeat="page in pages" ng-class="{'disabled': page - 1 == data.page}">
+        <a ng-click="go($index)">{{page}}</a></li>
+    </ul>
+  </div>
+  <table class="table" ng-if="data">
+    <thead>
+    <tr>
+      <th>Ontology class</th>
+      <th>Parent Class</th>
+      <th>En-Label</th>
+      <th>Fa-Label</th>
+      <th>Other Labels</th>
+      <th>Note</th>
+      <th>Approved</th>
+      <th>Edit</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat='a in data.data'>
+      <td>
+        <span>{{a.ontologyClass}}</span>
+      </td>
+      <td>
+        <span>{{a.parentOntologyClass}}</span>
+      </td>
+      <td>
+        <span>{{a.enLabel}}</span>
+      </td>
+      <td dir="rtl">
+        <span ng-if='!editing[$index]'>{{a.faLabel}}</span>
+        <input ng-if='editing[$index]' ng-value="a.faLabel" ng-model="edit[$index].faLabel">
+      </td>
+      <td dir="rtl">
+        <span ng-if='!editing[$index]'>{{a.faOtherLabels}}</span>
+        <input ng-if='editing[$index]' ng-value="a.faOtherLabels" ng-model="edit[$index].faOtherLabels">
+      </td>
+      <td dir="rtl">
+        <span ng-if='!editing[$index]'>{{a.note}}</span>
+        <input ng-if='editing[$index]' ng-value="a.note" ng-model="edit[$index].note">
+      </td>
+      <td>
+        <span ng-if='!editing[$index]'>{{a.approved}}</span>
+        <input ng-if='editing[$index]' type="checkbox" ng-value="a.approved" ng-model="edit[$index].approved">
+      </td>
+      <td>
+        <button ng-show='!editing[$index]' class="btn btn-danger" ng-click="editing[$index]=true">Edit</button>
+        <button ng-show='editing[$index]' class="btn btn-success"
+                ng-click="editing[$index]=false;edit($index,edit[$index])">OK
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</body>
+
+</html>
