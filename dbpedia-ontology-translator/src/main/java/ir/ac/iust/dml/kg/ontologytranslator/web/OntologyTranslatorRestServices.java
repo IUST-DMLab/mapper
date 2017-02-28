@@ -77,7 +77,7 @@ public class OntologyTranslatorRestServices {
                               @RequestParam String faOtherLabels,
                               @RequestParam String note,
                               @RequestParam boolean approved) throws Exception {
-    return translator.translate(new OntologyClassTranslationData(name, null, null,
+    return translator.translate(new OntologyClassTranslationData(name, null, null, null,
             faLabel, faOtherLabels, note, approved));
   }
 

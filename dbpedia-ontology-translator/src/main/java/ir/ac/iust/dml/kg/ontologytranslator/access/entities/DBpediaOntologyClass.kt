@@ -10,11 +10,13 @@ data class DBpediaOntologyClass(
       @Column(name = "id")
       @GeneratedValue(strategy = GenerationType.IDENTITY)
       var id: Long? = null,
-      @Index(name = "dboc_class_name")
+      @Index(name = "class_name")
       @Column(name = "class_name")
       var name: String? = null,
       @Column(name = "en_label")
       var enLabel: String? = null,
       @Index(name = "dboc_parent_id")
       @Column(name = "parent_id")
-      var parentId: Long? = null)
+      var parentId: Long? = null,
+      @Column(name = "comment")
+      var comment: String? = null)

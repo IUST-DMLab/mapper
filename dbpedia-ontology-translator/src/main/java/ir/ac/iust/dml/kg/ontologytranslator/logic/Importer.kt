@@ -34,16 +34,18 @@ class Importer {
          else parentTranslation = translatedParent
       } else parentTranslation = null
 
-      var translated = translationDao.read(clazz.name!!, parentTranslation?.id)
+      if (clazz.comment != "") println(clazz.comment)
+      var translated = translationDao.read(fixName(clazz.name!!), parentTranslation?.id)
       if (translated == null) {
          translated = OntologyClassTranslation(
                name = fixName(clazz.name!!),
                enLabel = clazz.enLabel,
-               parentId = parentTranslation?.id)
+               parentId = parentTranslation?.id,
+               comment = clazz.comment)
       } else {
          translated.parentId = parentTranslation?.id
          translated.enLabel = clazz.enLabel
-
+         translated.comment = clazz.comment
       }
       translationDao.save(translated)
       return translated

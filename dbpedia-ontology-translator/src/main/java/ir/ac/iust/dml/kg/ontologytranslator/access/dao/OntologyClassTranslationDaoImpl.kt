@@ -36,7 +36,15 @@ open class OntologyClassTranslationDaoImpl : OntologyClassTranslationDao {
       val criteria = session.createCriteria(OntologyClassTranslation::class.java)
       criteria.add(Restrictions.eq("name", name))
       if (parentId != null) criteria.add(Restrictions.eq("parentId", parentId))
-      val mapping = criteria.uniqueResult() as? OntologyClassTranslation
+      val list = criteria.list()
+      val mapping: OntologyClassTranslation?
+      if (list.isEmpty()) {
+         println("No instance for $name")
+         mapping = null
+      } else {
+         if (list.size > 1) println("multiple instances for $name")
+         mapping = list[0] as? OntologyClassTranslation
+      }
       session.close()
       return mapping
    }

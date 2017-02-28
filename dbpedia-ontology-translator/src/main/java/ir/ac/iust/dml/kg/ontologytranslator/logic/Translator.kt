@@ -19,6 +19,7 @@ class Translator {
             ontologyClass = translation.name,
             parentOntologyClass = if (translation.parentId == null) null else dao.read(translation.parentId)!!.name,
             enLabel = translation.enLabel,
+            comment = translation.comment,
             faLabel = translation.faLabel,
             faOtherLabels = translation.faOtherLabels,
             note = translation.note,

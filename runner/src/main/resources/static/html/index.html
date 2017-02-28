@@ -22,10 +22,11 @@
   <div class="text-center">
     <form class="form-inline">
       <label>Search</label>
-      <input type="text" class="input" ng-model="search" placeholder="Search"/>
-      <label><input type="checkbox" class="input-small" ng-model="approved">Approved</label>
-      <label><input type="checkbox" class="input-small" ng-model="hasFarsi">Has Farsi</label>
-      <button class="btn btn-success" ng-click="go(0, search, approved, hasFarsi)">Go</button>
+      <input type="text" class="input" ng-model="filter.search" placeholder="Search"/>
+      <label><input type="checkbox" class="input-small" ng-model="filter.approved">Approved</label>
+      <label><input type="checkbox" class="input-small" ng-model="filter.hasFarsi">Has Farsi</label>
+      <button class="btn btn-success" ng-click="go(0, filter.search, filter.approved, filter.hasFarsi)">Go</button>
+      <button class="btn btn-warning" ng-click="go(0)">Clear</button>
     </form>
     <ul class="pagination">
       <li ng-repeat="page in pages" ng-class="{'disabled': page - 1 == data.page}">
@@ -35,9 +36,11 @@
   <table class="table" ng-if="data">
     <thead>
     <tr>
+      <th>#</th>
       <th>Ontology class</th>
       <th>Parent Class</th>
       <th>En-Label</th>
+      <th>Comment</th>
       <th>Fa-Label</th>
       <th>Other Labels</th>
       <th>Note</th>
@@ -47,14 +50,18 @@
     </thead>
     <tbody>
     <tr ng-repeat='a in data.data'>
+      <td>{{data.page * data.pageSize + $index}}</td>
       <td>
         <span>{{a.ontologyClass}}</span>
       </td>
       <td>
-        <span>{{a.parentOntologyClass}}</span>
+        <span ng-click="go(0, a.parentOntologyClass)">{{a.parentOntologyClass}}</span>
       </td>
       <td>
         <span>{{a.enLabel}}</span>
+      </td>
+      <td>
+        <span>{{a.comment}}</span>
       </td>
       <td dir="rtl">
         <span ng-if='!editing[$index]'>{{a.faLabel}}</span>
@@ -73,7 +80,7 @@
         <input ng-if='editing[$index]' type="checkbox" ng-value="a.approved" ng-model="edit[$index].approved">
       </td>
       <td>
-        <button ng-show='!editing[$index]' class="btn btn-danger" ng-click="editing[$index]=true">Edit</button>
+        <button ng-show='!editing[$index]' class="btn btn-danger" ng-click="editing[$index]=true;">Edit</button>
         <button ng-show='editing[$index]' class="btn btn-success"
                 ng-click="editing[$index]=false;edit($index,edit[$index])">OK
         </button>
