@@ -30,7 +30,7 @@ class TripleJsonFileReader(path: Path) : Iterator<TripleData>, Closeable {
                try {
                   return gson.fromJson("{" + buffer.toString() + "}", TripleData::class.java)
                } catch (e: Throwable) {
-                  return TripleData(templateType = "incomplete")
+                  return TripleData(templateName = "incomplete")
                }
             }
             else if (started) buffer.append(line)
