@@ -1,0 +1,52 @@
+package ir.ac.iust.dml.kg.dbpediahelper.access.dao.file
+
+import com.google.gson.GsonBuilder
+import ir.ac.iust.dml.kg.dbpediahelper.access.dao.KnowledgeBaseTripleDao
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.KnowledgeBaseTriple
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.MappingStatus
+import ir.ac.iust.dml.kg.utils.PagedData
+import org.apache.commons.io.FileUtils
+import java.io.BufferedWriter
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
+import java.nio.file.Files
+import java.nio.file.Path
+
+class FileKnowledgeBaseTripleDaoImpl(val path: Path, val flushSize: Int = 1000) : KnowledgeBaseTripleDao {
+
+   init {
+      if (!Files.exists(path)) Files.createDirectories(path)
+   }
+
+   var fileIndex = 0;
+   var notFlushedTriples = mutableListOf<KnowledgeBaseTriple>()
+   var gson = GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create()
+
+   override fun save(t: KnowledgeBaseTriple) {
+      notFlushedTriples.add(t)
+      synchronized(notFlushedTriples) {
+         if (notFlushedTriples.size > flushSize) {
+            val p = path.resolve("${fileIndex / 100}").resolve("$fileIndex.json")
+            if (!Files.exists(p.parent)) Files.createDirectories(p.parent)
+            gson.toJson(notFlushedTriples, BufferedWriter(OutputStreamWriter(
+                  FileOutputStream(p.toFile()), "UTF-8")))
+            notFlushedTriples.clear()
+            fileIndex++
+         }
+      }
+   }
+
+   override fun deleteAll() {
+      FileUtils.deleteDirectory(path.toFile())
+      Files.createDirectories(path)
+   }
+
+   override fun list(pageSize: Int, page: Int): PagedData<KnowledgeBaseTriple> {
+      throw UnsupportedOperationException("not implemented")
+   }
+
+   override fun read(subject: String?, predicate: String?, objekt: String?, status: MappingStatus?): MutableList<KnowledgeBaseTriple> {
+      throw UnsupportedOperationException("not implemented")
+   }
+
+}

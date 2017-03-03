@@ -16,7 +16,12 @@ public class MappingHelperUIController {
             "<br/>" +
             "To Generate Persian mapping, click <a href='helper/generate'>here</a>" +
             "<br/>" +
-            "To Generate Triples, click <a href='helper/triples'>here</a>" +
+            "To Generate Triples without saving (for checking console outputs), " +
+            "click <a href='helper/triples?type=none'>here</a>" +
+            "<br/>" +
+            "To Generate Triples on json files, click <a href='helper/triples?type=file'>here</a>" +
+            "<br/>" +
+            "To Generate Triples on mysql, click <a href='helper/triples?type=mysql'>here</a>" +
             "<br/>" +
 //                "Reload prefixes by clicking <a href='helper/prefixes'>here</a>" +
 //                "<br/>" +

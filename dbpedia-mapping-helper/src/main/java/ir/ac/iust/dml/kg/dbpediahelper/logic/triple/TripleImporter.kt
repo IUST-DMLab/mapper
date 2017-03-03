@@ -2,8 +2,9 @@ package ir.ac.iust.dml.kg.dbpediahelper.logic.triple
 
 import ir.ac.iust.dml.kg.dbpediahelper.access.dao.DBpediaPropertyMappingDao
 import ir.ac.iust.dml.kg.dbpediahelper.access.dao.KnowledgeBaseTripleDao
+import ir.ac.iust.dml.kg.dbpediahelper.access.dao.StatisticalEventDao
 import ir.ac.iust.dml.kg.dbpediahelper.access.dao.TemplateMappingDao
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.TripleStatsDao
+import ir.ac.iust.dml.kg.dbpediahelper.access.dao.file.FileKnowledgeBaseTripleDaoImpl
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.DBpediaPropertyMapping
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.KnowledgeBaseTriple
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.MappingStatus
@@ -28,10 +29,15 @@ class TripleImporter {
    @Autowired
    lateinit var prefixService: PrefixService
    @Autowired
-   lateinit var statsDao: TripleStatsDao
+   lateinit var event: StatisticalEventDao
+
+   public enum class StoreType {
+      none, file, mysql
+   }
 
    @Throws(Exception::class)
-   fun traverse() {
+   fun traverse(storeType: StoreType = StoreType.none) {
+
       val WIKI_DUMP_ARTICLE = "wiki.triple.input.folder"
       val config = ConfigReader.getConfig(mapOf(WIKI_DUMP_ARTICLE to "~/.pkg/data/triples"))
       val path = ConfigReader.getPath(config[WIKI_DUMP_ARTICLE]!! as String)
@@ -40,23 +46,33 @@ class TripleImporter {
          throw Exception("There is no file ${path.toAbsolutePath()} existed.")
       }
 
+      val store = when (storeType) {
+         StoreType.file -> FileKnowledgeBaseTripleDaoImpl(path.resolve("mapped"))
+         StoreType.mysql -> tripleDao
+         else -> null
+      }
+
       // deletes all old triples
-      tripleDao.deleteAll()
+      store?.deleteAll()
       val result = PathWalker.getPath(path, Regex("\\d+\\.json"))
       for (p in result) {
-         statsDao.fileProcessed(p.toString())
+         event.fileProcessed(p.toString())
          var tripleNumber = 0
          TripleJsonFileReader(p).use { reader ->
             while (reader.hasNext()) {
-               statsDao.tripleRead()
+               event.tripleRead()
                val data = reader.next()
                tripleNumber++
                if (data.templateName == null) continue
                if (data.templateName != "infobox" && !data.templateName!!.startsWith("جعبه")) continue
-               statsDao.tripleProcessed()
+               event.tripleProcessed()
                if (tripleNumber % 100 == 0) {
                   logger.info("triple number is $tripleNumber")
-                  statsDao.log()
+               }
+
+               if (tripleNumber % 100000 == 0) {
+                  logger.info("triple number is $tripleNumber")
+                  event.log()
                }
 
                logger.info("data: $data")
@@ -106,11 +122,12 @@ class TripleImporter {
                // 3- looking for not translated template predicate in database and use its mapping if existed
                // 4- looking for translated template predicate in database and use its mapping if existed
 
-               if (!findMap(rawProperty, "fa", data, englishTemplateType, templatePredicate))
-                  if (!findMap(rawProperty, "en", data, englishTemplateType, notTranslatedTemplatePredicate))
-                     if (!checkCountAndAdd(rawProperty, data, notTranslatedTemplatePredicate))
-                        if (!checkCountAndAdd(rawProperty, data, templatePredicate))
-                           createTriple(rawProperty, data, null, MappingStatus.NotMapped)
+               val s = StoreData(store = store, rawProperty = rawProperty, data = data)
+               if (!findMap(s, "fa", englishTemplateType, templatePredicate))
+                  if (!findMap(s, "en", englishTemplateType, notTranslatedTemplatePredicate))
+                     if (!checkCountAndAdd(s, notTranslatedTemplatePredicate))
+                        if (!checkCountAndAdd(s, templatePredicate))
+                           createTriple(s, null, MappingStatus.NotMapped)
 
             }
          }
@@ -125,26 +142,25 @@ class TripleImporter {
       return result
    }
 
-   fun checkCountAndAdd(rawProperty: String, data: TripleData, templateProperty: String): Boolean {
+   fun checkCountAndAdd(s: StoreData, templateProperty: String): Boolean {
       val list = mappingDao.readOntologyProperty(templateProperty)
       // we have less than two mappings for template property. in almost all cases we have a mapping
       if (list.isNotEmpty() && list.size <= 2) {
-         logger.info("we have less than two mappings for template propery $templateProperty")
-         if (list.contains("dbo:" + rawProperty)) {
-            data.predicate = "dbo:" + rawProperty
-            createTriple(rawProperty, data, null, MappingStatus.NotApproved)
+         logger.info("we have less than two mappings for template property $templateProperty")
+         if (list.contains("dbo:" + s.rawProperty)) {
+            s.data.predicate = "dbo:" + s.rawProperty
+            createTriple(s, null, MappingStatus.NotApproved)
          } else
             for (string in list) {
-               data.predicate = string
-               createTriple(rawProperty, data, null, MappingStatus.Multiple)
+               s.data.predicate = string
+               createTriple(s, null, MappingStatus.Multiple)
             }
          return true
       }
       return false
    }
 
-   fun findMap(rawProperty: String, language: String, data: TripleData,
-               englishTemplateType: String, templatePredicate: String): Boolean {
+   fun findMap(s: StoreData, language: String, englishTemplateType: String, templatePredicate: String): Boolean {
       var map = mappingDao.read(language = language, type = englishTemplateType,
             templateProperty = templatePredicate)
       /**
@@ -156,11 +172,11 @@ class TripleImporter {
          // more than one mapping for template `language/type/property`
          if (map.size > 2) return false
          if (map.size > 1)
-            logger.info("multiple mapping for $language/${englishTemplateType}/${data.predicate}")
+            logger.info("multiple mapping for $language/${englishTemplateType}/${s.data.predicate}")
          val writtenMap = mutableSetOf<String>()
          for (m in map) {
             if (writtenMap.contains(m.ontologyProperty)) continue
-            createTriple(rawProperty, data, m, null)
+            createTriple(s, m, null)
             writtenMap.add(m.ontologyProperty!!)
          }
          return true
@@ -175,7 +191,7 @@ class TripleImporter {
             val writtenMap = mutableSetOf<String>()
             for (m in map) {
                if (writtenMap.contains(m.ontologyProperty)) continue
-               createTriple(rawProperty, data, m, MappingStatus.Multiple)
+               createTriple(s, m, MappingStatus.Multiple)
                writtenMap.add(m.ontologyProperty!!)
             }
             return true
@@ -184,36 +200,40 @@ class TripleImporter {
       return false
    }
 
-   fun createTriple(rawProperty: String, data: TripleData, mapping: DBpediaPropertyMapping?,
-                    status: MappingStatus?) {
-      // predicate = ontology property if existed. data.predicate if not.
-      var predicate =
-            if (mapping != null && mapping.ontologyProperty != null)
-               mapping.ontologyProperty
-            else data.predicate
+   data class StoreData(val store: KnowledgeBaseTripleDao?, val rawProperty: String, val data: TripleData)
 
-      // we add dbp to predicate if it is not a URL or prefix
-      if (!predicate!!.contains(":") && !predicate.contains("//"))
-         predicate = "dbp:" + targetProperty(predicate)
+   fun createTriple(triple: StoreData, mapping: DBpediaPropertyMapping?, status: MappingStatus?) {
+      with(triple) {
+         // predicate = ontology property if existed. data.predicate if not.
+         var predicate =
+               if (mapping != null && mapping.ontologyProperty != null)
+                  mapping.ontologyProperty
+               else data.predicate
 
-      try {
-         val t = KnowledgeBaseTriple(
-               source = data.source,
-               subject = data.subject, predicate = predicate, objekt = data.objekt,
-               status = status ?: mapping!!.status, templateType = data.templateType,
-               rawProperty = rawProperty,
-               language = if (data.templateName == "infobox") "en" else "fa"
-         )
-//         tripleDao.save(t)
+         // we add dbp to predicate if it is not a URL or prefix
+         if (!predicate!!.contains(":") && !predicate.contains("//"))
+            predicate = "dbp:" + targetProperty(predicate)
 
-         statsDao.propertyUsed(t.predicate!!)
-         statsDao.statusGenerated(t.status!!)
-         statsDao.typeUsed(t.templateType!!)
-         statsDao.typeAndEntityUsed(t.templateType!!, t.subject!!)
-         statsDao.typeAndPropertyUsed(t.templateType!!, t.predicate!!)
+         try {
+            val t = KnowledgeBaseTriple(
+                  source = data.source,
+                  subject = data.subject, predicate = predicate, objekt = data.objekt,
+                  status = status ?: mapping!!.status, templateType = data.templateType,
+                  rawProperty = rawProperty,
+                  language = if (data.templateName == "infobox") "en" else "fa"
+            )
 
-      } catch (e: Throwable) {
-         logger.error("error create triple $data:", e)
+            store?.save(t)
+
+            event.propertyUsed(t.predicate!!)
+            event.statusGenerated(t.status!!)
+            event.typeUsed(t.templateType!!)
+            event.typeAndEntityUsed(t.templateType!!, t.subject!!)
+            event.typeAndPropertyUsed(t.templateType!!, t.predicate!!)
+
+         } catch (e: Throwable) {
+            logger.error("error create triple $data:", e)
+         }
       }
    }
 }

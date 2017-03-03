@@ -1,11 +1,11 @@
 package ir.ac.iust.dml.kg.dbpediahelper.access.dao.memory
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.TripleStatsDao
+import ir.ac.iust.dml.kg.dbpediahelper.access.dao.StatisticalEventDao
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.MappingStatus
 import org.springframework.stereotype.Repository
 
 @Repository
-open class TripleStatsDaoImpl : TripleStatsDao {
+open class StatisticalEventDaoImpl : StatisticalEventDao {
 
    var numberOfTriples: Int = 0
    var numberOfProcessedTriples: Int = 0
