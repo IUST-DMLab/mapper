@@ -20,4 +20,12 @@ interface DBpediaPropertyMappingDao {
    fun readByEnTitle(type: String? = null, enProperty: String): MutableList<TemplatePropertyMapping>
 
    fun listTemplatePropertyMapping(pageSize: Int = 20, page: Int = 10): PagedData<TemplatePropertyMapping>
+
+   fun listUniqueProperties(language: String?, pageSize: Int = 20, page: Int = 10): List<String>
+
+   fun listUniqueOntologyProperties(templateProperty: String): List<String>
+
+   fun countTemplateProperties(templateProperty: String): Long
+
+   fun countOntologyProperties(templateProperty: String, ontologyProperty: String): Long
 }

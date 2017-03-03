@@ -16,6 +16,8 @@ public class MappingHelperUIController {
             "<br/>" +
             "To Generate Persian mapping, click <a href='helper/generate'>here</a>" +
             "<br/>" +
+            "To Generate Persian auto-generate mapping, click <a href='helper/generateByCount'>here</a>" +
+            "<br/>" +
             "To Generate Triples without saving (for checking console outputs), " +
             "click <a href='helper/triples?type=none'>here</a>" +
             "<br/>" +

@@ -117,4 +117,44 @@ class DbpediaHelperLoader {
       } while (list.data.isNotEmpty())
    }
 
+   class PropertyAndCount(val property: String, val count: Long) : Comparable<PropertyAndCount> {
+      override fun compareTo(other: PropertyAndCount) = count.compareTo(other.count)
+   }
+
+   fun generateByCount() {
+      var page = 0
+      do {
+         val list = dao.listUniqueProperties(language = "fa", page = page++)
+         for (uniqueProperty in list) {
+            val ontologyProperties = dao.listUniqueOntologyProperties(uniqueProperty)
+            if (ontologyProperties.size == 1) {
+               addMapping(uniqueProperty, ontologyProperties[0])
+               continue
+            }
+
+            // list is larger than 1
+            val countList = ontologyProperties.map {
+               PropertyAndCount(property = it,
+                     count = dao.countOntologyProperties(uniqueProperty, it))
+            }
+            countList.sortedDescending()
+
+            var total = 0L
+            countList.forEach { total += it.count }
+            val totalThird = total / 3
+
+            for (c in countList) {
+               if (c.count < totalThird) break
+               addMapping(uniqueProperty, c.property)
+            }
+         }
+      } while (list.isNotEmpty())
+   }
+
+   private fun addMapping(templateProperty: String, ontologyProperty: String) {
+      val m = DBpediaPropertyMapping(language = "fa", clazz = null,
+            ontologyProperty = ontologyProperty, templateProperty = templateProperty,
+            status = MappingStatus.Translated, type = null)
+      dao.save(m)
+   }
 }

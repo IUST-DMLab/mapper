@@ -5,6 +5,7 @@ import ir.ac.iust.dml.kg.dbpediahelper.access.entities.DBpediaPropertyMapping
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.TemplatePropertyMapping
 import ir.ac.iust.dml.kg.utils.PagedData
 import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
+import org.hibernate.Criteria
 import org.hibernate.SessionFactory
 import org.hibernate.criterion.Projections
 import org.hibernate.criterion.Restrictions
@@ -95,5 +96,50 @@ open class DBpediaPropertyMappingDaoImpl : DBpediaPropertyMappingDao {
       val list = SqlJpaTools.page(TemplatePropertyMapping::class.java, page, pageSize, session)
       session.close()
       return list
+   }
+
+   @Suppress("UNCHECKED_CAST")
+   override fun listUniqueProperties(language: String?, pageSize: Int, page: Int): List<String> {
+      val session = this.sessionFactory.openSession()
+      val criteria = session.createCriteria(DBpediaPropertyMapping::class.java)
+      if (language != null) criteria.add(Restrictions.like("language", language))
+      criteria.setProjection(Projections.distinct(Projections.property("templateProperty")))
+      criteria.setFirstResult(page * pageSize)
+      criteria.setMaxResults(pageSize)
+      val mapping = criteria.list() as MutableList<String>
+      session.close()
+      return mapping
+   }
+
+   override fun countTemplateProperties(templateProperty: String): Long {
+      val session = this.sessionFactory.openSession()
+      val criteria = session.createCriteria(DBpediaPropertyMapping::class.java)
+      criteria.add(Restrictions.eq("templateProperty", templateProperty))
+      val count = criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
+            .setProjection(Projections.rowCount()).uniqueResult() as Long
+      session.close()
+      return count
+   }
+
+   @Suppress("UNCHECKED_CAST")
+   override fun listUniqueOntologyProperties(templateProperty: String): List<String> {
+      val session = this.sessionFactory.openSession()
+      val criteria = session.createCriteria(DBpediaPropertyMapping::class.java)
+      criteria.add(Restrictions.eq("templateProperty", templateProperty))
+      criteria.setProjection(Projections.distinct(Projections.property("ontologyProperty")))
+      val mapping = criteria.list() as MutableList<String>
+      session.close()
+      return mapping
+   }
+
+   override fun countOntologyProperties(templateProperty: String, ontologyProperty: String): Long {
+      val session = this.sessionFactory.openSession()
+      val criteria = session.createCriteria(DBpediaPropertyMapping::class.java)
+      criteria.add(Restrictions.eq("templateProperty", templateProperty))
+      criteria.add(Restrictions.eq("ontologyProperty", ontologyProperty))
+      val count = criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
+            .setProjection(Projections.rowCount()).uniqueResult() as Long
+      session.close()
+      return count
    }
 }

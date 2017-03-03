@@ -47,6 +47,12 @@ public class MappingHelperRestServices {
         return "Generated!";
     }
 
+    @RequestMapping("/generateByCount")
+    public String generateByCount() throws Exception {
+        helperLoader.generateByCount();
+        return "Generated!";
+    }
+
     @RequestMapping("/export")
     @ResponseBody
     public ExportData exportXml(@RequestParam(required = false) String language) throws Exception {
