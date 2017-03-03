@@ -1,5 +1,6 @@
-package ir.ac.iust.dml.kg.dbpediahelper.access.dao
+package ir.ac.iust.dml.kg.dbpediahelper.access.dao.mongo
 
+import ir.ac.iust.dml.kg.dbpediahelper.access.dao.KnowledgeBaseTripleDao
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.KnowledgeBaseTriple
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.MappingStatus
 import ir.ac.iust.dml.kg.utils.PagedData

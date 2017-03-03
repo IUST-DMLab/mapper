@@ -3,6 +3,7 @@ package ir.ac.iust.dml.kg.dbpediahelper.logic.triple
 import ir.ac.iust.dml.kg.dbpediahelper.access.dao.DBpediaPropertyMappingDao
 import ir.ac.iust.dml.kg.dbpediahelper.access.dao.KnowledgeBaseTripleDao
 import ir.ac.iust.dml.kg.dbpediahelper.access.dao.TemplateMappingDao
+import ir.ac.iust.dml.kg.dbpediahelper.access.dao.TripleStatsDao
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.DBpediaPropertyMapping
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.KnowledgeBaseTriple
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.MappingStatus
@@ -26,6 +27,8 @@ class TripleImporter {
    lateinit var templateMappingDao: TemplateMappingDao
    @Autowired
    lateinit var prefixService: PrefixService
+   @Autowired
+   lateinit var statsDao: TripleStatsDao
 
    @Throws(Exception::class)
    fun traverse() {
@@ -41,15 +44,20 @@ class TripleImporter {
       tripleDao.deleteAll()
       val result = PathWalker.getPath(path, Regex("\\d+\\.json"))
       for (p in result) {
+         statsDao.fileProcessed(p.toString())
          var tripleNumber = 0
          TripleJsonFileReader(p).use { reader ->
             while (reader.hasNext()) {
+               statsDao.tripleRead()
                val data = reader.next()
                tripleNumber++
                if (data.templateName == null) continue
                if (data.templateName != "infobox" && !data.templateName!!.startsWith("جعبه")) continue
-               if (tripleNumber % 10000 == 0)
+               statsDao.tripleProcessed()
+               if (tripleNumber % 100 == 0) {
                   logger.info("triple number is $tripleNumber")
+                  statsDao.log()
+               }
 
                logger.info("data: $data")
                /**
@@ -189,14 +197,21 @@ class TripleImporter {
          predicate = "dbp:" + targetProperty(predicate)
 
       try {
-         tripleDao.save(
-               KnowledgeBaseTriple(
-                     source = data.source,
-                     subject = data.subject, predicate = predicate, objekt = data.objekt,
-                     status = status ?: mapping!!.status, templateType = data.templateType,
-                     rawProperty = rawProperty,
-                     language = if (data.templateName == "infobox") "en" else "fa"
-               ))
+         val t = KnowledgeBaseTriple(
+               source = data.source,
+               subject = data.subject, predicate = predicate, objekt = data.objekt,
+               status = status ?: mapping!!.status, templateType = data.templateType,
+               rawProperty = rawProperty,
+               language = if (data.templateName == "infobox") "en" else "fa"
+         )
+//         tripleDao.save(t)
+
+         statsDao.propertyUsed(t.predicate!!)
+         statsDao.statusGenerated(t.status!!)
+         statsDao.typeUsed(t.templateType!!)
+         statsDao.typeAndEntityUsed(t.templateType!!, t.subject!!)
+         statsDao.typeAndPropertyUsed(t.templateType!!, t.predicate!!)
+
       } catch (e: Throwable) {
          logger.error("error create triple $data:", e)
       }

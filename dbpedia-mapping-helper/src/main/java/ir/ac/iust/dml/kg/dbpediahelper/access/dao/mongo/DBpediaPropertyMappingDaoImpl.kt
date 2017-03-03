@@ -1,5 +1,6 @@
-package ir.ac.iust.dml.kg.dbpediahelper.access.dao
+package ir.ac.iust.dml.kg.dbpediahelper.access.dao.mongo
 
+import ir.ac.iust.dml.kg.dbpediahelper.access.dao.DBpediaPropertyMappingDao
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.DBpediaPropertyMapping
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.TemplatePropertyMapping
 import ir.ac.iust.dml.kg.utils.PagedData
