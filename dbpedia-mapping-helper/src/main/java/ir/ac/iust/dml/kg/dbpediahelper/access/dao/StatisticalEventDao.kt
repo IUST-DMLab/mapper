@@ -4,7 +4,7 @@ import ir.ac.iust.dml.kg.dbpediahelper.access.entities.MappingStatus
 
 interface StatisticalEventDao {
 
-   fun log()
+   fun log(): String
 
    fun statusGenerated(status: MappingStatus)
 

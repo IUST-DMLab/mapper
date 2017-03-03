@@ -2,6 +2,7 @@ package ir.ac.iust.dml.kg.dbpediahelper.access.dao.mongo
 
 import ir.ac.iust.dml.kg.dbpediahelper.access.dao.DBpediaPropertyMappingDao
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.DBpediaPropertyMapping
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.MappingStatus
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.TemplatePropertyMapping
 import ir.ac.iust.dml.kg.utils.PagedData
 import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
@@ -17,11 +18,13 @@ open class DBpediaPropertyMappingDaoImpl : DBpediaPropertyMappingDao {
 
    @Suppress("UNCHECKED_CAST")
    override fun read(language: String?, clazz: String?, type: String?,
-                     like: Boolean, hasClass: Boolean, templateProperty: String?, ontologyProperty: String?):
+                     like: Boolean, hasClass: Boolean, templateProperty: String?,
+                     secondTemplateProperty: String?, ontologyProperty: String?, status: MappingStatus?):
          MutableList<DBpediaPropertyMapping> {
       val session = this.sessionFactory.openSession()
       val criteria = session.createCriteria(DBpediaPropertyMapping::class.java)
       if (language != null) criteria.add(Restrictions.eq("language", language))
+      if (status != null) criteria.add(Restrictions.eq("status", status))
       if (clazz != null) criteria.add(Restrictions.eq("clazz", clazz))
       if (type != null) criteria.add(Restrictions.eq("type", type))
       if (hasClass) criteria.add(Restrictions.isNotNull("clazz"))
@@ -31,7 +34,11 @@ open class DBpediaPropertyMappingDaoImpl : DBpediaPropertyMappingDao {
          if (ontologyProperty != null)
             criteria.add(Restrictions.like("ontologyProperty", "%$ontologyProperty%"))
       } else {
-         if (templateProperty != null)
+         if (templateProperty != null && secondTemplateProperty != null && templateProperty != secondTemplateProperty)
+            criteria.add(Restrictions.or(
+                  Restrictions.eq("templateProperty", templateProperty),
+                  Restrictions.eq("templateProperty", secondTemplateProperty)))
+         else if (templateProperty != null)
             criteria.add(Restrictions.eq("templateProperty", templateProperty))
          if (ontologyProperty != null)
             criteria.add(Restrictions.eq("ontologyProperty", ontologyProperty))

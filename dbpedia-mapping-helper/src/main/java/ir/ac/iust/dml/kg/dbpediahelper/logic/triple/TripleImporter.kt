@@ -14,7 +14,9 @@ import ir.ac.iust.dml.kg.utils.PathWalker
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.nio.charset.Charset
 import java.nio.file.Files
+import java.nio.file.Path
 
 @Service
 class TripleImporter {
@@ -70,9 +72,9 @@ class TripleImporter {
                   logger.info("triple number is $tripleNumber")
                }
 
-               if (tripleNumber % 100000 == 0) {
+               if (tripleNumber % 10000 == 0) {
                   logger.info("triple number is $tripleNumber")
-                  event.log()
+                  saveLog(path)
                }
 
                logger.info("data: $data")
@@ -123,15 +125,21 @@ class TripleImporter {
                // 4- looking for translated template predicate in database and use its mapping if existed
 
                val s = StoreData(store = store, rawProperty = rawProperty, data = data)
-               if (!findMap(s, "fa", englishTemplateType, templatePredicate))
-                  if (!findMap(s, "en", englishTemplateType, notTranslatedTemplatePredicate))
-                     if (!checkCountAndAdd(s, notTranslatedTemplatePredicate))
-                        if (!checkCountAndAdd(s, templatePredicate))
-                           createTriple(s, null, MappingStatus.NotMapped)
+               if (!findMap(s, englishTemplateType, templatePredicate, notTranslatedTemplatePredicate))
+//                  if (!findMap(s, "en", englishTemplateType, notTranslatedTemplatePredicate))
+//                     if (!checkCountAndAdd(s, notTranslatedTemplatePredicate))
+//                        if (!checkCountAndAdd(s, templatePredicate))
+                  createTriple(s, null, MappingStatus.NotMapped)
 
             }
          }
       }
+      saveLog(path)
+      println(event.log())
+   }
+
+   private fun saveLog(path: Path) {
+      Files.write(path.resolve("mapped").resolve("stats.txt"), event.log().toByteArray(Charset.forName("UTF-8")))
    }
 
    val DIGIT_END_REGEX = Regex("(\\w+)\\d+")
@@ -142,27 +150,28 @@ class TripleImporter {
       return result
    }
 
-   fun checkCountAndAdd(s: StoreData, templateProperty: String): Boolean {
-      val list = mappingDao.readOntologyProperty(templateProperty)
-      // we have less than two mappings for template property. in almost all cases we have a mapping
-      if (list.isNotEmpty() && list.size <= 2) {
-         logger.info("we have less than two mappings for template property $templateProperty")
-         if (list.contains("dbo:" + s.rawProperty)) {
-            s.data.predicate = "dbo:" + s.rawProperty
-            createTriple(s, null, MappingStatus.NotApproved)
-         } else
-            for (string in list) {
-               s.data.predicate = string
-               createTriple(s, null, MappingStatus.Multiple)
-            }
-         return true
-      }
-      return false
-   }
+//   fun checkCountAndAdd(s: StoreData, templateProperty: String): Boolean {
+//      val list = mappingDao.readOntologyProperty(templateProperty)
+//      // we have less than two mappings for template property. in almost all cases we have a mapping
+//      if (list.isNotEmpty() && list.size <= 2) {
+//         logger.info("we have less than two mappings for template property $templateProperty")
+//         if (list.contains("dbo:" + s.rawProperty)) {
+//            s.data.predicate = "dbo:" + s.rawProperty
+//            createTriple(s, null, MappingStatus.NotApproved)
+//         } else
+//            for (string in list) {
+//               s.data.predicate = string
+//               createTriple(s, null, MappingStatus.Multiple)
+//            }
+//         return true
+//      }
+//      return false
+//   }
 
-   fun findMap(s: StoreData, language: String, englishTemplateType: String, templatePredicate: String): Boolean {
-      var map = mappingDao.read(language = language, type = englishTemplateType,
-            templateProperty = templatePredicate)
+   fun findMap(s: StoreData, englishTemplateType: String,
+               templatePredicate: String, secondTemplatePredicate: String): Boolean {
+      var map = mappingDao.read(language = null, type = englishTemplateType,
+            templateProperty = templatePredicate, secondTemplateProperty = secondTemplatePredicate)
       /**
        * we may have two cases:
        * 1- when we haven't any mapping for template `language/type/property`
@@ -172,7 +181,7 @@ class TripleImporter {
          // more than one mapping for template `language/type/property`
          if (map.size > 2) return false
          if (map.size > 1)
-            logger.info("multiple mapping for $language/${englishTemplateType}/${s.data.predicate}")
+            logger.info("multiple mapping for $englishTemplateType/${s.data.predicate}")
          val writtenMap = mutableSetOf<String>()
          for (m in map) {
             if (writtenMap.contains(m.ontologyProperty)) continue
@@ -185,15 +194,10 @@ class TripleImporter {
           * no mapping for template `language/type/property`,
           * we now search for `language/property` in any types.
           */
-         map = mappingDao.read(language = language, templateProperty = templatePredicate)
+         map = mappingDao.read(language = null, templateProperty = templatePredicate,
+               secondTemplateProperty = secondTemplatePredicate, status = MappingStatus.Translated)
          if (map.isNotEmpty()) {
-            if (map.size > 2) return false
-            val writtenMap = mutableSetOf<String>()
-            for (m in map) {
-               if (writtenMap.contains(m.ontologyProperty)) continue
-               createTriple(s, m, MappingStatus.Multiple)
-               writtenMap.add(m.ontologyProperty!!)
-            }
+            for (m in map) createTriple(s, m, MappingStatus.Translated)
             return true
          }
       }
