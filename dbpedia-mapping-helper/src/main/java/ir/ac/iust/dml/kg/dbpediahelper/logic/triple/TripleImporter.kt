@@ -60,82 +60,86 @@ class TripleImporter {
       for (p in result) {
          event.fileProcessed(p.toString())
          var tripleNumber = 0
-         TripleJsonFileReader(p).use { reader ->
-            while (reader.hasNext()) {
-               try {
-                  event.tripleRead()
-                  val data = reader.next()
-                  tripleNumber++
-                  if (data.templateName == null) continue
-                  if (data.templateName != "infobox" && !data.templateName!!.startsWith("جعبه")) continue
-                  event.tripleProcessed()
-                  if (tripleNumber % 100 == 0) {
-                     logger.info("triple number is $tripleNumber")
-                  }
+         try {
+            TripleJsonFileReader(p).use { reader ->
+               while (reader.hasNext()) {
+                  try {
+                     event.tripleRead()
+                     val data = reader.next()
+                     tripleNumber++
+                     if (data.templateName == null) continue
+                     if (data.templateName != "infobox" && !data.templateName!!.startsWith("جعبه")) continue
+                     event.tripleProcessed()
+                     if (tripleNumber % 100 == 0) {
+                        logger.info("triple number is $tripleNumber")
+                     }
 
-                  if (tripleNumber % 10000 == 0) {
-                     logger.info("triple number is $tripleNumber")
-                     saveLog(path)
-                  }
+                     if (tripleNumber % 10000 == 0) {
+                        logger.info("triple number is $tripleNumber")
+                        saveLog(path)
+                     }
 
-                  logger.info("data: $data")
-                  /**
-                   * we like to change persian template name to english template name. because we have
-                   * mapping for english template names in tables of
-                   * template_property_mapping and dbpedia_property_mapping
-                   */
-                  val templateMappings = templateMappingDao.read(nameFa = data.templateType!!)
-                  val englishTemplateType =
-                        if (templateMappings.isNotEmpty()) templateMappings[0].typeEn!!
-                        else data.templateType!!
-                  logger.info("english template type is $englishTemplateType (if we have english type)")
+                     logger.info("data: $data")
+                     /**
+                      * we like to change persian template name to english template name. because we have
+                      * mapping for english template names in tables of
+                      * template_property_mapping and dbpedia_property_mapping
+                      */
+                     val templateMappings = templateMappingDao.read(nameFa = data.templateType!!)
+                     val englishTemplateType =
+                           if (templateMappings.isNotEmpty()) templateMappings[0].typeEn!!
+                           else data.templateType!!
+                     logger.info("english template type is $englishTemplateType (if we have english type)")
 
-                  // replace URIs by prefixes
-                  val rawProperty = data.predicate!!
-                  data.subject = prefixService.replacePrefixes(data.subject!!)
-                  data.predicate = prefixService.replacePrefixes(data.predicate!!)
-                  data.predicate = targetProperty(data.predicate!!)
-                  data.objekt = prefixService.replacePrefixes(data.objekt!!)
+                     // replace URIs by prefixes
+                     val rawProperty = data.predicate!!
+                     data.subject = prefixService.replacePrefixes(data.subject!!)
+                     data.predicate = prefixService.replacePrefixes(data.predicate!!)
+                     data.predicate = targetProperty(data.predicate!!)
+                     data.objekt = prefixService.replacePrefixes(data.objekt!!)
 
-                  // template predicate is predicate without URI for example dob:writer -> writer
-                  var templatePredicate: String
-                  if (data.predicate!!.contains(":"))
-                     templatePredicate = data.predicate!!.substringAfter(':')
-                  else templatePredicate = data.predicate!!
-                  templatePredicate = targetProperty(templatePredicate)
-                  logger.info("template predicate is $templatePredicate")
+                     // template predicate is predicate without URI for example dob:writer -> writer
+                     var templatePredicate: String
+                     if (data.predicate!!.contains(":"))
+                        templatePredicate = data.predicate!!.substringAfter(':')
+                     else templatePredicate = data.predicate!!
+                     templatePredicate = targetProperty(templatePredicate)
+                     logger.info("template predicate is $templatePredicate")
 
-                  /**
-                   * we change template predicate to translated template predicate by table
-                   * template_property_mapping
-                   */
-                  val notTranslatedTemplatePredicate: String
-                  val templateMapping = mappingDao.readByEnTitle(englishTemplateType, templatePredicate)
-                  if (templateMapping.isNotEmpty()) {
-                     notTranslatedTemplatePredicate = templatePredicate
-                     templatePredicate = templateMapping[0].faProperty!!
-                  } else {
-                     notTranslatedTemplatePredicate = templatePredicate
-                  }
-                  logger.trace("not translated template predicate is $notTranslatedTemplatePredicate")
+                     /**
+                      * we change template predicate to translated template predicate by table
+                      * template_property_mapping
+                      */
+                     val notTranslatedTemplatePredicate: String
+                     val templateMapping = mappingDao.readByEnTitle(englishTemplateType, templatePredicate)
+                     if (templateMapping.isNotEmpty()) {
+                        notTranslatedTemplatePredicate = templatePredicate
+                        templatePredicate = templateMapping[0].faProperty!!
+                     } else {
+                        notTranslatedTemplatePredicate = templatePredicate
+                     }
+                     logger.trace("not translated template predicate is $notTranslatedTemplatePredicate")
 
-                  // main part of algorithm is:
-                  // 1- checking for exact template language/type/property mapping
-                  // 2- checking for template language/*/property mapping
-                  // 3- looking for not translated template predicate in database and use its mapping if existed
-                  // 4- looking for translated template predicate in database and use its mapping if existed
+                     // main part of algorithm is:
+                     // 1- checking for exact template language/type/property mapping
+                     // 2- checking for template language/*/property mapping
+                     // 3- looking for not translated template predicate in database and use its mapping if existed
+                     // 4- looking for translated template predicate in database and use its mapping if existed
 
-                  val s = StoreData(store = store, rawProperty = rawProperty, data = data)
-                  if (!findMap(s, englishTemplateType, templatePredicate, notTranslatedTemplatePredicate))
+                     val s = StoreData(store = store, rawProperty = rawProperty, data = data)
+                     if (!findMap(s, englishTemplateType, templatePredicate, notTranslatedTemplatePredicate))
 //                  if (!findMap(s, "en", englishTemplateType, notTranslatedTemplatePredicate))
 //                     if (!checkCountAndAdd(s, notTranslatedTemplatePredicate))
 //                        if (!checkCountAndAdd(s, templatePredicate))
-                     createTriple(s, null, MappingStatus.NotMapped)
+                        createTriple(s, null, MappingStatus.NotMapped)
 
-               } catch (th: Throwable) {
-                  logger.error(th)
+                  } catch (th: Throwable) {
+                     logger.error(th)
+                  }
                }
             }
+         } catch (th: Throwable) {
+            logger.error(th)
          }
       }
       saveLog(path)
