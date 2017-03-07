@@ -41,6 +41,12 @@ public class MappingHelperRestServices {
         return "Imported!";
     }
 
+    @RequestMapping("/writeStats")
+    public String triples() throws Exception {
+        tripleImporter.writeStats();
+        return "Stats created!";
+    }
+
     @RequestMapping("/generate")
     public String generate() throws Exception {
         helperLoader.generatePersian();

@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.dbpediahelper.access.dao.mongo
+package ir.ac.iust.dml.kg.dbpediahelper.access.dao.hibernate
 
 import ir.ac.iust.dml.kg.dbpediahelper.access.dao.KnowledgeBaseTripleDao
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.KnowledgeBaseTriple

@@ -1,9 +1,6 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic.triple
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.DBpediaPropertyMappingDao
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.KnowledgeBaseTripleDao
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.StatisticalEventDao
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.TemplateMappingDao
+import ir.ac.iust.dml.kg.dbpediahelper.access.dao.*
 import ir.ac.iust.dml.kg.dbpediahelper.access.dao.file.FileKnowledgeBaseTripleDaoImpl
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.DBpediaPropertyMapping
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.KnowledgeBaseTriple
@@ -29,12 +26,41 @@ class TripleImporter {
    @Autowired
    lateinit var templateMappingDao: TemplateMappingDao
    @Autowired
+   lateinit var tripleStatisticsDao: TripleStatisticsDao
+   @Autowired
    lateinit var prefixService: PrefixService
    @Autowired
    lateinit var event: StatisticalEventDao
 
-   public enum class StoreType {
+   enum class StoreType {
       none, file, mysql
+   }
+
+   @Throws(Exception::class)
+   fun writeStats() {
+      val WIKI_DUMP_ARTICLE = "mapped.triple.stats.file"
+      val config = ConfigReader.getConfig(mapOf(WIKI_DUMP_ARTICLE to "~/.pkg/data/triples/mapped/stats.txt"))
+      val path = ConfigReader.getPath(config[WIKI_DUMP_ARTICLE]!! as String)
+      Files.createDirectories(path.parent)
+      if (!Files.exists(path)) {
+         throw Exception("There is no file ${path.toAbsolutePath()} existed.")
+      }
+
+      tripleStatisticsDao.deleteAll()
+
+      StatisticsLogReader(path).use {
+         var lineNumber = 0
+         while (it.hasNext()) {
+            lineNumber++
+            if (lineNumber % 1000 == 0) logger.trace("line number $lineNumber processed")
+            val stats = it.next()
+            try {
+               tripleStatisticsDao.save(stats)
+            } catch (e: Throwable) {
+               logger.error("error in $stats", e)
+            }
+         }
+      }
    }
 
    @Throws(Exception::class)
@@ -120,17 +146,8 @@ class TripleImporter {
                      }
                      logger.trace("not translated template predicate is $notTranslatedTemplatePredicate")
 
-                     // main part of algorithm is:
-                     // 1- checking for exact template language/type/property mapping
-                     // 2- checking for template language/*/property mapping
-                     // 3- looking for not translated template predicate in database and use its mapping if existed
-                     // 4- looking for translated template predicate in database and use its mapping if existed
-
                      val s = StoreData(store = store, rawProperty = rawProperty, data = data)
                      if (!findMap(s, englishTemplateType, templatePredicate, notTranslatedTemplatePredicate))
-//                  if (!findMap(s, "en", englishTemplateType, notTranslatedTemplatePredicate))
-//                     if (!checkCountAndAdd(s, notTranslatedTemplatePredicate))
-//                        if (!checkCountAndAdd(s, templatePredicate))
                         createTriple(s, null, MappingStatus.NotMapped)
 
                   } catch (th: Throwable) {
@@ -157,24 +174,6 @@ class TripleImporter {
          result = DIGIT_END_REGEX.matchEntire(result)!!.groups[1]!!.value
       return result
    }
-
-//   fun checkCountAndAdd(s: StoreData, templateProperty: String): Boolean {
-//      val list = mappingDao.readOntologyProperty(templateProperty)
-//      // we have less than two mappings for template property. in almost all cases we have a mapping
-//      if (list.isNotEmpty() && list.size <= 2) {
-//         logger.info("we have less than two mappings for template property $templateProperty")
-//         if (list.contains("dbo:" + s.rawProperty)) {
-//            s.data.predicate = "dbo:" + s.rawProperty
-//            createTriple(s, null, MappingStatus.NotApproved)
-//         } else
-//            for (string in list) {
-//               s.data.predicate = string
-//               createTriple(s, null, MappingStatus.Multiple)
-//            }
-//         return true
-//      }
-//      return false
-//   }
 
    fun findMap(s: StoreData, englishTemplateType: String,
                templatePredicate: String, secondTemplatePredicate: String): Boolean {
