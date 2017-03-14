@@ -5,6 +5,7 @@ import ir.ac.iust.dml.kg.dbpediahelper.access.entities.TemplateToClassMapping
 import ir.ac.iust.dml.kg.utils.PagedData
 import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
 import org.hibernate.SessionFactory
+import org.hibernate.criterion.Projections
 import org.hibernate.criterion.Restrictions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
@@ -68,5 +69,27 @@ open class TemplateToClassDaoImpl : TemplateToClassDao {
       val list = SqlJpaTools.page(TemplateToClassMapping::class.java, page, pageSize, session, *c)
       session.close()
       return list
+   }
+
+   @Suppress("UNCHECKED_CAST")
+   override fun searchTemplateName(page: Int, pageSize: Int, keyword: String?): List<String> {
+      val session = this.sessionFactory.openSession()
+      val criteria = session.createCriteria(TemplateToClassMapping::class.java)
+      criteria.add(Restrictions.like("templateName", "%$keyword%"))
+      criteria.setProjection(Projections.distinct(Projections.property("templateName")))
+      val mapping = criteria.list() as MutableList<String>
+      session.close()
+      return mapping
+   }
+
+   @Suppress("UNCHECKED_CAST")
+   override fun searchClassName(page: Int, pageSize: Int, keyword: String?): List<String> {
+      val session = this.sessionFactory.openSession()
+      val criteria = session.createCriteria(TemplateToClassMapping::class.java)
+      criteria.add(Restrictions.like("className", "%$keyword%"))
+      criteria.setProjection(Projections.distinct(Projections.property("className")))
+      val mapping = criteria.list() as MutableList<String>
+      session.close()
+      return mapping
    }
 }

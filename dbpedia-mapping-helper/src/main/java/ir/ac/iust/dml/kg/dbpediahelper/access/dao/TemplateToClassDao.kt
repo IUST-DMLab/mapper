@@ -13,4 +13,7 @@ interface TemplateToClassDao {
               language: String? = null, approved: Boolean? = null,
               after: Long? = null, noUpdateEpoch: Boolean? = null):
          PagedData<TemplateToClassMapping>
+
+   fun searchTemplateName(page: Int, pageSize: Int, keyword: String?): List<String>
+   fun searchClassName(page: Int, pageSize: Int, keyword: String?): List<String>
 }

@@ -20,15 +20,15 @@ class MappingRestService {
 
    @RequestMapping("search", method = arrayOf(RequestMethod.GET))
    @ResponseBody
-   fun search(@RequestParam page: Int,
+   fun search(@RequestParam(required = false, defaultValue = "0") page: Int?,
               @RequestParam(required = false, defaultValue = "20") pageSize: Int?,
               @RequestParam(required = false) templateName: String?,
               @RequestParam(required = false) className: String?,
               @RequestParam(required = false, defaultValue = "false") like: Boolean?,
-              @RequestParam(required = false) language: String,
+              @RequestParam(required = false) language: String?,
               @RequestParam(required = false) approved: Boolean?,
               @RequestParam(required = false) after: Long? = null)
-         = templateToClassLogic.search(page = page, pageSize = pageSize!!,
+         = templateToClassLogic.search(page = page!!, pageSize = pageSize!!,
          templateName = templateName, className = className, like = like!!,
          language = language, approved = approved, after = after)
 
@@ -50,4 +50,18 @@ class MappingRestService {
    @RequestMapping("edit", method = arrayOf(RequestMethod.POST))
    @ResponseBody
    fun editData(@RequestBody data: TemplateToClassData) = templateToClassLogic.edit(data)
+
+   @RequestMapping("searchTemplateName", method = arrayOf(RequestMethod.POST))
+   @ResponseBody
+   fun searchTemplateName(@RequestParam(required = false, defaultValue = "0") page: Int?,
+                          @RequestParam(required = false, defaultValue = "20") pageSize: Int?,
+                          @RequestParam keyword: String?) =
+         templateToClassLogic.searchTemplateName(page!!, pageSize!!, keyword)
+
+   @RequestMapping("searchClassName", method = arrayOf(RequestMethod.POST))
+   @ResponseBody
+   fun searchClassName(@RequestParam(required = false, defaultValue = "0") page: Int?,
+                       @RequestParam(required = false, defaultValue = "20") pageSize: Int?,
+                       @RequestParam keyword: String?) =
+         templateToClassLogic.searchClassName(page!!, pageSize!!, keyword)
 }

@@ -14,7 +14,7 @@ public class WelcomeController {
             "<br/>" +
             "<a href='/template'>Cross-lingual Template Equalities</a><br/>" +
             "<a href='/helper'>DBpedia Mapping Helper</a><br/>" +
-            "<a href='/translator'>DBpedia Ontology Class Translator</a>" +
+            "<a href='/translator'>DBpedia Ontology Class Translator</a><br/>" +
             "<a href='/swagger-ui.html'>All public services</a>";
   }
 }

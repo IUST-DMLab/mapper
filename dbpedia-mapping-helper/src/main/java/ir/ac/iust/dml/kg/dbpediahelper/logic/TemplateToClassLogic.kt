@@ -60,4 +60,7 @@ class TemplateToClassLogic {
       dao.save(entity)
       return getEditData(entity.id)
    }
+
+   fun searchTemplateName(page: Int, pageSize: Int, keyword: String?) = dao.searchTemplateName(page, pageSize, keyword)
+   fun searchClassName(page: Int, pageSize: Int, keyword: String?) = dao.searchClassName(page, pageSize, keyword)
 }
