@@ -51,14 +51,14 @@ class MappingRestService {
    @ResponseBody
    fun editData(@RequestBody data: TemplateToClassData) = templateToClassLogic.edit(data)
 
-   @RequestMapping("searchTemplateName", method = arrayOf(RequestMethod.POST))
+   @RequestMapping("searchTemplateName", method = arrayOf(RequestMethod.GET))
    @ResponseBody
    fun searchTemplateName(@RequestParam(required = false, defaultValue = "0") page: Int?,
                           @RequestParam(required = false, defaultValue = "20") pageSize: Int?,
                           @RequestParam keyword: String?) =
          templateToClassLogic.searchTemplateName(page!!, pageSize!!, keyword)
 
-   @RequestMapping("searchClassName", method = arrayOf(RequestMethod.POST))
+   @RequestMapping("searchClassName", method = arrayOf(RequestMethod.GET))
    @ResponseBody
    fun searchClassName(@RequestParam(required = false, defaultValue = "0") page: Int?,
                        @RequestParam(required = false, defaultValue = "20") pageSize: Int?,
