@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.templateequalities.logic.export
 
-import ir.ac.iust.dml.kg.templateequalities.access.dao.TemplatePropertyMappingDao
+import ir.ac.iust.dml.kg.access.dao.entities.dao.WikipediaPropertyTranslationDao
 import ir.ac.iust.dml.kg.utils.DataExporter
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 class Exporter {
 
    @Autowired
-   lateinit var dao: TemplatePropertyMappingDao
+   lateinit var dao: WikipediaPropertyTranslationDao
    val logger = Logger.getLogger(this.javaClass)!!
 
    @Throws(Exception::class)

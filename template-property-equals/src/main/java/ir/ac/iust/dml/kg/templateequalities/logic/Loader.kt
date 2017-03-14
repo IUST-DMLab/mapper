@@ -1,7 +1,7 @@
 package ir.ac.iust.dml.kg.templateequalities.logic
 
-import ir.ac.iust.dml.kg.templateequalities.access.dao.TemplatePropertyMappingDao
-import ir.ac.iust.dml.kg.templateequalities.access.entities.WikipediaPropertyTranslation
+import ir.ac.iust.dml.kg.access.dao.entities.WikipediaPropertyTranslation
+import ir.ac.iust.dml.kg.access.dao.entities.dao.WikipediaPropertyTranslationDao
 import ir.ac.iust.dml.kg.templateequalities.logic.wiki.InfoboxTemplateReader
 import ir.ac.iust.dml.kg.templateequalities.logic.wiki.MappingDiscoveryListener
 import ir.ac.iust.dml.kg.utils.ConfigReader
@@ -16,7 +16,7 @@ import java.nio.file.Files
 class Loader {
 
     @Autowired
-    lateinit var dao: TemplatePropertyMappingDao
+    lateinit var dao: WikipediaPropertyTranslationDao
     val logger = Logger.getLogger(this.javaClass)!!
 
     @Throws(Exception::class)

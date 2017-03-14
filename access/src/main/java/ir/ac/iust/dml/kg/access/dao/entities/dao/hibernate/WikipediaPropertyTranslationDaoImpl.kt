@@ -1,6 +1,7 @@
-package ir.ac.iust.dml.kg.templateequalities.access.dao
+package ir.ac.iust.dml.kg.access.dao.entities.dao.hibernate
 
-import ir.ac.iust.dml.kg.templateequalities.access.entities.WikipediaPropertyTranslation
+import ir.ac.iust.dml.kg.access.dao.entities.WikipediaPropertyTranslation
+import ir.ac.iust.dml.kg.access.dao.entities.dao.WikipediaPropertyTranslationDao
 import ir.ac.iust.dml.kg.utils.PagedData
 import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
 import org.hibernate.SessionFactory
@@ -9,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 
 @Repository
-open class TemplatePropertyMappingDaoImpl : TemplatePropertyMappingDao {
+open class WikipediaPropertyTranslationDaoImpl : WikipediaPropertyTranslationDao {
 
     @Suppress("UNCHECKED_CAST")
     override fun readByFaTitle(type: String?, faProperty: String): MutableList<WikipediaPropertyTranslation> {

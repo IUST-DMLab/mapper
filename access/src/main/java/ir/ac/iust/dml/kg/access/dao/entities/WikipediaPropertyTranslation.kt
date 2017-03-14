@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.templateequalities.access.entities
+package ir.ac.iust.dml.kg.access.dao.entities
 
 import org.hibernate.annotations.Index
 import javax.persistence.*

@@ -1,9 +1,9 @@
-package ir.ac.iust.dml.kg.templateequalities.access.dao
+package ir.ac.iust.dml.kg.access.dao.entities.dao
 
-import ir.ac.iust.dml.kg.templateequalities.access.entities.WikipediaPropertyTranslation
+import ir.ac.iust.dml.kg.access.dao.entities.WikipediaPropertyTranslation
 import ir.ac.iust.dml.kg.utils.PagedData
 
-interface TemplatePropertyMappingDao {
+interface WikipediaPropertyTranslationDao {
     fun save(p: WikipediaPropertyTranslation)
 
     fun list(pageSize: Int = 20, page: Int = 10): PagedData<WikipediaPropertyTranslation>

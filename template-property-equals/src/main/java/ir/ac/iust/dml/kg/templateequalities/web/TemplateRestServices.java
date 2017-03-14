@@ -1,8 +1,8 @@
 package ir.ac.iust.dml.kg.templateequalities.web;
 
 import io.swagger.annotations.Api;
-import ir.ac.iust.dml.kg.templateequalities.access.dao.TemplatePropertyMappingDao;
-import ir.ac.iust.dml.kg.templateequalities.access.entities.WikipediaPropertyTranslation;
+import ir.ac.iust.dml.kg.access.dao.entities.WikipediaPropertyTranslation;
+import ir.ac.iust.dml.kg.access.dao.entities.dao.WikipediaPropertyTranslationDao;
 import ir.ac.iust.dml.kg.templateequalities.logic.Loader;
 import ir.ac.iust.dml.kg.templateequalities.logic.export.ExportData;
 import ir.ac.iust.dml.kg.templateequalities.logic.export.Exporter;
@@ -20,7 +20,7 @@ public class TemplateRestServices {
   @Autowired
   private Exporter exporter;
   @Autowired
-  private TemplatePropertyMappingDao dao;
+  private WikipediaPropertyTranslationDao dao;
 
   @RequestMapping("/load")
   public String load() throws Exception {
