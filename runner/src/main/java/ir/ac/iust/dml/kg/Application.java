@@ -10,18 +10,18 @@ import org.springframework.context.annotation.ImportResource;
 
 @SpringBootApplication
 @ImportResource(value = {
+        "classpath:access-context.xml",
         "classpath:template-equals-context.xml",
         "classpath:dbpedia-helper-context.xml",
-        "classpath:ontology-translation-context.xml",
-        "classpath:mysql.xml"
+        "classpath:ontology-translation-context.xml"
 })
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class,
         DataSourceTransactionManagerAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class})
 public class Application {
 
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(Application.class, args);
+  }
 
 }

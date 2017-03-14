@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-3.1.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+  <context:component-scan base-package="ir.ac.iust.dml.kg.access"/>
+  <bean class="org.springframework.orm.hibernate4.LocalSessionFactoryBean"
+        id="sessionFactory">
+    <property name="packagesToScan">
+      <list>
+        <value>ir.ac.iust.dml.kg</value>
+      </list>
+    </property>
+    <property name="hibernateProperties">
+      <props>
+        <prop key="hibernate.dialect">ir.ac.iust.dml.kg.utils.UTF8MySQL5Dialect
+        </prop>
+        <prop key="cache.use_query_cache">true</prop>
+        <prop key="cache.use_second_level_cache">true</prop>
+        <prop key="hibernate.connection.driver_class">com.mysql.jdbc.Driver</prop>
+        <prop key="hibernate.connection.url">
+          jdbc:mysql://localhost:3306/knowledge_graph?createDatabaseIfNotExist=true&amp;useUnicode=true&amp;characterEncoding=utf8
+        </prop>
+        <prop key="hibernate.connection.CharSet">utf8</prop>
+        <prop key="hibernate.connection.characterEncoding">utf8</prop>
+        <prop key="hibernate.connection.useUnicode">true</prop>
+        <prop key="hibernate.default_schema">knowledge_graph</prop>
+        <prop key="hibernate.hbm2ddl.auto">update</prop>
+        <prop key="hibernate.connection.username">root</prop>
+        <prop key="hibernate.connection.password">Dmlab2017</prop>
+        <prop key="show_sql">false</prop>
+      </props>
+    </property>
+  </bean>
+  <bean class="org.springframework.orm.hibernate4.HibernateTransactionManager" id="txManager">
+    <property name="sessionFactory" ref="sessionFactory"/>
+    <qualifier value="db"/>
+  </bean>
+
+  <tx:annotation-driven transaction-manager="txManager"/>
+  <aop:aspectj-autoproxy proxy-target-class="true"/>
+</beans>

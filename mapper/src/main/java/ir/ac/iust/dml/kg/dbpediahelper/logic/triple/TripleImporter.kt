@@ -19,18 +19,13 @@ import java.nio.file.Path
 class TripleImporter {
 
    val logger = Logger.getLogger(this.javaClass)!!
-   @Autowired
-   lateinit var tripleDao: FkgTripleDao
-   @Autowired
-   lateinit var mappingDao: FkgPropertyMappingDao
-   @Autowired
-   lateinit var wikipediaTemplateRedirectDao: WikipediaTemplateRedirectDao
-   @Autowired
-   lateinit var fkgTripleStatisticsDao: FkgTripleStatisticsDao
-   @Autowired
-   lateinit var prefixService: PrefixService
-   @Autowired
-   lateinit var event: StatisticalEventDao
+   @Autowired lateinit var tripleDao: FkgTripleDao
+   @Autowired lateinit var mappingDao: FkgPropertyMappingDao
+   @Autowired lateinit var wikiTemplateRedirectDao: WikipediaTemplateRedirectDao
+   @Autowired lateinit var wikiPropertyTranslationDao: WikipediaPropertyTranslationDao
+   @Autowired lateinit var fkgTripleStatisticsDao: FkgTripleStatisticsDao
+   @Autowired lateinit var prefixService: PrefixService
+   @Autowired lateinit var event: StatisticalEventDao
 
    enum class StoreType {
       none, file, mysql
@@ -111,9 +106,9 @@ class TripleImporter {
                       * mapping for english template names in tables of
                       * template_property_mapping and dbpedia_property_mapping
                       */
-                     val templateMappings = wikipediaTemplateRedirectDao.read(nameFa = data.templateType!!)
+                     val templateRedirects = wikiTemplateRedirectDao.read(nameFa = data.templateType!!)
                      val englishTemplateType =
-                           if (templateMappings.isNotEmpty()) templateMappings[0].typeEn!!
+                           if (templateRedirects.isNotEmpty()) templateRedirects[0].typeEn!!
                            else data.templateType!!
                      logger.info("english template type is $englishTemplateType (if we have english type)")
 
@@ -137,7 +132,7 @@ class TripleImporter {
                       * template_property_mapping
                       */
                      val notTranslatedTemplatePredicate: String
-                     val templateMapping = mappingDao.readByEnTitle(englishTemplateType, templatePredicate)
+                     val templateMapping = wikiPropertyTranslationDao.readByEnTitle(englishTemplateType, templatePredicate)
                      if (templateMapping.isNotEmpty()) {
                         notTranslatedTemplatePredicate = templatePredicate
                         templatePredicate = templateMapping[0].faProperty!!

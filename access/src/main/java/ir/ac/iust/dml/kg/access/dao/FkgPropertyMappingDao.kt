@@ -1,7 +1,6 @@
 package ir.ac.iust.dml.kg.access.dao
 
 import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
-import ir.ac.iust.dml.kg.access.entities.WikipediaPropertyTranslation
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.utils.PagedData
 
@@ -19,10 +18,6 @@ interface FkgPropertyMappingDao {
          MutableList<FkgPropertyMapping>
 
    fun readOntologyProperty(templateProperty: String): List<String>
-
-   fun readByEnTitle(type: String? = null, enProperty: String): MutableList<WikipediaPropertyTranslation>
-
-   fun listTemplatePropertyMapping(pageSize: Int = 20, page: Int = 10): PagedData<WikipediaPropertyTranslation>
 
    fun listUniqueProperties(language: String?, pageSize: Int = 20, page: Int = 10): List<String>
 

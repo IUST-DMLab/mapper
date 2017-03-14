@@ -31,7 +31,7 @@ public class MappingHelperRestServices {
 
     @RequestMapping("/load")
     public String load() throws Exception {
-        helperLoader.load();
+      helperLoader.writeDbpediaEnglishMapping();
         return "Loaded!";
     }
 

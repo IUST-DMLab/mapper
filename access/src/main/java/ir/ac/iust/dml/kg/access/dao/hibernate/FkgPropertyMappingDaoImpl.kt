@@ -2,7 +2,6 @@ package ir.ac.iust.dml.kg.access.dao.hibernate
 
 import ir.ac.iust.dml.kg.access.dao.FkgPropertyMappingDao
 import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
-import ir.ac.iust.dml.kg.access.entities.WikipediaPropertyTranslation
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.utils.PagedData
 import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
@@ -84,25 +83,6 @@ open class FkgPropertyMappingDaoImpl : FkgPropertyMappingDao {
       val mapping = criteria.list() as MutableList<String>
       session.close()
       return mapping
-   }
-
-   @Suppress("UNCHECKED_CAST")
-   override fun readByEnTitle(type: String?, enProperty: String): MutableList<WikipediaPropertyTranslation> {
-      val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(WikipediaPropertyTranslation::class.java)
-      if (type != null) criteria.add(Restrictions.like("type", "%$type%"))
-      criteria.add(Restrictions.like("enProperty", "%$enProperty%"))
-      val mapping = criteria.list() as MutableList<WikipediaPropertyTranslation>
-      session.close()
-      return mapping
-   }
-
-   @Suppress("UNCHECKED_CAST")
-   override fun listTemplatePropertyMapping(pageSize: Int, page: Int): PagedData<WikipediaPropertyTranslation> {
-      val session = this.sessionFactory.openSession()
-      val list = SqlJpaTools.page(WikipediaPropertyTranslation::class.java, page, pageSize, session)
-      session.close()
-      return list
    }
 
    @Suppress("UNCHECKED_CAST")

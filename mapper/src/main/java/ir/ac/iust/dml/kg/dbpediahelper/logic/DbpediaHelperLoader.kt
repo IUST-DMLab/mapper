@@ -1,6 +1,7 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic
 
 import ir.ac.iust.dml.kg.access.dao.FkgPropertyMappingDao
+import ir.ac.iust.dml.kg.access.dao.WikipediaPropertyTranslationDao
 import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.dbpediahelper.logic.dump.OwlDumpReader
@@ -13,14 +14,13 @@ import java.nio.file.Files
 @Service
 class DbpediaHelperLoader {
 
-   @Autowired
-   lateinit var dao: FkgPropertyMappingDao
-   @Autowired
-   lateinit var prefixService: PrefixService
+   @Autowired lateinit var dao: FkgPropertyMappingDao
+   @Autowired lateinit var wikiPropertyTranslationDao: WikipediaPropertyTranslationDao
+   @Autowired lateinit var prefixService: PrefixService
    val logger = Logger.getLogger(this.javaClass)!!
 
    @Throws(Exception::class)
-   fun load() {
+   fun writeDbpediaEnglishMapping() {
       val ONTOLOGY_DUMP = "ontology.dump.en"
       val config = ConfigReader.getConfig(mapOf(ONTOLOGY_DUMP to "~/.pkg/data/dbpedia_mapping.owl"))
       val path = ConfigReader.getPath(config[ONTOLOGY_DUMP]!! as String)
@@ -72,7 +72,7 @@ class DbpediaHelperLoader {
    fun generatePersian() {
       var page = 0
       do {
-         val list = dao.listTemplatePropertyMapping(page = page++)
+         val list = wikiPropertyTranslationDao.list(page = page++)
          for ((id, type, faProperty, enProperty, notTranslated) in list.data) {
             if (notTranslated!!) continue
             val dbpediaEnglishMapping = dao.read(language = "en", type = type,
