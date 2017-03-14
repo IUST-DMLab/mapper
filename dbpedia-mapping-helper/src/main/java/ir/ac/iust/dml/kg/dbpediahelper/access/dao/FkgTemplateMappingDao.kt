@@ -3,7 +3,7 @@ package ir.ac.iust.dml.kg.dbpediahelper.access.dao
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgTemplateMapping
 import ir.ac.iust.dml.kg.utils.PagedData
 
-interface TemplateToClassDao {
+interface FkgTemplateMappingDao {
    fun save(t: FkgTemplateMapping)
    fun deleteAll()
    fun read(templateName: String, className: String?): FkgTemplateMapping?

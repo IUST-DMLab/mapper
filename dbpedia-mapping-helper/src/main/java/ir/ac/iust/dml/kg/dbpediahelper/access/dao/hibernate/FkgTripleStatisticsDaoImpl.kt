@@ -1,13 +1,13 @@
 package ir.ac.iust.dml.kg.dbpediahelper.access.dao.hibernate
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.TripleStatisticsDao
+import ir.ac.iust.dml.kg.dbpediahelper.access.dao.FkgTripleStatisticsDao
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgTripleStatistics
 import org.hibernate.SessionFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 
 @Repository
-open class TripleStatisticsDaoImpl : TripleStatisticsDao {
+open class FkgTripleStatisticsDaoImpl : FkgTripleStatisticsDao {
 
    @Autowired
    lateinit var sessionFactory: SessionFactory

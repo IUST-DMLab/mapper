@@ -1,7 +1,7 @@
 package ir.ac.iust.dml.kg.dbpediahelper.access.dao.file
 
 import com.google.gson.GsonBuilder
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.KnowledgeBaseTripleDao
+import ir.ac.iust.dml.kg.dbpediahelper.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.utils.PagedData
@@ -12,7 +12,7 @@ import java.io.OutputStreamWriter
 import java.nio.file.Files
 import java.nio.file.Path
 
-class FileKnowledgeBaseTripleDaoImpl(val path: Path, val flushSize: Int = 1000) : KnowledgeBaseTripleDao {
+class FileFkgTripleDaoImpl(val path: Path, val flushSize: Int = 1000) : FkgTripleDao {
 
    init {
       if (!Files.exists(path)) Files.createDirectories(path)

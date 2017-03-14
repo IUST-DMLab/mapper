@@ -4,7 +4,7 @@ import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.utils.PagedData
 
-interface KnowledgeBaseTripleDao {
+interface FkgTripleDao {
    fun save(t: FkgTriple)
 
    fun deleteAll()

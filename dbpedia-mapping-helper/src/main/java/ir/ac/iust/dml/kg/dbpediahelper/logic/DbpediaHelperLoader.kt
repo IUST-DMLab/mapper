@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.DBpediaPropertyMappingDao
+import ir.ac.iust.dml.kg.dbpediahelper.access.dao.FkgPropertyMappingDao
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.dbpediahelper.logic.dump.OwlDumpReader
@@ -14,7 +14,7 @@ import java.nio.file.Files
 class DbpediaHelperLoader {
 
    @Autowired
-   lateinit var dao: DBpediaPropertyMappingDao
+   lateinit var dao: FkgPropertyMappingDao
    @Autowired
    lateinit var prefixService: PrefixService
    val logger = Logger.getLogger(this.javaClass)!!

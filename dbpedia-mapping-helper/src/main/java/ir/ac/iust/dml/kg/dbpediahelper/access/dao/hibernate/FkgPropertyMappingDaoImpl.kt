@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.dbpediahelper.access.dao.hibernate
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.DBpediaPropertyMappingDao
+import ir.ac.iust.dml.kg.dbpediahelper.access.dao.FkgPropertyMappingDao
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.WikipediaPropertyTranslation
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.MappingStatus
@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 
 @Repository
-open class DBpediaPropertyMappingDaoImpl : DBpediaPropertyMappingDao {
+open class FkgPropertyMappingDaoImpl : FkgPropertyMappingDao {
 
    @Suppress("UNCHECKED_CAST")
    override fun read(language: String?, clazz: String?, type: String?,

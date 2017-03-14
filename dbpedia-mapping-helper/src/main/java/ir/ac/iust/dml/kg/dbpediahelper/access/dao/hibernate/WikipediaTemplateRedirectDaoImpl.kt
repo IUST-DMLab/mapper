@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.dbpediahelper.access.dao.hibernate
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.TemplateMappingDao
+import ir.ac.iust.dml.kg.dbpediahelper.access.dao.WikipediaTemplateRedirectDao
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.WikipediaTemplateRedirect
 import ir.ac.iust.dml.kg.utils.PagedData
 import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 
 @Repository
-open class TemplateMappingDaoImpl : TemplateMappingDao {
+open class WikipediaTemplateRedirectDaoImpl : WikipediaTemplateRedirectDao {
 
    @Autowired
    lateinit var sessionFactory: SessionFactory

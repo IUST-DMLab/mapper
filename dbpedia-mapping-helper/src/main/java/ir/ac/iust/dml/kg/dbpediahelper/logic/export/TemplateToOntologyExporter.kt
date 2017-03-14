@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic.export
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.DBpediaPropertyMappingDao
+import ir.ac.iust.dml.kg.dbpediahelper.access.dao.FkgPropertyMappingDao
 import ir.ac.iust.dml.kg.utils.DataExporter
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 class TemplateToOntologyExporter {
 
    @Autowired
-   lateinit var dao: DBpediaPropertyMappingDao
+   lateinit var dao: FkgPropertyMappingDao
    val logger = Logger.getLogger(this.javaClass)!!
 
    @Throws(Exception::class)

@@ -1,7 +1,7 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic.triple
 
 import ir.ac.iust.dml.kg.dbpediahelper.access.dao.*
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.file.FileKnowledgeBaseTripleDaoImpl
+import ir.ac.iust.dml.kg.dbpediahelper.access.dao.file.FileFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.MappingStatus
@@ -20,13 +20,13 @@ class TripleImporter {
 
    val logger = Logger.getLogger(this.javaClass)!!
    @Autowired
-   lateinit var tripleDao: KnowledgeBaseTripleDao
+   lateinit var tripleDao: FkgTripleDao
    @Autowired
-   lateinit var mappingDao: DBpediaPropertyMappingDao
+   lateinit var mappingDao: FkgPropertyMappingDao
    @Autowired
-   lateinit var templateMappingDao: TemplateMappingDao
+   lateinit var wikipediaTemplateRedirectDao: WikipediaTemplateRedirectDao
    @Autowired
-   lateinit var tripleStatisticsDao: TripleStatisticsDao
+   lateinit var fkgTripleStatisticsDao: FkgTripleStatisticsDao
    @Autowired
    lateinit var prefixService: PrefixService
    @Autowired
@@ -46,7 +46,7 @@ class TripleImporter {
          throw Exception("There is no file ${path.toAbsolutePath()} existed.")
       }
 
-      tripleStatisticsDao.deleteAll()
+      fkgTripleStatisticsDao.deleteAll()
 
       StatisticsLogReader(path).use {
          var lineNumber = 0
@@ -55,7 +55,7 @@ class TripleImporter {
             if (lineNumber % 1000 == 0) logger.trace("line number $lineNumber processed")
             val stats = it.next()
             try {
-               tripleStatisticsDao.save(stats)
+               fkgTripleStatisticsDao.save(stats)
             } catch (e: Throwable) {
                logger.error("error in $stats", e)
             }
@@ -75,7 +75,7 @@ class TripleImporter {
       }
 
       val store = when (storeType) {
-         StoreType.file -> FileKnowledgeBaseTripleDaoImpl(path.resolve("mapped"))
+         StoreType.file -> FileFkgTripleDaoImpl(path.resolve("mapped"))
          StoreType.mysql -> tripleDao
          else -> null
       }
@@ -111,7 +111,7 @@ class TripleImporter {
                       * mapping for english template names in tables of
                       * template_property_mapping and dbpedia_property_mapping
                       */
-                     val templateMappings = templateMappingDao.read(nameFa = data.templateType!!)
+                     val templateMappings = wikipediaTemplateRedirectDao.read(nameFa = data.templateType!!)
                      val englishTemplateType =
                            if (templateMappings.isNotEmpty()) templateMappings[0].typeEn!!
                            else data.templateType!!
@@ -211,7 +211,7 @@ class TripleImporter {
       return false
    }
 
-   data class StoreData(val store: KnowledgeBaseTripleDao?, val rawProperty: String, val data: TripleData)
+   data class StoreData(val store: FkgTripleDao?, val rawProperty: String, val data: TripleData)
 
    fun createTriple(triple: StoreData, mapping: FkgPropertyMapping?, status: MappingStatus?) {
       with(triple) {

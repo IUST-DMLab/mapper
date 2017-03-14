@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.dbpediahelper.access.dao.hibernate
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.KnowledgeBaseTripleDao
+import ir.ac.iust.dml.kg.dbpediahelper.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.utils.PagedData
@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 
 @Repository
-open class KnowledgeBaseTripleDaoImpl : KnowledgeBaseTripleDao {
+open class FkgTripleDaoImpl : FkgTripleDao {
 
    @Autowired
    lateinit var sessionFactory: SessionFactory

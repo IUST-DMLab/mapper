@@ -5,7 +5,7 @@ import ir.ac.iust.dml.kg.dbpediahelper.access.entities.WikipediaPropertyTranslat
 import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.utils.PagedData
 
-interface DBpediaPropertyMappingDao {
+interface FkgPropertyMappingDao {
    fun save(p: FkgPropertyMapping)
 
    fun deleteAll()
