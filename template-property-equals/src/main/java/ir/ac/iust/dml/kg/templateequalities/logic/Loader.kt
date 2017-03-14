@@ -1,7 +1,7 @@
 package ir.ac.iust.dml.kg.templateequalities.logic
 
-import ir.ac.iust.dml.kg.access.dao.entities.WikipediaPropertyTranslation
-import ir.ac.iust.dml.kg.access.dao.entities.dao.WikipediaPropertyTranslationDao
+import ir.ac.iust.dml.kg.access.dao.WikipediaPropertyTranslationDao
+import ir.ac.iust.dml.kg.access.entities.WikipediaPropertyTranslation
 import ir.ac.iust.dml.kg.templateequalities.logic.wiki.InfoboxTemplateReader
 import ir.ac.iust.dml.kg.templateequalities.logic.wiki.MappingDiscoveryListener
 import ir.ac.iust.dml.kg.utils.ConfigReader

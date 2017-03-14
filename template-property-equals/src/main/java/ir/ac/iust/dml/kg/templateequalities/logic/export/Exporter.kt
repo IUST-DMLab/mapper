@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.templateequalities.logic.export
 
-import ir.ac.iust.dml.kg.access.dao.entities.dao.WikipediaPropertyTranslationDao
+import ir.ac.iust.dml.kg.access.dao.WikipediaPropertyTranslationDao
 import ir.ac.iust.dml.kg.utils.DataExporter
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired

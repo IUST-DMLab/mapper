@@ -1,8 +1,8 @@
 package ir.ac.iust.dml.kg.templateequalities.web;
 
 import io.swagger.annotations.Api;
-import ir.ac.iust.dml.kg.access.dao.entities.WikipediaPropertyTranslation;
-import ir.ac.iust.dml.kg.access.dao.entities.dao.WikipediaPropertyTranslationDao;
+import ir.ac.iust.dml.kg.access.dao.WikipediaPropertyTranslationDao;
+import ir.ac.iust.dml.kg.access.entities.WikipediaPropertyTranslation;
 import ir.ac.iust.dml.kg.templateequalities.logic.Loader;
 import ir.ac.iust.dml.kg.templateequalities.logic.export.ExportData;
 import ir.ac.iust.dml.kg.templateequalities.logic.export.Exporter;

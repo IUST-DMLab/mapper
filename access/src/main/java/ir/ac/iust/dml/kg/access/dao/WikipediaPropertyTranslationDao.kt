@@ -1,6 +1,6 @@
-package ir.ac.iust.dml.kg.access.dao.entities.dao
+package ir.ac.iust.dml.kg.access.dao
 
-import ir.ac.iust.dml.kg.access.dao.entities.WikipediaPropertyTranslation
+import ir.ac.iust.dml.kg.access.entities.WikipediaPropertyTranslation
 import ir.ac.iust.dml.kg.utils.PagedData
 
 interface WikipediaPropertyTranslationDao {

@@ -1,7 +1,7 @@
-package ir.ac.iust.dml.kg.access.dao.entities.dao.hibernate
+package ir.ac.iust.dml.kg.access.dao.hibernate
 
-import ir.ac.iust.dml.kg.access.dao.entities.WikipediaPropertyTranslation
-import ir.ac.iust.dml.kg.access.dao.entities.dao.WikipediaPropertyTranslationDao
+import ir.ac.iust.dml.kg.access.dao.WikipediaPropertyTranslationDao
+import ir.ac.iust.dml.kg.access.entities.WikipediaPropertyTranslation
 import ir.ac.iust.dml.kg.utils.PagedData
 import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
 import org.hibernate.SessionFactory
