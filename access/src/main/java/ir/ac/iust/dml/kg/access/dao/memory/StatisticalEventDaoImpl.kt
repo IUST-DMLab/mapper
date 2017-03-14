@@ -2,9 +2,7 @@ package ir.ac.iust.dml.kg.access.dao.memory
 
 import ir.ac.iust.dml.kg.access.dao.StatisticalEventDao
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
-import org.springframework.stereotype.Repository
 
-@Repository
 open class StatisticalEventDaoImpl : StatisticalEventDao {
 
    var numberOfTriples: Int = 0

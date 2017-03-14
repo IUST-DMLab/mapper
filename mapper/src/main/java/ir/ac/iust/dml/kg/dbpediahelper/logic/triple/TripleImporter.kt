@@ -2,6 +2,7 @@ package ir.ac.iust.dml.kg.dbpediahelper.logic.triple
 
 import ir.ac.iust.dml.kg.access.dao.*
 import ir.ac.iust.dml.kg.access.dao.file.FileFkgTripleDaoImpl
+import ir.ac.iust.dml.kg.access.dao.memory.StatisticalEventDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
@@ -25,7 +26,7 @@ class TripleImporter {
    @Autowired lateinit var wikiPropertyTranslationDao: WikipediaPropertyTranslationDao
    @Autowired lateinit var fkgTripleStatisticsDao: FkgTripleStatisticsDao
    @Autowired lateinit var prefixService: PrefixService
-   @Autowired lateinit var event: StatisticalEventDao
+   @Autowired lateinit var eventDao: StatisticalEventDaoImpl
 
    enum class StoreType {
       none, file, mysql
@@ -79,18 +80,18 @@ class TripleImporter {
       store?.deleteAll()
       val result = PathWalker.getPath(path, Regex("\\d+\\.json"))
       for (p in result) {
-         event.fileProcessed(p.toString())
+         eventDao.fileProcessed(p.toString())
          var tripleNumber = 0
          try {
             TripleJsonFileReader(p).use { reader ->
                while (reader.hasNext()) {
                   try {
-                     event.tripleRead()
+                     eventDao.tripleRead()
                      val data = reader.next()
                      tripleNumber++
                      if (data.templateName == null) continue
                      if (data.templateName != "infobox" && !data.templateName!!.startsWith("جعبه")) continue
-                     event.tripleProcessed()
+                     eventDao.tripleProcessed()
                      if (tripleNumber % 100 == 0) {
                         logger.info("triple number is $tripleNumber")
                      }
@@ -155,11 +156,11 @@ class TripleImporter {
          }
       }
       saveLog(path)
-      println(event.log())
+      println(eventDao.log())
    }
 
    private fun saveLog(path: Path) {
-      Files.write(path.resolve("mapped").resolve("stats.txt"), event.log().toByteArray(Charset.forName("UTF-8")))
+      Files.write(path.resolve("mapped").resolve("stats.txt"), eventDao.log().toByteArray(Charset.forName("UTF-8")))
    }
 
    val DIGIT_END_REGEX = Regex("(\\w+)\\d+")
@@ -231,11 +232,11 @@ class TripleImporter {
 
             store?.save(t)
 
-            event.propertyUsed(t.predicate!!)
-            event.statusGenerated(t.status!!)
-            event.typeUsed(t.templateType!!)
-            event.typeAndEntityUsed(t.templateType!!, t.subject!!)
-            event.typeAndPropertyUsed(t.templateType!!, t.predicate!!)
+            eventDao.propertyUsed(t.predicate!!)
+            eventDao.statusGenerated(t.status!!)
+            eventDao.typeUsed(t.templateType!!)
+            eventDao.typeAndEntityUsed(t.templateType!!, t.subject!!)
+            eventDao.typeAndPropertyUsed(t.templateType!!, t.predicate!!)
 
          } catch (e: Throwable) {
             logger.error("error create triple $data:", e)
