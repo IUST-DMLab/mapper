@@ -5,7 +5,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "wiki_template_mapping_from_redirects")
-data class WikiTemplateMapping(
+data class WikipediaTemplateRedirect(
       @Id
       @Column(name = "id")
       @GeneratedValue(strategy = GenerationType.IDENTITY)

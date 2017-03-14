@@ -1,9 +1,9 @@
 package ir.ac.iust.dml.kg.dbpediahelper.access.dao.hibernate
 
 import ir.ac.iust.dml.kg.dbpediahelper.access.dao.DBpediaPropertyMappingDao
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.DBpediaPropertyMapping
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.MappingStatus
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.TemplatePropertyMapping
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgPropertyMapping
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.WikipediaPropertyTranslation
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.utils.PagedData
 import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
 import org.hibernate.Criteria
@@ -20,9 +20,9 @@ open class DBpediaPropertyMappingDaoImpl : DBpediaPropertyMappingDao {
    override fun read(language: String?, clazz: String?, type: String?,
                      like: Boolean, hasClass: Boolean, templateProperty: String?,
                      secondTemplateProperty: String?, ontologyProperty: String?, status: MappingStatus?):
-         MutableList<DBpediaPropertyMapping> {
+         MutableList<FkgPropertyMapping> {
       val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(DBpediaPropertyMapping::class.java)
+      val criteria = session.createCriteria(FkgPropertyMapping::class.java)
       if (language != null) criteria.add(Restrictions.eq("language", language))
       if (status != null) criteria.add(Restrictions.eq("status", status))
       if (clazz != null) criteria.add(Restrictions.eq("clazz", clazz))
@@ -43,7 +43,7 @@ open class DBpediaPropertyMappingDaoImpl : DBpediaPropertyMappingDao {
          if (ontologyProperty != null)
             criteria.add(Restrictions.eq("ontologyProperty", ontologyProperty))
       }
-      val mapping = criteria.list() as MutableList<DBpediaPropertyMapping>
+      val mapping = criteria.list() as MutableList<FkgPropertyMapping>
       session.close()
       return mapping
    }
@@ -51,7 +51,7 @@ open class DBpediaPropertyMappingDaoImpl : DBpediaPropertyMappingDao {
    @Autowired
    lateinit var sessionFactory: SessionFactory
 
-   override fun save(p: DBpediaPropertyMapping) {
+   override fun save(p: FkgPropertyMapping) {
       val session = this.sessionFactory.openSession()
       val tx = session.beginTransaction()
       session.saveOrUpdate(p)
@@ -61,16 +61,16 @@ open class DBpediaPropertyMappingDaoImpl : DBpediaPropertyMappingDao {
 
    override fun deleteAll() {
       val session = this.sessionFactory.openSession()
-      val q = session.createQuery("delete from DBpediaPropertyMapping")
+      val q = session.createQuery("delete from FkgPropertyMapping")
       q.executeUpdate()
       session.close()
    }
 
    @Suppress("UNCHECKED_CAST")
-   override fun list(pageSize: Int, page: Int, hasClass: Boolean): PagedData<DBpediaPropertyMapping> {
+   override fun list(pageSize: Int, page: Int, hasClass: Boolean): PagedData<FkgPropertyMapping> {
       val session = this.sessionFactory.openSession()
       val criteria = SqlJpaTools.conditionalCriteria(hasClass, Restrictions.isNotNull("clazz"))
-      val list = SqlJpaTools.page(DBpediaPropertyMapping::class.java, page, pageSize, session, *criteria)
+      val list = SqlJpaTools.page(FkgPropertyMapping::class.java, page, pageSize, session, *criteria)
       session.close()
       return list
    }
@@ -78,7 +78,7 @@ open class DBpediaPropertyMappingDaoImpl : DBpediaPropertyMappingDao {
    @Suppress("UNCHECKED_CAST")
    override fun readOntologyProperty(templateProperty: String): List<String> {
       val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(DBpediaPropertyMapping::class.java)
+      val criteria = session.createCriteria(FkgPropertyMapping::class.java)
       criteria.add(Restrictions.eq("templateProperty", templateProperty))
       criteria.setProjection(Projections.distinct(Projections.property("ontologyProperty")))
       val mapping = criteria.list() as MutableList<String>
@@ -87,20 +87,20 @@ open class DBpediaPropertyMappingDaoImpl : DBpediaPropertyMappingDao {
    }
 
    @Suppress("UNCHECKED_CAST")
-   override fun readByEnTitle(type: String?, enProperty: String): MutableList<TemplatePropertyMapping> {
+   override fun readByEnTitle(type: String?, enProperty: String): MutableList<WikipediaPropertyTranslation> {
       val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(TemplatePropertyMapping::class.java)
+      val criteria = session.createCriteria(WikipediaPropertyTranslation::class.java)
       if (type != null) criteria.add(Restrictions.like("type", "%$type%"))
       criteria.add(Restrictions.like("enProperty", "%$enProperty%"))
-      val mapping = criteria.list() as MutableList<TemplatePropertyMapping>
+      val mapping = criteria.list() as MutableList<WikipediaPropertyTranslation>
       session.close()
       return mapping
    }
 
    @Suppress("UNCHECKED_CAST")
-   override fun listTemplatePropertyMapping(pageSize: Int, page: Int): PagedData<TemplatePropertyMapping> {
+   override fun listTemplatePropertyMapping(pageSize: Int, page: Int): PagedData<WikipediaPropertyTranslation> {
       val session = this.sessionFactory.openSession()
-      val list = SqlJpaTools.page(TemplatePropertyMapping::class.java, page, pageSize, session)
+      val list = SqlJpaTools.page(WikipediaPropertyTranslation::class.java, page, pageSize, session)
       session.close()
       return list
    }
@@ -108,7 +108,7 @@ open class DBpediaPropertyMappingDaoImpl : DBpediaPropertyMappingDao {
    @Suppress("UNCHECKED_CAST")
    override fun listUniqueProperties(language: String?, pageSize: Int, page: Int): List<String> {
       val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(DBpediaPropertyMapping::class.java)
+      val criteria = session.createCriteria(FkgPropertyMapping::class.java)
       if (language != null) criteria.add(Restrictions.like("language", language))
       criteria.setProjection(Projections.distinct(Projections.property("templateProperty")))
       criteria.setFirstResult(page * pageSize)
@@ -120,7 +120,7 @@ open class DBpediaPropertyMappingDaoImpl : DBpediaPropertyMappingDao {
 
    override fun countTemplateProperties(templateProperty: String): Long {
       val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(DBpediaPropertyMapping::class.java)
+      val criteria = session.createCriteria(FkgPropertyMapping::class.java)
       criteria.add(Restrictions.eq("templateProperty", templateProperty))
       val count = criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
             .setProjection(Projections.rowCount()).uniqueResult() as Long
@@ -131,7 +131,7 @@ open class DBpediaPropertyMappingDaoImpl : DBpediaPropertyMappingDao {
    @Suppress("UNCHECKED_CAST")
    override fun listUniqueOntologyProperties(templateProperty: String): List<String> {
       val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(DBpediaPropertyMapping::class.java)
+      val criteria = session.createCriteria(FkgPropertyMapping::class.java)
       criteria.add(Restrictions.eq("templateProperty", templateProperty))
       criteria.setProjection(Projections.distinct(Projections.property("ontologyProperty")))
       val mapping = criteria.list() as MutableList<String>
@@ -141,7 +141,7 @@ open class DBpediaPropertyMappingDaoImpl : DBpediaPropertyMappingDao {
 
    override fun countOntologyProperties(templateProperty: String, ontologyProperty: String): Long {
       val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(DBpediaPropertyMapping::class.java)
+      val criteria = session.createCriteria(FkgPropertyMapping::class.java)
       criteria.add(Restrictions.eq("templateProperty", templateProperty))
       criteria.add(Restrictions.eq("ontologyProperty", ontologyProperty))
       val count = criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)

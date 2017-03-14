@@ -1,11 +1,12 @@
 package ir.ac.iust.dml.kg.dbpediahelper.access.entities
 
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.TripleStatisticsType
 import org.hibernate.annotations.Index
 import javax.persistence.*
 
 @Entity
 @Table(name = "triple_stats")
-data class TripleStatistics(
+data class FkgTripleStatistics(
       @Id
       @Column(name = "id")
       @GeneratedValue(strategy = GenerationType.IDENTITY)

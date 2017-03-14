@@ -2,7 +2,7 @@ package ir.ac.iust.dml.kg.templateequalities.web;
 
 import io.swagger.annotations.Api;
 import ir.ac.iust.dml.kg.templateequalities.access.dao.TemplatePropertyMappingDao;
-import ir.ac.iust.dml.kg.templateequalities.access.entities.TemplatePropertyMapping;
+import ir.ac.iust.dml.kg.templateequalities.access.entities.WikipediaPropertyTranslation;
 import ir.ac.iust.dml.kg.templateequalities.logic.Loader;
 import ir.ac.iust.dml.kg.templateequalities.logic.export.ExportData;
 import ir.ac.iust.dml.kg.templateequalities.logic.export.Exporter;
@@ -36,26 +36,26 @@ public class TemplateRestServices {
 
   @RequestMapping(value = "/rest/v1/mapping/{lang}/{title}", method = RequestMethod.GET)
   @ResponseBody
-  public List<TemplatePropertyMapping> readByLang(@PathVariable String lang,
-                                                  @PathVariable String title) {
+  public List<WikipediaPropertyTranslation> readByLang(@PathVariable String lang,
+                                                       @PathVariable String title) {
     if (lang.equals("fa")) return dao.readByFaTitle(null, title);
     return dao.readByEnTitle(null, title);
   }
 
   @RequestMapping(value = "/rest/v1/mapping/{lang}/{type}/{title}", method = RequestMethod.GET)
   @ResponseBody
-  public List<TemplatePropertyMapping> readByLangAndType(@PathVariable String lang,
-                                                         @PathVariable String type,
-                                                         @PathVariable String title) {
+  public List<WikipediaPropertyTranslation> readByLangAndType(@PathVariable String lang,
+                                                              @PathVariable String type,
+                                                              @PathVariable String title) {
     if (lang.equals("fa")) return dao.readByFaTitle(type, title);
     return dao.readByEnTitle(type, title);
   }
 
   @RequestMapping(value = "/rest/v1/mapping", method = RequestMethod.GET)
   @ResponseBody
-  public List<TemplatePropertyMapping> read(@RequestParam String lang,
-                                            @RequestParam(required = false) String type,
-                                            @RequestParam String title) {
+  public List<WikipediaPropertyTranslation> read(@RequestParam String lang,
+                                                 @RequestParam(required = false) String type,
+                                                 @RequestParam String title) {
     if (lang.equals("fa")) return dao.readByFaTitle(type, title);
     return dao.readByEnTitle(type, title);
   }

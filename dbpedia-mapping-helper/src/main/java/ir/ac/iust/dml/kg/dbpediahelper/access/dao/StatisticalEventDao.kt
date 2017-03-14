@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.dbpediahelper.access.dao
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.MappingStatus
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.MappingStatus
 
 interface StatisticalEventDao {
 

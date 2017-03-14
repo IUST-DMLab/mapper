@@ -5,7 +5,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "dbpedia_ontology_classes")
-data class DBpediaOntologyClass(
+data class DBpediaClass(
       @Id
       @Column(name = "id")
       @GeneratedValue(strategy = GenerationType.IDENTITY)

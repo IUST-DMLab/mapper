@@ -1,11 +1,11 @@
-package ir.ac.iust.dml.kg.templateequalities.access.entities
+package ir.ac.iust.dml.kg.dbpediahelper.access.entities
 
 import org.hibernate.annotations.Index
 import javax.persistence.*
 
 @Entity
 @Table(name = "template_property_mapping")
-data class TemplatePropertyMapping(
+data class WikipediaPropertyTranslation(
         @Id
         @Column(name = "id")
         @GeneratedValue(strategy = GenerationType.IDENTITY)

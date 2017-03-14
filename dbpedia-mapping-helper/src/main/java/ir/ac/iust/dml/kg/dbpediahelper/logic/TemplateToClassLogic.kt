@@ -1,7 +1,7 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic
 
 import ir.ac.iust.dml.kg.dbpediahelper.access.dao.TemplateToClassDao
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.TemplateToClassMapping
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgTemplateMapping
 import ir.ac.iust.dml.kg.dbpediahelper.logic.data.TemplateToClassData
 import ir.ac.iust.dml.kg.utils.LanguageChecker
 import org.springframework.beans.factory.annotation.Autowired
@@ -47,8 +47,8 @@ class TemplateToClassLogic {
 
    fun edit(data: TemplateToClassData): TemplateToClassData {
       val entity =
-            if (data.id == null) TemplateToClassMapping()
-            else dao.read(data.id!!) ?: TemplateToClassMapping()
+            if (data.id == null) FkgTemplateMapping()
+            else dao.read(data.id!!) ?: FkgTemplateMapping()
       entity.className = data.className
       entity.templateName = data.templateName
       entity.approved = data.approved

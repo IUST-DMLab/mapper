@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.ontologytranslator.access.dao
 
-import ir.ac.iust.dml.kg.ontologytranslator.access.entities.OntologyClassTranslation
+import ir.ac.iust.dml.kg.ontologytranslator.access.entities.FkgClass
 import ir.ac.iust.dml.kg.utils.PagedData
 import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
 import org.hibernate.SessionFactory
@@ -14,7 +14,7 @@ open class OntologyClassTranslationDaoImpl : OntologyClassTranslationDao {
    @Autowired
    lateinit var sessionFactory: SessionFactory
 
-   override fun save(p: OntologyClassTranslation) {
+   override fun save(p: FkgClass) {
       val session = this.sessionFactory.openSession()
       val tx = session.beginTransaction()
       session.saveOrUpdate(p)
@@ -22,44 +22,44 @@ open class OntologyClassTranslationDaoImpl : OntologyClassTranslationDao {
       session.close()
    }
 
-   override fun read(id: Long?): OntologyClassTranslation? {
+   override fun read(id: Long?): FkgClass? {
       val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(OntologyClassTranslation::class.java)
+      val criteria = session.createCriteria(FkgClass::class.java)
       criteria.add(Restrictions.eq("id", id))
-      val mapping = criteria.uniqueResult() as? OntologyClassTranslation
+      val mapping = criteria.uniqueResult() as? FkgClass
       session.close()
       return mapping
    }
 
-   override fun read(name: String, parentId: Long?): OntologyClassTranslation? {
+   override fun read(name: String, parentId: Long?): FkgClass? {
       val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(OntologyClassTranslation::class.java)
+      val criteria = session.createCriteria(FkgClass::class.java)
       criteria.add(Restrictions.eq("name", name))
       if (parentId != null) criteria.add(Restrictions.eq("parentId", parentId))
       val list = criteria.list()
-      val mapping: OntologyClassTranslation?
+      val mapping: FkgClass?
       if (list.isEmpty()) {
          println("No instance for $name")
          mapping = null
       } else {
          if (list.size > 1) println("multiple instances for $name")
-         mapping = list[0] as? OntologyClassTranslation
+         mapping = list[0] as? FkgClass
       }
       session.close()
       return mapping
    }
 
-   override fun readRoot(): OntologyClassTranslation? {
+   override fun readRoot(): FkgClass? {
       val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(OntologyClassTranslation::class.java)
+      val criteria = session.createCriteria(FkgClass::class.java)
       criteria.add(Restrictions.isNull("parentId"))
-      val mapping = criteria.uniqueResult() as? OntologyClassTranslation
+      val mapping = criteria.uniqueResult() as? FkgClass
       session.close()
       return mapping
    }
 
    override fun search(name: String?, parentId: Long?, like: Boolean, approved: Boolean?, hasFarsi: Boolean?,
-                       pageSize: Int, page: Int): PagedData<OntologyClassTranslation> {
+                       pageSize: Int, page: Int): PagedData<FkgClass> {
       val session = this.sessionFactory.openSession()
       val criteria = SqlJpaTools.conditionalCriteria(
             name != null && !like, Restrictions.eq("name", name),
@@ -72,17 +72,17 @@ open class OntologyClassTranslationDaoImpl : OntologyClassTranslationDao {
             hasFarsi != null && hasFarsi, Restrictions.isNotNull("faLabel"),
             hasFarsi != null && !hasFarsi, Restrictions.isNull("faLabel")
       )
-      val list = SqlJpaTools.page(OntologyClassTranslation::class.java, page, pageSize, session, *criteria)
+      val list = SqlJpaTools.page(FkgClass::class.java, page, pageSize, session, *criteria)
       session.close()
       return list
    }
 
    @Suppress("UNCHECKED_CAST")
-   override fun getChildren(id: Long): List<OntologyClassTranslation> {
+   override fun getChildren(id: Long): List<FkgClass> {
       val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(OntologyClassTranslation::class.java)
+      val criteria = session.createCriteria(FkgClass::class.java)
       criteria.add(Restrictions.eq("parentId", id))
-      val mapping = criteria.list() as MutableList<OntologyClassTranslation>
+      val mapping = criteria.list() as MutableList<FkgClass>
       session.close()
       return mapping
    }

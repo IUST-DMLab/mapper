@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic.export
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.MappingStatus
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.MappingStatus
 import javax.xml.bind.annotation.XmlRootElement
 
 data class TemplateToOntologyMap(var language: String? = null,

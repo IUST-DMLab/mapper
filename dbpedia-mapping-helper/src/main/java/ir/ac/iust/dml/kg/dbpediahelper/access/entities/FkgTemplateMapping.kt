@@ -5,7 +5,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "fkg_mapping_template_to_class")
-data class TemplateToClassMapping(
+data class FkgTemplateMapping(
       @Id
       @Column(name = "id")
       @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,7 +1,7 @@
 package ir.ac.iust.dml.kg.dbpediahelper.access.dao.hibernate
 
 import ir.ac.iust.dml.kg.dbpediahelper.access.dao.TemplateMappingDao
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.WikiTemplateMapping
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.WikipediaTemplateRedirect
 import ir.ac.iust.dml.kg.utils.PagedData
 import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
 import org.hibernate.SessionFactory
@@ -15,18 +15,18 @@ open class TemplateMappingDaoImpl : TemplateMappingDao {
    @Autowired
    lateinit var sessionFactory: SessionFactory
 
-   override fun list(pageSize: Int, page: Int): PagedData<WikiTemplateMapping> {
+   override fun list(pageSize: Int, page: Int): PagedData<WikipediaTemplateRedirect> {
       val session = this.sessionFactory.openSession()
-      val list = SqlJpaTools.page(WikiTemplateMapping::class.java, page, pageSize, session)
+      val list = SqlJpaTools.page(WikipediaTemplateRedirect::class.java, page, pageSize, session)
       session.close()
       return list
    }
 
    @Suppress("UNCHECKED_CAST")
    override fun read(nameFa: String?, typeFa: String?, nameEn: String?, typeEn: String?, like: Boolean):
-         MutableList<WikiTemplateMapping> {
+         MutableList<WikipediaTemplateRedirect> {
       val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(WikiTemplateMapping::class.java)
+      val criteria = session.createCriteria(WikipediaTemplateRedirect::class.java)
       if (nameFa != null)
          if (like) criteria.add(Restrictions.like("nameFa", "%$nameFa%"))
          else criteria.add(Restrictions.eq("nameFa", nameFa))
@@ -35,7 +35,7 @@ open class TemplateMappingDaoImpl : TemplateMappingDao {
          else criteria.add(Restrictions.eq("nameEn", nameEn))
       if (typeFa != null) criteria.add(Restrictions.eq("typeFa", typeFa))
       if (typeEn != null) criteria.add(Restrictions.eq("typeEn", typeEn))
-      val mapping = criteria.list() as MutableList<WikiTemplateMapping>
+      val mapping = criteria.list() as MutableList<WikipediaTemplateRedirect>
       session.close()
       return mapping
    }

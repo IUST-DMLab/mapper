@@ -1,8 +1,8 @@
 package ir.ac.iust.dml.kg.dbpediahelper.access.dao.hibernate
 
 import ir.ac.iust.dml.kg.dbpediahelper.access.dao.KnowledgeBaseTripleDao
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.KnowledgeBaseTriple
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.MappingStatus
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgTriple
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.utils.PagedData
 import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
 import org.hibernate.SessionFactory
@@ -16,7 +16,7 @@ open class KnowledgeBaseTripleDaoImpl : KnowledgeBaseTripleDao {
    @Autowired
    lateinit var sessionFactory: SessionFactory
 
-   override fun save(t: KnowledgeBaseTriple) {
+   override fun save(t: FkgTriple) {
       val session = this.sessionFactory.openSession()
       val tx = session.beginTransaction()
       session.saveOrUpdate(t)
@@ -26,29 +26,29 @@ open class KnowledgeBaseTripleDaoImpl : KnowledgeBaseTripleDao {
 
    override fun deleteAll() {
       val session = this.sessionFactory.openSession()
-      val q = session.createQuery("delete from KnowledgeBaseTriple")
+      val q = session.createQuery("delete from FkgTriple")
       q.executeUpdate()
       session.close()
    }
 
-   override fun list(pageSize: Int, page: Int): PagedData<KnowledgeBaseTriple> {
+   override fun list(pageSize: Int, page: Int): PagedData<FkgTriple> {
       val session = this.sessionFactory.openSession()
 //      val criteria = SqlJpaTools.conditionalCriteria(hasClass, Restrictions.isNotNull("clazz"))
-      val list = SqlJpaTools.page(KnowledgeBaseTriple::class.java, page, pageSize, session)
+      val list = SqlJpaTools.page(FkgTriple::class.java, page, pageSize, session)
       session.close()
       return list
    }
 
    @Suppress("UNCHECKED_CAST")
    override fun read(subject: String?, predicate: String?, objekt: String?,
-                     status: MappingStatus?): MutableList<KnowledgeBaseTriple> {
+                     status: MappingStatus?): MutableList<FkgTriple> {
       val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(KnowledgeBaseTriple::class.java)
+      val criteria = session.createCriteria(FkgTriple::class.java)
       if (subject != null) criteria.add(Restrictions.eq("subject", subject))
       if (predicate != null) criteria.add(Restrictions.eq("predicate", predicate))
       if (objekt != null) criteria.add(Restrictions.eq("objekt", objekt))
       if (status != null) criteria.add(Restrictions.eq("status", status))
-      val triple = criteria.list() as MutableList<KnowledgeBaseTriple>
+      val triple = criteria.list() as MutableList<FkgTriple>
       session.close()
       return triple
    }

@@ -1,8 +1,8 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic
 
 import ir.ac.iust.dml.kg.dbpediahelper.access.dao.DBpediaPropertyMappingDao
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.DBpediaPropertyMapping
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.MappingStatus
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgPropertyMapping
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.dbpediahelper.logic.dump.OwlDumpReader
 import ir.ac.iust.dml.kg.utils.ConfigReader
 import org.apache.log4j.Logger
@@ -55,7 +55,7 @@ class DbpediaHelperLoader {
                if (infoboxType != null && ontologyClass != null
                      && ontologyProperty != null && templateProperty != null) {
                   logger.info("found: $infoboxType $templateProperty $ontologyClass $ontologyProperty")
-                  dao.save(DBpediaPropertyMapping(language = "en",
+                  dao.save(FkgPropertyMapping(language = "en",
                         type = infoboxType,
                         clazz = ontologyClass,
                         templateProperty = templateProperty,
@@ -81,7 +81,7 @@ class DbpediaHelperLoader {
                dbpediaEnglishMapping.addAll(dao.read(language = "en", type = type,
                      templateProperty = enProperty.replace('_', ' ')))
             if (dbpediaEnglishMapping.isNotEmpty()) {
-               val persianMapping = DBpediaPropertyMapping(language = "fa",
+               val persianMapping = FkgPropertyMapping(language = "fa",
                      type = type, clazz = dbpediaEnglishMapping[0].clazz,
                      templateProperty = faProperty,
                      ontologyProperty = dbpediaEnglishMapping[0].ontologyProperty,
@@ -98,7 +98,7 @@ class DbpediaHelperLoader {
                   for (mapping in dbpediaEnglishMapping) {
                      val ontologyProperty = mapping.ontologyProperty!!
                      if (checked.contains(ontologyProperty)) continue
-                     val persianMapping = DBpediaPropertyMapping(language = "fa", type = type,
+                     val persianMapping = FkgPropertyMapping(language = "fa", type = type,
                            clazz = null, templateProperty = faProperty, ontologyProperty = ontologyProperty,
                            status = MappingStatus.NotApproved)
                      checked.add(ontologyProperty)
@@ -106,7 +106,7 @@ class DbpediaHelperLoader {
                      dao.save(persianMapping)
                   }
                else {
-                  val persianMapping = DBpediaPropertyMapping(language = "fa", type = type,
+                  val persianMapping = FkgPropertyMapping(language = "fa", type = type,
                         clazz = null, templateProperty = faProperty,
                         ontologyProperty = "dbpe:" + enProperty,
                         status = MappingStatus.Translated)
@@ -152,7 +152,7 @@ class DbpediaHelperLoader {
    }
 
    private fun addMapping(templateProperty: String, ontologyProperty: String) {
-      val m = DBpediaPropertyMapping(language = "fa", clazz = null,
+      val m = FkgPropertyMapping(language = "fa", clazz = null,
             ontologyProperty = ontologyProperty, templateProperty = templateProperty,
             status = MappingStatus.Translated, type = null)
       dao.save(m)

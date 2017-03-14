@@ -2,9 +2,9 @@ package ir.ac.iust.dml.kg.dbpediahelper.logic.triple
 
 import ir.ac.iust.dml.kg.dbpediahelper.access.dao.*
 import ir.ac.iust.dml.kg.dbpediahelper.access.dao.file.FileKnowledgeBaseTripleDaoImpl
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.DBpediaPropertyMapping
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.KnowledgeBaseTriple
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.MappingStatus
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgPropertyMapping
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgTriple
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.dbpediahelper.logic.PrefixService
 import ir.ac.iust.dml.kg.utils.ConfigReader
 import ir.ac.iust.dml.kg.utils.PathWalker
@@ -213,7 +213,7 @@ class TripleImporter {
 
    data class StoreData(val store: KnowledgeBaseTripleDao?, val rawProperty: String, val data: TripleData)
 
-   fun createTriple(triple: StoreData, mapping: DBpediaPropertyMapping?, status: MappingStatus?) {
+   fun createTriple(triple: StoreData, mapping: FkgPropertyMapping?, status: MappingStatus?) {
       with(triple) {
          // predicate = ontology property if existed. data.predicate if not.
          var predicate =
@@ -226,7 +226,7 @@ class TripleImporter {
             predicate = "dbp:" + targetProperty(predicate)
 
          try {
-            val t = KnowledgeBaseTriple(
+            val t = FkgTriple(
                   source = data.source,
                   subject = data.subject, predicate = predicate, objekt = data.objekt,
                   status = status ?: mapping!!.status, templateType = data.templateType,

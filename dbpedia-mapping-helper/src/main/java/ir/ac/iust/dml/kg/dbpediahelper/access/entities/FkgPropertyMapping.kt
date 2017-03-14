@@ -1,11 +1,12 @@
 package ir.ac.iust.dml.kg.dbpediahelper.access.entities
 
+import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.MappingStatus
 import org.hibernate.annotations.Index
 import javax.persistence.*
 
 @Entity
 @Table(name = "dbpedia_property_mapping")
-data class DBpediaPropertyMapping(
+data class FkgPropertyMapping(
       @Id
       @Column(name = "id")
       @GeneratedValue(strategy = GenerationType.IDENTITY)

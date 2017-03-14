@@ -2,8 +2,8 @@ package ir.ac.iust.dml.kg.ontologytranslator.logic
 
 import ir.ac.iust.dml.kg.ontologytranslator.access.dao.DBpediaOntologyClassDao
 import ir.ac.iust.dml.kg.ontologytranslator.access.dao.OntologyClassTranslationDao
-import ir.ac.iust.dml.kg.ontologytranslator.access.entities.DBpediaOntologyClass
-import ir.ac.iust.dml.kg.ontologytranslator.access.entities.OntologyClassTranslation
+import ir.ac.iust.dml.kg.ontologytranslator.access.entities.DBpediaClass
+import ir.ac.iust.dml.kg.ontologytranslator.access.entities.FkgClass
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -25,8 +25,8 @@ class Importer {
    //TODO can we remove this?
    fun fixName(name: String) = if (name.startsWith("owl#")) name.substring(4) else name
 
-   fun createNode(clazz: DBpediaOntologyClass): OntologyClassTranslation {
-      val parentTranslation: OntologyClassTranslation?
+   fun createNode(clazz: DBpediaClass): FkgClass {
+      val parentTranslation: FkgClass?
       if (clazz.parentId != null && clazz.parentId != clazz.id) {
          val parent = sourceDao.read(clazz.parentId!!)!!
          val translatedParent = translationDao.read(fixName(parent.name!!), null)
@@ -37,7 +37,7 @@ class Importer {
       if (clazz.comment != "") println(clazz.comment)
       var translated = translationDao.read(fixName(clazz.name!!), parentTranslation?.id)
       if (translated == null) {
-         translated = OntologyClassTranslation(
+         translated = FkgClass(
                name = fixName(clazz.name!!),
                enLabel = clazz.enLabel,
                parentId = parentTranslation?.id,
