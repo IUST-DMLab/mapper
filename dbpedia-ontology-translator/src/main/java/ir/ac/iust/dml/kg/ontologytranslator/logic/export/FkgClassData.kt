@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.ontologytranslator.logic.export
 
-data class OntologyClassTranslationData(
+data class FkgClassData(
       var ontologyClass: String? = null,
       var parentOntologyClass: String? = null,
       var enLabel: String? = null,

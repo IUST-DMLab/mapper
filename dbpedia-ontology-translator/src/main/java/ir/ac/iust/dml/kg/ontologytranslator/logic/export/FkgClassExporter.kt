@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 
 
 @Service
-class OntologyTranslatorExporter {
+class FkgClassExporter {
 
    @Autowired
    lateinit var dao: FkgClassDao
