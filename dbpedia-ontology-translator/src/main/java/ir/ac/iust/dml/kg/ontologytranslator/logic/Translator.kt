@@ -1,7 +1,7 @@
 package ir.ac.iust.dml.kg.ontologytranslator.logic
 
-import ir.ac.iust.dml.kg.ontologytranslator.access.dao.OntologyClassTranslationDao
-import ir.ac.iust.dml.kg.ontologytranslator.access.entities.FkgClass
+import ir.ac.iust.dml.kg.access.dao.OntologyClassTranslationDao
+import ir.ac.iust.dml.kg.access.entities.FkgClass
 import ir.ac.iust.dml.kg.ontologytranslator.logic.export.OntologyClassTranslationData
 import ir.ac.iust.dml.kg.utils.PagedData
 import org.apache.log4j.Logger

@@ -1,6 +1,6 @@
-package ir.ac.iust.dml.kg.ontologytranslator.access.dao
+package ir.ac.iust.dml.kg.access.dao
 
-import ir.ac.iust.dml.kg.ontologytranslator.access.entities.DBpediaClass
+import ir.ac.iust.dml.kg.access.entities.DBpediaClass
 import ir.ac.iust.dml.kg.utils.PagedData
 
 interface DBpediaOntologyClassDao {

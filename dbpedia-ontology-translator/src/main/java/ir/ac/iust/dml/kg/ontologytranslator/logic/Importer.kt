@@ -1,9 +1,9 @@
 package ir.ac.iust.dml.kg.ontologytranslator.logic
 
-import ir.ac.iust.dml.kg.ontologytranslator.access.dao.DBpediaOntologyClassDao
-import ir.ac.iust.dml.kg.ontologytranslator.access.dao.OntologyClassTranslationDao
-import ir.ac.iust.dml.kg.ontologytranslator.access.entities.DBpediaClass
-import ir.ac.iust.dml.kg.ontologytranslator.access.entities.FkgClass
+import ir.ac.iust.dml.kg.access.dao.DBpediaOntologyClassDao
+import ir.ac.iust.dml.kg.access.dao.OntologyClassTranslationDao
+import ir.ac.iust.dml.kg.access.entities.DBpediaClass
+import ir.ac.iust.dml.kg.access.entities.FkgClass
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 

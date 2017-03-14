@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.ontologytranslator.logic.export
 
-import ir.ac.iust.dml.kg.ontologytranslator.access.dao.OntologyClassTranslationDao
+import ir.ac.iust.dml.kg.access.dao.OntologyClassTranslationDao
 import ir.ac.iust.dml.kg.ontologytranslator.logic.Translator
 import ir.ac.iust.dml.kg.utils.DataExporter
 import org.apache.log4j.Logger
