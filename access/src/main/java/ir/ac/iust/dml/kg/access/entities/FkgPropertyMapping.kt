@@ -16,10 +16,10 @@ data class FkgPropertyMapping(
       var language: String? = null,
       @Index(name = "dbpm_type")
       @Column(name = "type")
-      var type: String? = null,
+      var templateName: String? = null,
       @Index(name = "dbpm_class")
       @Column(name = "class")
-      var clazz: String? = null,
+      var ontologyClass: String? = null,
       @Index(name = "dbpm_template_property")
       @Column(name = "template_property")
       var templateProperty: String? = null,
@@ -29,4 +29,9 @@ data class FkgPropertyMapping(
       @Index(name = "dbpm_status")
       @Enumerated
       @Column(name = "status")
-      var status: MappingStatus? = null)
+      var status: MappingStatus? = null,
+      @Column(name = "approved")
+      var approved: Boolean? = null,
+      @Index(name = "dbpm_update_epoch")
+      @Column(name = "update_epoch")
+      var updateEpoch: Long? = null)

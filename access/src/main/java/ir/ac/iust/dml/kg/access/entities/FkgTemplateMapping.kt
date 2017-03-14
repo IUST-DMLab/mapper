@@ -15,7 +15,7 @@ data class FkgTemplateMapping(
       var templateName: String? = null,
       @Index(name = "ttc_class_name")
       @Column(name = "class_name")
-      var className: String? = null,
+      var ontologyClass: String? = null,
       @Index(name = "ttc_language")
       @Column(name = "language")
       var language: String? = null,

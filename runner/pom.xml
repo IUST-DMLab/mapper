@@ -49,7 +49,7 @@
         </dependency>
         <dependency>
             <groupId>ir.ac.iust.dml.kg</groupId>
-            <artifactId>dbpedia-mapping-helper</artifactId>
+            <artifactId>mapper</artifactId>
             <version>${parent.version}</version>
         </dependency>
       <dependency>

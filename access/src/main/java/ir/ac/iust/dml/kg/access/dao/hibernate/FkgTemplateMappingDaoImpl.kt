@@ -35,7 +35,7 @@ open class FkgTemplateMappingDaoImpl : FkgTemplateMappingDao {
       val session = this.sessionFactory.openSession()
       val criteria = session.createCriteria(FkgTemplateMapping::class.java)
       criteria.add(Restrictions.eq("templateName", templateName))
-      if (className != null) criteria.add(Restrictions.eq("className", className))
+      if (className != null) criteria.add(Restrictions.eq("ontologyClass", className))
       val mapping = criteria.uniqueResult() as FkgTemplateMapping?
       session.close()
       return mapping
@@ -58,8 +58,8 @@ open class FkgTemplateMappingDaoImpl : FkgTemplateMappingDao {
       val c = SqlJpaTools.conditionalCriteria(
             templateName != null && !like, Restrictions.eq("templateName", templateName),
             templateName != null && like, Restrictions.like("templateName", "%$templateName%"),
-            className != null && !like, Restrictions.eq("className", className),
-            className != null && like, Restrictions.like("className", "%$className%"),
+            className != null && !like, Restrictions.eq("ontologyClass", className),
+            className != null && like, Restrictions.like("ontologyClass", "%$className%"),
             language != null, Restrictions.eq("language", language),
             approved != null, Restrictions.eq("approved", approved),
             after != null, Restrictions.gt("updateEpoch", after),
@@ -83,11 +83,11 @@ open class FkgTemplateMappingDaoImpl : FkgTemplateMappingDao {
    }
 
    @Suppress("UNCHECKED_CAST")
-   override fun searchClassName(page: Int, pageSize: Int, keyword: String?): List<String> {
+   override fun searchOntologyClass(page: Int, pageSize: Int, keyword: String?): List<String> {
       val session = this.sessionFactory.openSession()
       val criteria = session.createCriteria(FkgTemplateMapping::class.java)
-      criteria.add(Restrictions.like("className", "%$keyword%"))
-      criteria.setProjection(Projections.distinct(Projections.property("className")))
+      criteria.add(Restrictions.like("ontologyClass", "%$keyword%"))
+      criteria.setProjection(Projections.distinct(Projections.property("ontologyClass")))
       val mapping = criteria.list() as MutableList<String>
       session.close()
       return mapping

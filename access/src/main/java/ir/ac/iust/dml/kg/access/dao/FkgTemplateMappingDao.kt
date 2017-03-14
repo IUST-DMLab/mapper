@@ -15,5 +15,5 @@ interface FkgTemplateMappingDao {
          PagedData<FkgTemplateMapping>
 
    fun searchTemplateName(page: Int, pageSize: Int, keyword: String?): List<String>
-   fun searchClassName(page: Int, pageSize: Int, keyword: String?): List<String>
+   fun searchOntologyClass(page: Int, pageSize: Int, keyword: String?): List<String>
 }

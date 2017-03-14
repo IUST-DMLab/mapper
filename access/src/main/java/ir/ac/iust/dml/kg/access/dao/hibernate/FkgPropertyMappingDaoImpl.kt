@@ -16,33 +16,92 @@ import org.springframework.stereotype.Repository
 open class FkgPropertyMappingDaoImpl : FkgPropertyMappingDao {
 
    @Suppress("UNCHECKED_CAST")
-   override fun read(language: String?, clazz: String?, type: String?,
-                     like: Boolean, hasClass: Boolean, templateProperty: String?,
-                     secondTemplateProperty: String?, ontologyProperty: String?, status: MappingStatus?):
-         MutableList<FkgPropertyMapping> {
+   override fun search(page: Int, pageSize: Int, language: String?, clazz: String?, type: String?,
+                       like: Boolean, hasClass: Boolean, templateProperty: String?,
+                       secondTemplateProperty: String?, ontologyProperty: String?, status: MappingStatus?,
+                       approved: Boolean?, after: Long?, noUpdateEpoch: Boolean?):
+         PagedData<FkgPropertyMapping> {
+      val session = this.sessionFactory.openSession()
+      val twoTemplateProperties = templateProperty != null
+            && secondTemplateProperty != null && templateProperty != secondTemplateProperty
+      val c = SqlJpaTools.conditionalCriteria(
+            type != null, Restrictions.eq("templateName", type),
+            clazz != null, Restrictions.eq("ontologyClass", clazz),
+            hasClass, Restrictions.isNotNull("ontologyClass"),
+            ontologyProperty != null && like, Restrictions.like("ontologyProperty", "%$ontologyProperty%"),
+            ontologyProperty != null && !like, Restrictions.eq("ontologyProperty", ontologyProperty),
+            language != null, Restrictions.eq("language", language),
+            status != null, Restrictions.eq("status", status),
+            approved != null, Restrictions.eq("approved", approved),
+            after != null, Restrictions.gt("updateEpoch", after),
+            noUpdateEpoch != null && noUpdateEpoch, Restrictions.isNull("updateEpoch"),
+            noUpdateEpoch != null && !noUpdateEpoch, Restrictions.isNotNull("updateEpoch"),
+
+            templateProperty != null && like, Restrictions.like("templateProperty", "%$templateProperty%"),
+
+            templateProperty != null && !like && !twoTemplateProperties,
+            Restrictions.eq("templateProperty", templateProperty),
+
+            templateProperty != null && !like && !twoTemplateProperties,
+            Restrictions.or(
+                  Restrictions.eq("templateProperty", templateProperty),
+                  Restrictions.eq("templateProperty", secondTemplateProperty))
+      )
+      val list = SqlJpaTools.page(FkgPropertyMapping::class.java, page, pageSize, session, *c)
+      session.close()
+      return list
+   }
+
+
+   override fun read(id: Long): FkgPropertyMapping? {
       val session = this.sessionFactory.openSession()
       val criteria = session.createCriteria(FkgPropertyMapping::class.java)
-      if (language != null) criteria.add(Restrictions.eq("language", language))
-      if (status != null) criteria.add(Restrictions.eq("status", status))
-      if (clazz != null) criteria.add(Restrictions.eq("clazz", clazz))
-      if (type != null) criteria.add(Restrictions.eq("type", type))
-      if (hasClass) criteria.add(Restrictions.isNotNull("clazz"))
-      if (like) {
-         if (templateProperty != null)
-            criteria.add(Restrictions.like("templateProperty", "%$templateProperty%"))
-         if (ontologyProperty != null)
-            criteria.add(Restrictions.like("ontologyProperty", "%$ontologyProperty%"))
-      } else {
-         if (templateProperty != null && secondTemplateProperty != null && templateProperty != secondTemplateProperty)
-            criteria.add(Restrictions.or(
-                  Restrictions.eq("templateProperty", templateProperty),
-                  Restrictions.eq("templateProperty", secondTemplateProperty)))
-         else if (templateProperty != null)
-            criteria.add(Restrictions.eq("templateProperty", templateProperty))
-         if (ontologyProperty != null)
-            criteria.add(Restrictions.eq("ontologyProperty", ontologyProperty))
-      }
-      val mapping = criteria.list() as MutableList<FkgPropertyMapping>
+      criteria.add(Restrictions.eq("id", id))
+      val mapping = criteria.uniqueResult() as FkgPropertyMapping?
+      session.close()
+      return mapping
+   }
+
+   @Suppress("UNCHECKED_CAST")
+   override fun searchTemplateName(page: Int, pageSize: Int, keyword: String?): List<String> {
+      val session = this.sessionFactory.openSession()
+      val criteria = session.createCriteria(FkgPropertyMapping::class.java)
+      criteria.add(Restrictions.like("templateName", "%$keyword%"))
+      criteria.setProjection(Projections.distinct(Projections.property("templateName")))
+      val mapping = criteria.list() as MutableList<String>
+      session.close()
+      return mapping
+   }
+
+   @Suppress("UNCHECKED_CAST")
+   override fun searchOntologyClass(page: Int, pageSize: Int, keyword: String?): List<String> {
+      val session = this.sessionFactory.openSession()
+      val criteria = session.createCriteria(FkgPropertyMapping::class.java)
+      criteria.add(Restrictions.like("ontologyClass", "%$keyword%"))
+      criteria.setProjection(Projections.distinct(Projections.property("ontologyClass")))
+      val mapping = criteria.list() as MutableList<String>
+      session.close()
+      return mapping
+   }
+
+   @Suppress("UNCHECKED_CAST")
+   override fun searchTemplatePropertyName(page: Int, pageSize: Int, keyword: String?): List<String> {
+      val session = this.sessionFactory.openSession()
+      val criteria = session.createCriteria(FkgPropertyMapping::class.java)
+      criteria.add(Restrictions.like("templateProperty", "%$keyword%"))
+      criteria.setProjection(Projections.distinct(Projections.property("templateProperty")))
+      val mapping = criteria.list() as MutableList<String>
+      session.close()
+      return mapping
+   }
+
+   @Suppress("UNCHECKED_CAST")
+   override fun searchOntologyPropertyName(page: Int, pageSize: Int, keyword: String?): List<String> {
+      val session = this.sessionFactory.openSession()
+      val criteria = session.createCriteria(FkgPropertyMapping::class.java)
+      criteria.add(Restrictions.like("ontologyProperty", "%$keyword%"))
+      criteria.setProjection(Projections.distinct(Projections.property("ontologyProperty")))
+      val mapping = criteria.list() as MutableList<String>
       session.close()
       return mapping
    }
@@ -68,7 +127,7 @@ open class FkgPropertyMappingDaoImpl : FkgPropertyMappingDao {
    @Suppress("UNCHECKED_CAST")
    override fun list(pageSize: Int, page: Int, hasClass: Boolean): PagedData<FkgPropertyMapping> {
       val session = this.sessionFactory.openSession()
-      val criteria = SqlJpaTools.conditionalCriteria(hasClass, Restrictions.isNotNull("clazz"))
+      val criteria = SqlJpaTools.conditionalCriteria(hasClass, Restrictions.isNotNull("ontologyClass"))
       val list = SqlJpaTools.page(FkgPropertyMapping::class.java, page, pageSize, session, *criteria)
       session.close()
       return list

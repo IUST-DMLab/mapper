@@ -173,8 +173,8 @@ class TripleImporter {
 
    fun findMap(s: StoreData, englishTemplateType: String,
                templatePredicate: String, secondTemplatePredicate: String): Boolean {
-      var map = mappingDao.read(language = null, type = englishTemplateType,
-            templateProperty = templatePredicate, secondTemplateProperty = secondTemplatePredicate)
+      var map = mappingDao.search(page = 0, pageSize = 0, language = null, type = englishTemplateType,
+            templateProperty = templatePredicate, secondTemplateProperty = secondTemplatePredicate).data
       /**
        * we may have two cases:
        * 1- when we haven't any mapping for template `language/type/property`
@@ -197,8 +197,8 @@ class TripleImporter {
           * no mapping for template `language/type/property`,
           * we now search for `language/property` in any types.
           */
-         map = mappingDao.read(language = null, templateProperty = templatePredicate,
-               secondTemplateProperty = secondTemplatePredicate, status = MappingStatus.Translated)
+         map = mappingDao.search(page = 0, pageSize = 0, language = null, templateProperty = templatePredicate,
+               secondTemplateProperty = secondTemplatePredicate, status = MappingStatus.Translated).data
          if (map.isNotEmpty()) {
             for (m in map) createTriple(s, m, MappingStatus.Translated)
             return true
