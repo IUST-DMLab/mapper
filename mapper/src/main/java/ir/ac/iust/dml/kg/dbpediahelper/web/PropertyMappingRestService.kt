@@ -1,6 +1,7 @@
 package ir.ac.iust.dml.kg.dbpediahelper.web
 
 import io.swagger.annotations.Api
+import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.dbpediahelper.logic.PropertyMappingLogic
 import ir.ac.iust.dml.kg.dbpediahelper.logic.data.FkgPropertyMappingData
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,11 +30,12 @@ class PropertyMappingRestService {
               @RequestParam(required = false, defaultValue = "false") like: Boolean?,
               @RequestParam(required = false) language: String?,
               @RequestParam(required = false) approved: Boolean?,
+              @RequestParam(required = false) status: MappingStatus?,
               @RequestParam(required = false) after: Long? = null)
          = propertyMappingLogic.search(page = page!!, pageSize = pageSize!!,
          templateName = templateName, className = className,
          templateProperty = templateProperty, ontologyProperty = ontologyProperty, like = like!!,
-         language = language, approved = approved, after = after)
+         language = language, approved = approved, after = after, status = status)
 
    @RequestMapping("data", method = arrayOf(RequestMethod.GET))
    @ResponseBody
@@ -47,10 +49,11 @@ class PropertyMappingRestService {
                 @RequestParam templateProperty: String?,
                 @RequestParam(required = false) ontologyProperty: String?,
                 @RequestParam language: String,
-                @RequestParam approved: Boolean) =
+                @RequestParam approved: Boolean,
+                @RequestParam(required = false) status: MappingStatus?) =
          propertyMappingLogic.edit(FkgPropertyMappingData(
                id = id, language = language, templateName = templateName,
-               ontologyClass = className, approved = approved,
+               ontologyClass = className, approved = approved, status = status,
                templateProperty = templateProperty, ontologyProperty = ontologyProperty))
 
    @RequestMapping("edit", method = arrayOf(RequestMethod.POST))

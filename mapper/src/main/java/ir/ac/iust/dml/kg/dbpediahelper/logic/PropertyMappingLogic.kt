@@ -2,6 +2,7 @@ package ir.ac.iust.dml.kg.dbpediahelper.logic
 
 import ir.ac.iust.dml.kg.access.dao.FkgPropertyMappingDao
 import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
+import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.dbpediahelper.logic.data.FkgPropertyMappingData
 import ir.ac.iust.dml.kg.utils.LanguageChecker
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,11 +32,12 @@ class PropertyMappingLogic {
 
    fun search(page: Int = 0, pageSize: Int = 20, templateName: String? = null, className: String? = null,
               templateProperty: String?, ontologyProperty: String?, like: Boolean = false,
-              language: String? = null, approved: Boolean? = null, after: Long? = null)
+              language: String? = null, approved: Boolean? = null, status: MappingStatus?,
+              after: Long? = null)
          = dao.search(page = page, pageSize = pageSize,
          type = templateName, clazz = className,
          templateProperty = templateProperty, ontologyProperty = ontologyProperty, like = like,
-         language = language, approved = approved, after = after)
+         language = language, approved = approved, after = after, status = status)
 
    fun getEditData(id: Long? = null): FkgPropertyMappingData {
       if (id == null) return FkgPropertyMappingData(approved = false)
@@ -43,7 +45,7 @@ class PropertyMappingLogic {
       return FkgPropertyMappingData(id = t.id, language = t.language,
             templateName = t.templateName, ontologyClass = t.ontologyClass,
             templateProperty = t.templateProperty, ontologyProperty = t.ontologyProperty,
-            approved = t.approved)
+            approved = t.approved, status = t.status)
    }
 
    fun edit(data: FkgPropertyMappingData): FkgPropertyMappingData {
@@ -55,6 +57,7 @@ class PropertyMappingLogic {
       entity.ontologyProperty = data.ontologyProperty
       entity.templateProperty = data.templateProperty
       entity.approved = data.approved
+      entity.status = data.status
       entity.language =
             if (data.language == null)
                (if (LanguageChecker.isEnglish(data.templateName!!)) "en" else "fa")
