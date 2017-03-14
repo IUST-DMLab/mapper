@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.ontologytranslator.logic
 
-import ir.ac.iust.dml.kg.access.dao.OntologyClassTranslationDao
+import ir.ac.iust.dml.kg.access.dao.FkgClassDao
 import ir.ac.iust.dml.kg.access.entities.FkgClass
 import ir.ac.iust.dml.kg.ontologytranslator.logic.export.OntologyClassTranslationData
 import ir.ac.iust.dml.kg.utils.PagedData
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class Translator {
-   @Autowired lateinit var dao: OntologyClassTranslationDao
+   @Autowired lateinit var dao: FkgClassDao
    val logger = Logger.getLogger(this.javaClass)
 
    fun sync(translation: FkgClass?): OntologyClassTranslationData? {

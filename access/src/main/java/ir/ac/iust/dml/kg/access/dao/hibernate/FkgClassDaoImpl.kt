@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.access.dao.hibernate
 
-import ir.ac.iust.dml.kg.access.dao.OntologyClassTranslationDao
+import ir.ac.iust.dml.kg.access.dao.FkgClassDao
 import ir.ac.iust.dml.kg.access.entities.FkgClass
 import ir.ac.iust.dml.kg.utils.PagedData
 import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 
 @Repository
-open class OntologyClassTranslationDaoImpl : OntologyClassTranslationDao {
+open class FkgClassDaoImpl : FkgClassDao {
 
    @Autowired
    lateinit var sessionFactory: SessionFactory

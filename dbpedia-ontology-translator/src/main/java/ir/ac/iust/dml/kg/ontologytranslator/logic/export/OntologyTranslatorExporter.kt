@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.ontologytranslator.logic.export
 
-import ir.ac.iust.dml.kg.access.dao.OntologyClassTranslationDao
+import ir.ac.iust.dml.kg.access.dao.FkgClassDao
 import ir.ac.iust.dml.kg.ontologytranslator.logic.Translator
 import ir.ac.iust.dml.kg.utils.DataExporter
 import org.apache.log4j.Logger
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 class OntologyTranslatorExporter {
 
    @Autowired
-   lateinit var dao: OntologyClassTranslationDao
+   lateinit var dao: FkgClassDao
    @Autowired
    lateinit var translator: Translator
    val logger = Logger.getLogger(this.javaClass)!!

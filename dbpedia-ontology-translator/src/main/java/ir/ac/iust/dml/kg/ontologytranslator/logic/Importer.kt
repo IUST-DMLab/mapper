@@ -1,7 +1,7 @@
 package ir.ac.iust.dml.kg.ontologytranslator.logic
 
-import ir.ac.iust.dml.kg.access.dao.DBpediaOntologyClassDao
-import ir.ac.iust.dml.kg.access.dao.OntologyClassTranslationDao
+import ir.ac.iust.dml.kg.access.dao.DBpediaClassDao
+import ir.ac.iust.dml.kg.access.dao.FkgClassDao
 import ir.ac.iust.dml.kg.access.entities.DBpediaClass
 import ir.ac.iust.dml.kg.access.entities.FkgClass
 import org.springframework.beans.factory.annotation.Autowired
@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service
 @Service
 class Importer {
 
-   @Autowired lateinit var sourceDao: DBpediaOntologyClassDao
-   @Autowired lateinit var translationDao: OntologyClassTranslationDao
+   @Autowired lateinit var sourceDao: DBpediaClassDao
+   @Autowired lateinit var translationDao: FkgClassDao
 
    fun importFromDb() {
       var page = 0
