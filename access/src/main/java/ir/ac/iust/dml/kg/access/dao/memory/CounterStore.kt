@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.dbpediahelper.access.dao.memory
+package ir.ac.iust.dml.kg.access.dao.memory
 
 class CounterStore<T> {
    var map: MutableMap<String, Counter<T>> = mutableMapOf()

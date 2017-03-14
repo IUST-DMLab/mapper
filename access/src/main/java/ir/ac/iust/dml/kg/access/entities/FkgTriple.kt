@@ -1,6 +1,6 @@
-package ir.ac.iust.dml.kg.dbpediahelper.access.entities
+package ir.ac.iust.dml.kg.access.entities
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.MappingStatus
+import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import org.hibernate.annotations.Index
 import javax.persistence.*
 

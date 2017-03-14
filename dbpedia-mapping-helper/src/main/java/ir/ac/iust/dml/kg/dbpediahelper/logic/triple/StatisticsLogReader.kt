@@ -1,7 +1,7 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic.triple
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgTripleStatistics
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.TripleStatisticsType
+import ir.ac.iust.dml.kg.access.entities.FkgTripleStatistics
+import ir.ac.iust.dml.kg.access.entities.enumerations.TripleStatisticsType
 import org.apache.log4j.Logger
 import java.io.BufferedReader
 import java.io.Closeable

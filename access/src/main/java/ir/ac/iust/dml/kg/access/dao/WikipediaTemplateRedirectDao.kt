@@ -1,6 +1,6 @@
-package ir.ac.iust.dml.kg.dbpediahelper.access.dao
+package ir.ac.iust.dml.kg.access.dao
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.WikipediaTemplateRedirect
+import ir.ac.iust.dml.kg.access.entities.WikipediaTemplateRedirect
 import ir.ac.iust.dml.kg.utils.PagedData
 
 interface WikipediaTemplateRedirectDao {

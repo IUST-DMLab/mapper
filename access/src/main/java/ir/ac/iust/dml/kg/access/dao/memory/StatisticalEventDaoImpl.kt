@@ -1,7 +1,7 @@
-package ir.ac.iust.dml.kg.dbpediahelper.access.dao.memory
+package ir.ac.iust.dml.kg.access.dao.memory
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.StatisticalEventDao
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.MappingStatus
+import ir.ac.iust.dml.kg.access.dao.StatisticalEventDao
+import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import org.springframework.stereotype.Repository
 
 @Repository

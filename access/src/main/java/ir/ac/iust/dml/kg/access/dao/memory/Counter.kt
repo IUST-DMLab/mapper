@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.dbpediahelper.access.dao.memory
+package ir.ac.iust.dml.kg.access.dao.memory
 
 class Counter<out T>(val target: T) {
    var count: Long = 0

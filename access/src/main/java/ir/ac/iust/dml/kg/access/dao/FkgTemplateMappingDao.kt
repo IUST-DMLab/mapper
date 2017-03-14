@@ -1,6 +1,6 @@
-package ir.ac.iust.dml.kg.dbpediahelper.access.dao
+package ir.ac.iust.dml.kg.access.dao
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgTemplateMapping
+import ir.ac.iust.dml.kg.access.entities.FkgTemplateMapping
 import ir.ac.iust.dml.kg.utils.PagedData
 
 interface FkgTemplateMappingDao {

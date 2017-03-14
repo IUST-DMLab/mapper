@@ -1,10 +1,10 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic.triple
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.*
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.file.FileFkgTripleDaoImpl
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgPropertyMapping
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgTriple
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.MappingStatus
+import ir.ac.iust.dml.kg.access.dao.*
+import ir.ac.iust.dml.kg.access.dao.file.FileFkgTripleDaoImpl
+import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
+import ir.ac.iust.dml.kg.access.entities.FkgTriple
+import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.dbpediahelper.logic.PrefixService
 import ir.ac.iust.dml.kg.utils.ConfigReader
 import ir.ac.iust.dml.kg.utils.PathWalker

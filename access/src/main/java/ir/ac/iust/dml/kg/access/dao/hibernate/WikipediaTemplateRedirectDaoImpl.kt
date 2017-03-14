@@ -1,7 +1,7 @@
-package ir.ac.iust.dml.kg.dbpediahelper.access.dao.hibernate
+package ir.ac.iust.dml.kg.access.dao.hibernate
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.WikipediaTemplateRedirectDao
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.WikipediaTemplateRedirect
+import ir.ac.iust.dml.kg.access.dao.WikipediaTemplateRedirectDao
+import ir.ac.iust.dml.kg.access.entities.WikipediaTemplateRedirect
 import ir.ac.iust.dml.kg.utils.PagedData
 import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
 import org.hibernate.SessionFactory

@@ -1,7 +1,7 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.FkgTemplateMappingDao
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgTemplateMapping
+import ir.ac.iust.dml.kg.access.dao.FkgTemplateMappingDao
+import ir.ac.iust.dml.kg.access.entities.FkgTemplateMapping
 import ir.ac.iust.dml.kg.dbpediahelper.logic.data.TemplateToClassData
 import ir.ac.iust.dml.kg.utils.LanguageChecker
 import org.springframework.beans.factory.annotation.Autowired

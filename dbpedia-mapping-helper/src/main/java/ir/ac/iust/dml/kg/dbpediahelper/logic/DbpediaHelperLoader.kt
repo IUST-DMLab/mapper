@@ -1,8 +1,8 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.FkgPropertyMappingDao
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgPropertyMapping
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.enumerations.MappingStatus
+import ir.ac.iust.dml.kg.access.dao.FkgPropertyMappingDao
+import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
+import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.dbpediahelper.logic.dump.OwlDumpReader
 import ir.ac.iust.dml.kg.utils.ConfigReader
 import org.apache.log4j.Logger

@@ -1,7 +1,7 @@
-package ir.ac.iust.dml.kg.dbpediahelper.access.dao.hibernate
+package ir.ac.iust.dml.kg.access.dao.hibernate
 
-import ir.ac.iust.dml.kg.dbpediahelper.access.dao.FkgTripleStatisticsDao
-import ir.ac.iust.dml.kg.dbpediahelper.access.entities.FkgTripleStatistics
+import ir.ac.iust.dml.kg.access.dao.FkgTripleStatisticsDao
+import ir.ac.iust.dml.kg.access.entities.FkgTripleStatistics
 import org.hibernate.SessionFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
