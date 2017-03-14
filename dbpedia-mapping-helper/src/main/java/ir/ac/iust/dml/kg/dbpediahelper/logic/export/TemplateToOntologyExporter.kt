@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 
 
 @Service
-class DbpediaHelperExporter {
+class TemplateToOntologyExporter {
 
    @Autowired
    lateinit var dao: DBpediaPropertyMappingDao

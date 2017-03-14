@@ -33,7 +33,7 @@ open class KnowledgeBaseTripleDaoImpl : KnowledgeBaseTripleDao {
 
    override fun list(pageSize: Int, page: Int): PagedData<KnowledgeBaseTriple> {
       val session = this.sessionFactory.openSession()
-//      val criteria = SqlJpaTools.condtionalCriteria(hasClass, Restrictions.isNotNull("clazz"))
+//      val criteria = SqlJpaTools.conditionalCriteria(hasClass, Restrictions.isNotNull("clazz"))
       val list = SqlJpaTools.page(KnowledgeBaseTriple::class.java, page, pageSize, session)
       session.close()
       return list

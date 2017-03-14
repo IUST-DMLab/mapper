@@ -2,8 +2,8 @@ package ir.ac.iust.dml.kg.dbpediahelper.web;
 
 import ir.ac.iust.dml.kg.dbpediahelper.logic.DbpediaHelperLoader;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.PrefixService;
-import ir.ac.iust.dml.kg.dbpediahelper.logic.export.DbpediaHelperExporter;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.ExportData;
+import ir.ac.iust.dml.kg.dbpediahelper.logic.export.TemplateToOntologyExporter;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.triple.TripleImporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +21,7 @@ public class MappingHelperRestServices {
     @Autowired
     private TripleImporter tripleImporter;
     @Autowired
-    private DbpediaHelperExporter helperExporter;
+    private TemplateToOntologyExporter templateToOntologyExporter;
 
     @RequestMapping("/prefixes")
     public String prefixes() throws Exception {
@@ -62,6 +62,6 @@ public class MappingHelperRestServices {
     @RequestMapping("/export")
     @ResponseBody
     public ExportData exportXml(@RequestParam(required = false) String language) throws Exception {
-        return helperExporter.export(language);
+        return templateToOntologyExporter.export(language);
     }
 }

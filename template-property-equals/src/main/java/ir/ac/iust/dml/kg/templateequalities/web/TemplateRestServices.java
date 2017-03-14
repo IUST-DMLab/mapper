@@ -1,5 +1,6 @@
 package ir.ac.iust.dml.kg.templateequalities.web;
 
+import io.swagger.annotations.Api;
 import ir.ac.iust.dml.kg.templateequalities.access.dao.TemplatePropertyMappingDao;
 import ir.ac.iust.dml.kg.templateequalities.access.entities.TemplatePropertyMapping;
 import ir.ac.iust.dml.kg.templateequalities.logic.Loader;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/template")
+@Api(tags = "template", description = "سرویس‌های خصیصه‌های معادل انگلیسی و فارسی")
 public class TemplateRestServices {
   @Autowired
   private Loader loader;
@@ -32,7 +34,7 @@ public class TemplateRestServices {
     return exporter.export();
   }
 
-  @RequestMapping("/rest/v1/mapping/{lang}/{title}")
+  @RequestMapping(value = "/rest/v1/mapping/{lang}/{title}", method = RequestMethod.GET)
   @ResponseBody
   public List<TemplatePropertyMapping> readByLang(@PathVariable String lang,
                                                   @PathVariable String title) {
@@ -40,7 +42,7 @@ public class TemplateRestServices {
     return dao.readByEnTitle(null, title);
   }
 
-  @RequestMapping("/rest/v1/mapping/{lang}/{type}/{title}")
+  @RequestMapping(value = "/rest/v1/mapping/{lang}/{type}/{title}", method = RequestMethod.GET)
   @ResponseBody
   public List<TemplatePropertyMapping> readByLangAndType(@PathVariable String lang,
                                                          @PathVariable String type,
@@ -49,7 +51,7 @@ public class TemplateRestServices {
     return dao.readByEnTitle(type, title);
   }
 
-  @RequestMapping("/rest/v1/mapping")
+  @RequestMapping(value = "/rest/v1/mapping", method = RequestMethod.GET)
   @ResponseBody
   public List<TemplatePropertyMapping> read(@RequestParam String lang,
                                             @RequestParam(required = false) String type,

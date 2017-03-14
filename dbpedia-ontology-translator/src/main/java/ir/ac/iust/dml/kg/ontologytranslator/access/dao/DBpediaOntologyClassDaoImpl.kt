@@ -43,7 +43,7 @@ open class DBpediaOntologyClassDaoImpl : DBpediaOntologyClassDao {
 
    override fun search(name: String?, parentId: Long?, like: Boolean, pageSize: Int, page: Int): PagedData<DBpediaOntologyClass> {
       val session = this.sessionFactory.openSession()
-      val criteria = SqlJpaTools.condtionalCriteria(
+      val criteria = SqlJpaTools.conditionalCriteria(
             name != null && !like, Restrictions.eq("name", name),
             name != null && like, Restrictions.like("name", "%$name%"),
             parentId != null, Restrictions.eq("parentId", parentId)

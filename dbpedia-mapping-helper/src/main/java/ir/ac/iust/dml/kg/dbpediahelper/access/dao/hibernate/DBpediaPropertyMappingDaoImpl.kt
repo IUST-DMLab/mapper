@@ -69,7 +69,7 @@ open class DBpediaPropertyMappingDaoImpl : DBpediaPropertyMappingDao {
    @Suppress("UNCHECKED_CAST")
    override fun list(pageSize: Int, page: Int, hasClass: Boolean): PagedData<DBpediaPropertyMapping> {
       val session = this.sessionFactory.openSession()
-      val criteria = SqlJpaTools.condtionalCriteria(hasClass, Restrictions.isNotNull("clazz"))
+      val criteria = SqlJpaTools.conditionalCriteria(hasClass, Restrictions.isNotNull("clazz"))
       val list = SqlJpaTools.page(DBpediaPropertyMapping::class.java, page, pageSize, session, *criteria)
       session.close()
       return list

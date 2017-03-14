@@ -61,7 +61,7 @@ open class OntologyClassTranslationDaoImpl : OntologyClassTranslationDao {
    override fun search(name: String?, parentId: Long?, like: Boolean, approved: Boolean?, hasFarsi: Boolean?,
                        pageSize: Int, page: Int): PagedData<OntologyClassTranslation> {
       val session = this.sessionFactory.openSession()
-      val criteria = SqlJpaTools.condtionalCriteria(
+      val criteria = SqlJpaTools.conditionalCriteria(
             name != null && !like, Restrictions.eq("name", name),
             name != null && like, Restrictions.or(
             Restrictions.like("name", "%$name%"),

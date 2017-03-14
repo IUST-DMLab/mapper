@@ -1,5 +1,6 @@
 package ir.ac.iust.dml.kg.ontologytranslator.web;
 
+import io.swagger.annotations.Api;
 import ir.ac.iust.dml.kg.ontologytranslator.logic.Importer;
 import ir.ac.iust.dml.kg.ontologytranslator.logic.Translator;
 import ir.ac.iust.dml.kg.ontologytranslator.logic.export.ExportData;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/translator")
+@Api(tags = "translator", description = "سرویس‌های ترجمه")
 public class OntologyTranslatorRestServices {
   @Autowired
   private Importer importer;
@@ -33,25 +35,25 @@ public class OntologyTranslatorRestServices {
     return translatorExporter.export();
   }
 
-  @RequestMapping(value = "/rest/v1/root")
+  @RequestMapping(value = "/rest/v1/root", method = RequestMethod.GET)
   @ResponseBody
   public OntologyClassTranslationData root() throws Exception {
     return translator.getRoot();
   }
 
-  @RequestMapping(value = "/rest/v1/node/{name}")
+  @RequestMapping(value = "/rest/v1/node/{name}", method = RequestMethod.GET)
   @ResponseBody
   public OntologyClassTranslationData getNode(@PathVariable String name) throws Exception {
     return translator.getNode(name);
   }
 
-  @RequestMapping(value = "/rest/v1/parent/{name}")
+  @RequestMapping(value = "/rest/v1/parent/{name}", method = RequestMethod.GET)
   @ResponseBody
   public OntologyClassTranslationData getParent(@PathVariable String name) throws Exception {
     return translator.getParent(name);
   }
 
-  @RequestMapping(value = "/rest/v1/children/{name}")
+  @RequestMapping(value = "/rest/v1/children/{name}", method = RequestMethod.GET)
   @ResponseBody
   public List<OntologyClassTranslationData> getChildren(@PathVariable String name) throws Exception {
     return translator.getChildren(name);
