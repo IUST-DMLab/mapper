@@ -3,6 +3,7 @@ package ir.ac.iust.dml.kg.dbpediahelper.logic.triple
 import ir.ac.iust.dml.kg.access.dao.*
 import ir.ac.iust.dml.kg.access.dao.file.FileFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.memory.StatisticalEventDaoImpl
+import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
@@ -29,7 +30,7 @@ class TripleImporter {
    @Autowired lateinit var eventDao: StatisticalEventDaoImpl
 
    enum class StoreType {
-      none, file, mysql
+      none, file, mysql, virtuoso
    }
 
    @Throws(Exception::class)
@@ -73,6 +74,7 @@ class TripleImporter {
       val store = when (storeType) {
          StoreType.file -> FileFkgTripleDaoImpl(path.resolve("mapped"))
          StoreType.mysql -> tripleDao
+         StoreType.virtuoso -> VirtuosoFkgTripleDaoImpl()
          else -> null
       }
 
@@ -229,6 +231,12 @@ class TripleImporter {
                   rawProperty = rawProperty,
                   language = if (data.templateName == "infobox") "en" else "fa"
             )
+
+            if (store is VirtuosoFkgTripleDaoImpl) {
+               t.subject = prefixService.prefixToUri(t.subject)
+               t.predicate = prefixService.prefixToUri(t.predicate)
+               t.objekt = prefixService.prefixToUri(t.objekt)
+            }
 
             store?.save(t)
 

@@ -39,4 +39,12 @@ class PrefixService {
                 .forEach { result = result.replace(it, prefixAddresses[it]!! + ":") }
         return result
     }
+
+   fun prefixToUri(source: String?): String? {
+      if (source == null || !source.contains(':')) return source
+      val splits = source.split(":")
+      var address = prefixNames[splits[0]]
+      if (address != null && !address.startsWith("http://")) address = "http://" + address
+      return if (address == null) splits[1] else address + splits[1]
+   }
 }
