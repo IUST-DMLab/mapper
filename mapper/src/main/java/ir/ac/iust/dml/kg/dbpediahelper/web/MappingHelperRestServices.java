@@ -1,6 +1,7 @@
 package ir.ac.iust.dml.kg.dbpediahelper.web;
 
-import ir.ac.iust.dml.kg.dbpediahelper.logic.DbpediaHelperLoader;
+import ir.ac.iust.dml.kg.dbpediahelper.logic.EntityToClassLogic;
+import ir.ac.iust.dml.kg.dbpediahelper.logic.MappingLoader;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.PrefixService;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.ExportData;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.TemplateToOntologyExporter;
@@ -14,54 +15,63 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/helper")
 public class MappingHelperRestServices {
-    @Autowired
-    private PrefixService prefixService;
-    @Autowired
-    private DbpediaHelperLoader helperLoader;
-    @Autowired
-    private TripleImporter tripleImporter;
-    @Autowired
-    private TemplateToOntologyExporter templateToOntologyExporter;
+  @Autowired
+  private PrefixService prefixService;
+  @Autowired
+  private MappingLoader helperLoader;
+  @Autowired
+  private TripleImporter tripleImporter;
+  @Autowired
+  private TemplateToOntologyExporter templateToOntologyExporter;
+  @Autowired
+  private EntityToClassLogic entityToClassLogic;
 
-    @RequestMapping("/prefixes")
-    public String prefixes() throws Exception {
-        prefixService.reload();
-        return "Reloaded!";
-    }
+  @RequestMapping("/prefixes")
+  public String prefixes() throws Exception {
+    prefixService.reload();
+    return "Reloaded!";
+  }
 
-    @RequestMapping("/load")
-    public String load() throws Exception {
-      helperLoader.writeDbpediaEnglishMapping();
-        return "Loaded!";
-    }
+  @RequestMapping("/load")
+  public String load() throws Exception {
+    helperLoader.writeDbpediaEnglishMapping();
+    return "Loaded!";
+  }
 
-    @RequestMapping("/triples")
-    public String triples(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
-        tripleImporter.traverse(type);
-        return "Imported!";
-    }
 
-    @RequestMapping("/writeStats")
-    public String triples() throws Exception {
-        tripleImporter.writeStats();
-        return "Stats created!";
-    }
+  @RequestMapping("/loadTypes")
+  public String loadTypes() throws Exception {
+    entityToClassLogic.load();
+    return "Loaded!";
+  }
 
-    @RequestMapping("/generate")
-    public String generate() throws Exception {
-        helperLoader.generatePersian();
-        return "Generated!";
-    }
+  @RequestMapping("/triples")
+  public String triples(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
+    tripleImporter.traverse(type);
+    return "Imported!";
+  }
 
-    @RequestMapping("/generateByCount")
-    public String generateByCount() throws Exception {
-        helperLoader.generateByCount();
-        return "Generated!";
-    }
+  @RequestMapping("/writeStats")
+  public String triples() throws Exception {
+    tripleImporter.writeStats();
+    return "Stats created!";
+  }
 
-    @RequestMapping("/export")
-    @ResponseBody
-    public ExportData exportXml(@RequestParam(required = false) String language) throws Exception {
-        return templateToOntologyExporter.export(language);
-    }
+  @RequestMapping("/generate")
+  public String generate() throws Exception {
+    helperLoader.generatePersian();
+    return "Generated!";
+  }
+
+  @RequestMapping("/generateByCount")
+  public String generateByCount() throws Exception {
+    helperLoader.generateByCount();
+    return "Generated!";
+  }
+
+  @RequestMapping("/export")
+  @ResponseBody
+  public ExportData exportXml(@RequestParam(required = false) String language) throws Exception {
+    return templateToOntologyExporter.export(language);
+  }
 }

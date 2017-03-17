@@ -20,7 +20,7 @@
   </modules>
 
   <properties>
-    <kotlin.version>1.1.0</kotlin.version>
+     <kotlin.version>1.1.1</kotlin.version>
     <!--<hibernate.version>5.2.6.Final</hibernate.version>-->
     <hibernate.version>5.0.9.Final</hibernate.version>
     <spring-framework.version>4.3.2.RELEASE</spring-framework.version>
