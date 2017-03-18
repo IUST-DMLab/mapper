@@ -1,5 +1,5 @@
 app.service('RestService', ['$http', function ($http) {
-    var baseURl = 'http://localhost:8090/';
+   var baseURl = 'http://194.225.227.161:8090/';
     var self = this;
     this.ingoing = 0;
 
