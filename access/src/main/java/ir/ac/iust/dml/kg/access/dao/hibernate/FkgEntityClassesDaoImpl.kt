@@ -68,10 +68,10 @@ open class FkgEntityClassesDaoImpl : FkgEntityClassesDao {
    }
 
    @Suppress("UNCHECKED_CAST")
-   override fun readClassesOfEntity(entityName: String): List<String> {
+   override fun readClassesOfEntity(entity: String): List<String> {
       val session = this.sessionFactory.openSession()
       val criteria = session.createCriteria(FkgEntityClasses::class.java)
-      criteria.add(Restrictions.eq("entityName", entityName))
+      criteria.add(Restrictions.eq("entity", entity))
       criteria.setProjection(Projections.distinct(Projections.property("className")))
       val mapping = criteria.list() as MutableList<String>
       session.close()
@@ -79,18 +79,17 @@ open class FkgEntityClassesDaoImpl : FkgEntityClassesDao {
    }
 
    @Suppress("UNCHECKED_CAST")
-   override fun search(page: Int, pageSize: Int, language: String?,
-                       entityName: String?, className: String?, like: Boolean,
+   override fun search(page: Int, pageSize: Int,
+                       entity: String?, className: String?, like: Boolean,
                        status: MappingStatus?, approved: Boolean?, after: Long?):
            PagedData<FkgEntityClasses> {
       val session = this.sessionFactory.openSession()
       val c = SqlJpaTools.conditionalCriteria(
-              language != null, Restrictions.eq("language", language),
               status != null, Restrictions.eq("status", status),
               approved != null, Restrictions.eq("approved", approved),
               after != null, Restrictions.gt("updateEpoch", after),
-              entityName != null && like, Restrictions.like("entityName", "%$entityName%"),
-              entityName != null && !like, Restrictions.eq("entityName", entityName),
+              entity != null && like, Restrictions.like("entity", "%$entity%"),
+              entity != null && !like, Restrictions.eq("entity", entity),
               className != null && like, Restrictions.like("className", "%$className%"),
               className != null && !like, Restrictions.eq("className", className)
       )

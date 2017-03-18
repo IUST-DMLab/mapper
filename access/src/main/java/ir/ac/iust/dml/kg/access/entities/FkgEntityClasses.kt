@@ -23,6 +23,8 @@ data class FkgEntityClasses(
         @Enumerated
         @Column(name = "status")
         var status: MappingStatus? = null,
+        @Column(name = "approved")
+        var approved: Boolean? = null,
         @Index(name = "dbpm_update_epoch")
         @Column(name = "update_epoch")
         var updateEpoch: Long? = null)

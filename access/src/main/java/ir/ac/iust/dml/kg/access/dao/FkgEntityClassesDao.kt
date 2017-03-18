@@ -11,9 +11,9 @@ interface FkgEntityClassesDao {
    fun list(pageSize: Int = 20, page: Int = 10): PagedData<FkgEntityClasses>
    fun read(id: Long): FkgEntityClasses?
    fun read(entity: String, className: String): FkgEntityClasses?
-   fun readClassesOfEntity(entityName: String): List<String>
-   fun search(page: Int, pageSize: Int, language: String?,
-              entityName: String? = null, className: String? = null, like: Boolean = false,
+   fun readClassesOfEntity(entity: String): List<String>
+   fun search(page: Int, pageSize: Int,
+              entity: String? = null, className: String? = null, like: Boolean = false,
               status: MappingStatus? = null, approved: Boolean? = null,
               after: Long? = null):
            PagedData<FkgEntityClasses>
