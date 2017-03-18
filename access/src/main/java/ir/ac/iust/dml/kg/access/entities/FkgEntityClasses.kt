@@ -19,12 +19,15 @@ data class FkgEntityClasses(
         var className: String? = null,
         @Column(name = "class_tree")
         var classTree: String? = null,
-        @Index(name = "dbpm_status")
+        @Index(name = "dec_status")
         @Enumerated
         @Column(name = "status")
         var status: MappingStatus? = null,
         @Column(name = "approved")
         var approved: Boolean? = null,
-        @Index(name = "dbpm_update_epoch")
+        @Index(name = "dec_update_epoch")
         @Column(name = "update_epoch")
-        var updateEpoch: Long? = null)
+        var updateEpoch: Long? = null,
+        @Index(name = "dec_count")
+        @Column(name = "count")
+        var tupleCount: Long? = null)

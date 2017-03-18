@@ -6,21 +6,24 @@ import javax.persistence.*
 @Entity
 @Table(name = "fkg_mapping_template_to_class")
 data class FkgTemplateMapping(
-      @Id
+        @Id
       @Column(name = "id")
       @GeneratedValue(strategy = GenerationType.IDENTITY)
       var id: Long? = null,
-      @Index(name = "ttc_template_name")
+        @Index(name = "ttc_template_name")
       @Column(name = "template_name")
       var templateName: String? = null,
-      @Index(name = "ttc_class_name")
+        @Index(name = "ttc_class_name")
       @Column(name = "class_name")
       var ontologyClass: String? = null,
-      @Index(name = "ttc_language")
+        @Index(name = "ttc_language")
       @Column(name = "language")
       var language: String? = null,
-      @Column(name = "approved")
+        @Column(name = "approved")
       var approved: Boolean? = null,
-      @Index(name = "ttc_update_epoch")
+        @Index(name = "ttc_update_epoch")
       @Column(name = "update_epoch")
-      var updateEpoch: Long? = null)
+        var updateEpoch: Long? = null,
+        @Index(name = "ttc_count")
+        @Column(name = "count")
+        var tupleCount: Long? = null)
