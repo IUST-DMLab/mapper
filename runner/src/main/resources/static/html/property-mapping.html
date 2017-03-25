@@ -2,7 +2,7 @@
 <html ng-app='kgui'>
 
 <head>
-    <title>Knowledge Graph - Ontology Translation UI</title>
+    <title>Knowledge Graph - Property Mapping UI</title>
     <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" href="../node_modules/angular-ui-bootstrap/dist/ui-bootstrap-csp.css">
     <link rel="stylesheet" href="../styles/main.css">
@@ -28,7 +28,7 @@
     <script type="text/javascript" src="../scripts/app/controller/main.js"></script>
 </head>
 
-<body ng-controller="MainController">
+<body ng-controller="PropertyMappingController">
 <div ng-if="data" class="container">
     <br/>
 
@@ -42,22 +42,24 @@
             </button>
             <button class="btn btn-warning" ng-click="go(0)">Clear</button>
         </form>
-        <ul class="pagination">
-            <li ng-repeat="page in pages" ng-class="{'disabled': page - 1 == data.page}">
-                <a ng-click="go($index)">{{page}}</a></li>
-        </ul>
+        <div paging
+             page="data.pageNo"
+             page-size="data.pageSize"
+             total="data.rowCount"
+             paging-action="go(page-1)">
+        </div>
     </div>
+
     <table class="table" ng-if="data">
         <thead>
         <tr>
             <th>#</th>
-            <th>Ontology class</th>
-            <th>Parent Class</th>
-            <th>En-Label</th>
-            <th>Comment</th>
-            <th>Fa-Label</th>
-            <th>Other Labels</th>
-            <th>Note</th>
+            <th>Language</th>
+            <th>Template Name</th>
+            <th>Ontology Class</th>
+            <th>Template Property</th>
+            <th>Ontology Property</th>
+            <th>Status</th>
             <th>Approved</th>
             <th>Edit</th>
         </tr>
@@ -66,37 +68,44 @@
         <tr ng-repeat='a in data.data'>
             <td>{{data.page * data.pageSize + $index}}</td>
             <td>
+                <span>{{a.language}}</span>
+            </td>
+            <td>
+                <span>{{a.templateName}}</span>
+            </td>
+            <td>
                 <span>{{a.ontologyClass}}</span>
             </td>
             <td>
-                <span ng-click="go(0, a.parentOntologyClass)">{{a.parentOntologyClass}}</span>
+                <span>{{a.templateProperty}}</span>
             </td>
             <td>
-                <span>{{a.enLabel}}</span>
+                <span ng-if='!editing[$index]'>{{a.ontologyProperty}}</span>
+                <input ng-if='editing[$index]'
+                       type="text"
+                       ng-model="a.ontologyProperty"
+                       placeholder="Ontology Property"
+                       auto-complete="autoCompleteOptions"
+                       class="editing"/>
+                <!--<input ng-if='editing[$index]' ng-value="a.ontologyClass" ng-model="edit[$index].ontologyClass">-->
             </td>
             <td>
-                <span>{{a.comment}}</span>
-            </td>
-            <td dir="rtl">
-                <span ng-if='!editing[$index]'>{{a.faLabel}}</span>
-                <input ng-if='editing[$index]' ng-value="a.faLabel" ng-model="edit[$index].faLabel">
-            </td>
-            <td dir="rtl">
-                <span ng-if='!editing[$index]'>{{a.faOtherLabels}}</span>
-                <input ng-if='editing[$index]' ng-value="a.faOtherLabels" ng-model="edit[$index].faOtherLabels">
-            </td>
-            <td dir="rtl">
-                <span ng-if='!editing[$index]'>{{a.note}}</span>
-                <input ng-if='editing[$index]' ng-value="a.note" ng-model="edit[$index].note">
+                <span ng-if='!editing[$index]'>{{a.status}}</span>
+                <select ng-if='editing[$index]' ng-model="a.status" ng-options="s for s in statusList">
+                    <option value="" selected="selected"></option>
+                </select>
+                <!--<input ng-if='editing[$index]' type="checkbox" ng-checked="a.approved" ng-model="a.approved">-->
             </td>
             <td>
                 <span ng-if='!editing[$index]'>{{a.approved}}</span>
-                <input ng-if='editing[$index]' type="checkbox" ng-value="a.approved" ng-model="edit[$index].approved">
+                <input ng-if='editing[$index]' type="checkbox" ng-checked="a.approved" ng-model="a.approved">
             </td>
             <td>
                 <button ng-show='!editing[$index]' class="btn btn-danger" ng-click="editing[$index]=true;">Edit</button>
                 <button ng-show='editing[$index]' class="btn btn-success"
-                        ng-click="editing[$index]=false;edit($index,edit[$index])">OK
+                        ng-click="editing[$index]=false;save($index, a)">OK
+                </button>
+                <button ng-show='editing[$index]' class="btn" ng-click="editing[$index]=false;revert($index)">Cancel
                 </button>
             </td>
         </tr>

@@ -22,3 +22,7 @@ td {
 * {
     font-family: Sahel, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
 }
+
+.editing {
+    border: solid 1px red;
+}
