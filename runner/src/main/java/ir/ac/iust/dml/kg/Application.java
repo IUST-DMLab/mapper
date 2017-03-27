@@ -1,5 +1,6 @@
 package ir.ac.iust.dml.kg;
 
+import ir.ac.iust.dml.kg.web.filter.FilterRegistrationConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,14 +11,16 @@ import org.springframework.context.annotation.ImportResource;
 
 @SpringBootApplication
 @ImportResource(value = {
-        "classpath:access-context.xml",
-        "classpath:template-equals-context.xml",
-        "classpath:dbpedia-helper-context.xml",
-        "classpath:ontology-translation-context.xml"
+      "classpath:access-context.xml",
+      "classpath:template-equals-context.xml",
+      "classpath:dbpedia-helper-context.xml",
+      "classpath:ontology-translation-context.xml"
 })
-@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class,
-        DataSourceTransactionManagerAutoConfiguration.class,
-        HibernateJpaAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {
+      FilterRegistrationConfiguration.class,
+      DataSourceAutoConfiguration.class,
+      DataSourceTransactionManagerAutoConfiguration.class,
+      HibernateJpaAutoConfiguration.class})
 public class Application {
 
   public static void main(String[] args) {
