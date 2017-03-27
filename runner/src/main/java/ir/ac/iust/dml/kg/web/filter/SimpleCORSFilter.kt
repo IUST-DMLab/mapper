@@ -8,9 +8,7 @@ class SimpleCORSFilter : Filter {
 
   override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
     val httpServletResponse = response as HttpServletResponse
-    httpServletResponse.setHeader("Access-Control-Allow-Origin",
-            if (request.remoteAddr == "0:0:0:0:0:0:0:1") "http://127.0.0.1"
-            else "http://194.225.227.161")
+    httpServletResponse.setHeader("Access-Control-Allow-Origin", "*")
     httpServletResponse.setHeader("Access-Control-Allow-Credentials", "true")
     httpServletResponse.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE")
     httpServletResponse.setHeader("Access-Control-Max-Age", "3600")
