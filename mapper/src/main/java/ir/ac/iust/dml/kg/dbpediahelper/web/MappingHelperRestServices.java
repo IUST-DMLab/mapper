@@ -47,7 +47,7 @@ public class MappingHelperRestServices {
 
   @RequestMapping("/triples")
   public String triples(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
-    tripleImporter.traverse(type);
+    tripleImporter.processTripleInputFiles(type);
     return "Imported!";
   }
 
