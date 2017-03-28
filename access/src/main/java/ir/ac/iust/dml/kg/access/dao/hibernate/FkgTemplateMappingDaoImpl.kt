@@ -5,6 +5,7 @@ import ir.ac.iust.dml.kg.access.entities.FkgTemplateMapping
 import ir.ac.iust.dml.kg.utils.PagedData
 import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
 import org.hibernate.SessionFactory
+import org.hibernate.criterion.Order
 import org.hibernate.criterion.Projections
 import org.hibernate.criterion.Restrictions
 import org.springframework.beans.factory.annotation.Autowired
@@ -66,7 +67,7 @@ open class FkgTemplateMappingDaoImpl : FkgTemplateMappingDao {
             noUpdateEpoch != null && noUpdateEpoch, Restrictions.isNull("updateEpoch"),
             noUpdateEpoch != null && !noUpdateEpoch, Restrictions.isNotNull("updateEpoch")
       )
-      val list = SqlJpaTools.page(FkgTemplateMapping::class.java, page, pageSize, session, null, *c)
+      val list = SqlJpaTools.page(FkgTemplateMapping::class.java, page, pageSize, session, listOf(Order.desc("approved"), Order.desc("tupleCount")), *c)
       session.close()
       return list
    }

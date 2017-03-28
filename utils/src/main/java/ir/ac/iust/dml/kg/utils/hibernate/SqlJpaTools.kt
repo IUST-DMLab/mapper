@@ -20,12 +20,12 @@ object SqlJpaTools {
 
   @Suppress("UNCHECKED_CAST")
   fun <T> page(clazz: Class<T>, page: Int, pageSize: Int,
-               session: Session, order: Order?, vararg criteria: Criterion): PagedData<T> {
+               session: Session, orders: List<Order>?, vararg criteria: Criterion): PagedData<T> {
     val c = session.createCriteria(clazz)
     for (criterion in criteria) c.add(criterion)
     c.setFirstResult(page * pageSize)
     if (pageSize > 0) c.setMaxResults(pageSize)
-    if (order != null) c.addOrder(order)
+    if (orders != null) for (order in orders) c.addOrder(order)
     val data = c.list() as MutableList<T>
     val count = c.setFirstResult(0).setMaxResults(1)
             .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
