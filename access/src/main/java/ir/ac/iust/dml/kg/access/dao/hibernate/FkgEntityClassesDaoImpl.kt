@@ -43,7 +43,7 @@ open class FkgEntityClassesDaoImpl : FkgEntityClassesDao {
    @Suppress("UNCHECKED_CAST")
    override fun list(pageSize: Int, page: Int): PagedData<FkgEntityClasses> {
       val session = this.sessionFactory.openSession()
-      val list = SqlJpaTools.page(FkgEntityClasses::class.java, page, pageSize, session)
+      val list = SqlJpaTools.page(FkgEntityClasses::class.java, page, pageSize, session, null)
       session.close()
       return list
    }
@@ -93,7 +93,7 @@ open class FkgEntityClassesDaoImpl : FkgEntityClassesDao {
               className != null && like, Restrictions.like("className", "%$className%"),
               className != null && !like, Restrictions.eq("className", className)
       )
-      val list = SqlJpaTools.page(FkgEntityClasses::class.java, page, pageSize, session, *c)
+      val list = SqlJpaTools.page(FkgEntityClasses::class.java, page, pageSize, session, null, *c)
       session.close()
       return list
    }

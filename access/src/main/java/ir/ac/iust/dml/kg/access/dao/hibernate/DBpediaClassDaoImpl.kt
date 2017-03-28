@@ -49,7 +49,7 @@ open class DBpediaClassDaoImpl : DBpediaClassDao {
             name != null && like, Restrictions.like("name", "%$name%"),
             parentId != null, Restrictions.eq("parentId", parentId)
       )
-      val list = SqlJpaTools.page(DBpediaClass::class.java, page, pageSize, session, *criteria)
+     val list = SqlJpaTools.page(DBpediaClass::class.java, page, pageSize, session, null, *criteria)
       session.close()
       return list
    }

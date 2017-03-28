@@ -49,7 +49,7 @@ open class WikipediaPropertyTranslationDaoImpl : WikipediaPropertyTranslationDao
   @Suppress("UNCHECKED_CAST")
   override fun list(pageSize: Int, page: Int): PagedData<WikipediaPropertyTranslation> {
     val session = this.sessionFactory.openSession()
-    val list = SqlJpaTools.page(WikipediaPropertyTranslation::class.java, page, pageSize, session)
+    val list = SqlJpaTools.page(WikipediaPropertyTranslation::class.java, page, pageSize, session, null)
     session.close()
     return list
   }

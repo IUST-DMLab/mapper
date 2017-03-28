@@ -66,7 +66,7 @@ open class FkgTemplateMappingDaoImpl : FkgTemplateMappingDao {
             noUpdateEpoch != null && noUpdateEpoch, Restrictions.isNull("updateEpoch"),
             noUpdateEpoch != null && !noUpdateEpoch, Restrictions.isNotNull("updateEpoch")
       )
-      val list = SqlJpaTools.page(FkgTemplateMapping::class.java, page, pageSize, session, *c)
+      val list = SqlJpaTools.page(FkgTemplateMapping::class.java, page, pageSize, session, null, *c)
       session.close()
       return list
    }

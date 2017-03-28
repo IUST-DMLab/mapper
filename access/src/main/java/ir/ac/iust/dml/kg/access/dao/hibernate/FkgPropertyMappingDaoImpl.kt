@@ -48,7 +48,7 @@ open class FkgPropertyMappingDaoImpl : FkgPropertyMappingDao {
             noUpdateEpoch != null && noUpdateEpoch, Restrictions.isNull("updateEpoch"),
             noUpdateEpoch != null && !noUpdateEpoch, Restrictions.isNotNull("updateEpoch")
     )
-    val list = SqlJpaTools.page(FkgPropertyMapping::class.java, page, pageSize, session, *c)
+    val list = SqlJpaTools.page(FkgPropertyMapping::class.java, page, pageSize, session, null, *c)
     session.close()
     return list
   }
@@ -129,7 +129,7 @@ open class FkgPropertyMappingDaoImpl : FkgPropertyMappingDao {
   override fun list(pageSize: Int, page: Int, hasClass: Boolean): PagedData<FkgPropertyMapping> {
     val session = this.sessionFactory.openSession()
     val criteria = SqlJpaTools.conditionalCriteria(hasClass, Restrictions.isNotNull("ontologyClass"))
-    val list = SqlJpaTools.page(FkgPropertyMapping::class.java, page, pageSize, session, *criteria)
+    val list = SqlJpaTools.page(FkgPropertyMapping::class.java, page, pageSize, session, null, *criteria)
     session.close()
     return list
   }

@@ -17,7 +17,7 @@ open class WikipediaTemplateRedirectDaoImpl : WikipediaTemplateRedirectDao {
 
    override fun list(pageSize: Int, page: Int): PagedData<WikipediaTemplateRedirect> {
       val session = this.sessionFactory.openSession()
-      val list = SqlJpaTools.page(WikipediaTemplateRedirect::class.java, page, pageSize, session)
+      val list = SqlJpaTools.page(WikipediaTemplateRedirect::class.java, page, pageSize, session, null)
       session.close()
       return list
    }
