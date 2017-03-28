@@ -7,6 +7,7 @@ import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
+import ir.ac.iust.dml.kg.access.entities.enumerations.TripleStatisticsType
 import ir.ac.iust.dml.kg.dbpediahelper.logic.PrefixService
 import ir.ac.iust.dml.kg.utils.ConfigReader
 import ir.ac.iust.dml.kg.utils.PathWalker
@@ -49,15 +50,30 @@ class TripleImporter {
       var lineNumber = 0
       while (it.hasNext()) {
         lineNumber++
-        if (lineNumber % 1000 == 0) logger.trace("line number $lineNumber processed")
+        if (lineNumber % 1000 == 0) logger.info("line number $lineNumber processed")
         val stats = it.next()
         try {
+          if (stats.countType == TripleStatisticsType.typedEntity) break
           fkgTripleStatisticsDao.save(stats)
         } catch (e: Throwable) {
           logger.error("error in $stats", e)
         }
       }
     }
+  }
+
+  @Throws(Exception::class)
+  fun fixWikiTemplateMapping(): Boolean {
+    var page = 0
+    val MULTI_SPACE_REGEX = Regex("\\s+")
+    do {
+      val pagedData = wikiTemplateRedirectDao.list(page = page++, pageSize = 100)
+      pagedData.data.forEach {
+        it.nameEn = it.nameEn!!.toLowerCase().replace("-", " ").replace(MULTI_SPACE_REGEX, " ").trim()
+        wikiTemplateRedirectDao.save(it)
+      }
+    } while (pagedData.data.isNotEmpty())
+    return true
   }
 
   @Throws(Exception::class)

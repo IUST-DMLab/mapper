@@ -51,6 +51,12 @@ public class MappingHelperRestServices {
     return "Imported!";
   }
 
+  @RequestMapping("/fixWikiTemplateMapping")
+  public String fixWikiTemplateMapping() throws Exception {
+    tripleImporter.fixWikiTemplateMapping();
+    return "Fixed!";
+  }
+
   @RequestMapping("/writeStats")
   public String triples() throws Exception {
     tripleImporter.writeStats();
