@@ -14,39 +14,39 @@ import java.nio.file.Path
 
 class FileFkgTripleDaoImpl(val path: Path, val flushSize: Int = 1000) : FkgTripleDao {
 
-   init {
-      if (!Files.exists(path)) Files.createDirectories(path)
-   }
+  init {
+    if (!Files.exists(path)) Files.createDirectories(path)
+  }
 
-   var fileIndex = 0;
-   var notFlushedTriples = mutableListOf<FkgTriple>()
-   var gson = GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create()
+  var fileIndex = 0;
+  var notFlushedTriples = mutableListOf<FkgTriple>()
+  var gson = GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create()
 
-   override fun save(t: FkgTriple) {
+  override fun save(t: FkgTriple) {
+    synchronized(notFlushedTriples) {
       notFlushedTriples.add(t)
-      synchronized(notFlushedTriples) {
-         if (notFlushedTriples.size > flushSize) {
-            val p = path.resolve("${fileIndex / 100}").resolve("$fileIndex.json")
-            if (!Files.exists(p.parent)) Files.createDirectories(p.parent)
-            gson.toJson(notFlushedTriples, BufferedWriter(OutputStreamWriter(
-                  FileOutputStream(p.toFile()), "UTF-8")))
-            notFlushedTriples.clear()
-            fileIndex++
-         }
+      if (notFlushedTriples.size > flushSize) {
+        val p = path.resolve("${fileIndex / 100}").resolve("$fileIndex.json")
+        if (!Files.exists(p.parent)) Files.createDirectories(p.parent)
+        gson.toJson(notFlushedTriples, BufferedWriter(OutputStreamWriter(
+                FileOutputStream(p.toFile()), "UTF-8")))
+        notFlushedTriples.clear()
+        fileIndex++
       }
-   }
+    }
+  }
 
-   override fun deleteAll() {
-      FileUtils.deleteDirectory(path.toFile())
-      Files.createDirectories(path)
-   }
+  override fun deleteAll() {
+    FileUtils.deleteDirectory(path.toFile())
+    Files.createDirectories(path)
+  }
 
-   override fun list(pageSize: Int, page: Int): PagedData<FkgTriple> {
-      throw UnsupportedOperationException("not implemented")
-   }
+  override fun list(pageSize: Int, page: Int): PagedData<FkgTriple> {
+    throw UnsupportedOperationException("not implemented")
+  }
 
-   override fun read(subject: String?, predicate: String?, objekt: String?, status: MappingStatus?): MutableList<FkgTriple> {
-      throw UnsupportedOperationException("not implemented")
-   }
+  override fun read(subject: String?, predicate: String?, objekt: String?, status: MappingStatus?): MutableList<FkgTriple> {
+    throw UnsupportedOperationException("not implemented")
+  }
 
 }

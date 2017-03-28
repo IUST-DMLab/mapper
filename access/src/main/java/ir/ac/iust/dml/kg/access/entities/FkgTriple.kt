@@ -29,7 +29,7 @@ class FkgTriple(
         @Column(name = "object")
         var objekt: String? = null,
         @Column(name = "template_type")
-        var templateType: String? = null,
+        var templateName: String? = null,
         @Column(name = "raw_property")
         var rawProperty: String? = null,
         @Index(name = "t_status")

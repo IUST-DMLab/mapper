@@ -94,8 +94,9 @@ class TripleImporter {
                 eventDao.tripleRead()
                 val data = reader.next()
                 tripleNumber++
-                if (data.templateName == null) continue
-                if (data.templateName != "infobox" && !data.templateName!!.startsWith("جعبه")) continue
+                if (data.templateType == null || data.templateNameFull == null) continue
+                if (data.templateType != "infobox" && !data.templateType!!.startsWith("جعبه")) continue
+                data.templateName = data.templateNameFull!!.substring(data.templateType!!.length + 1).trim()
 //              val start = System.currentTimeMillis()
                 eventDao.tripleProcessed()
                 if (tripleNumber % 100 == 0)
@@ -114,17 +115,19 @@ class TripleImporter {
                  * mapping for english template names in tables of
                  * template_property_mapping and dbpedia_property_mapping
                  */
-                val templateRedirects = wikiTemplateRedirectDao.read(nameFa = data.templateType!!)
-                val englishTemplateType =
-                        if (templateRedirects.isNotEmpty()) templateRedirects[0].typeEn!!
-                        else data.templateType!!
-                logger.trace("english template type is $englishTemplateType (if we have english type)")
+                val templateRedirects = wikiTemplateRedirectDao.read(nameFa = data.templateName!!)
+                val englishTemplateName =
+                        if (templateRedirects.isNotEmpty()) {
+                          logger.trace("I found it: " + data.templateName)
+                          templateRedirects[0].nameEn!!
+                        } else data.templateName!!
+                logger.trace("english template type is $englishTemplateName (if we have english type)")
 //              logger.info("2: " + (System.currentTimeMillis() - start))
                 // replace URIs by prefixes
                 val rawProperty = data.predicate!!
                 data.subject = prefixService.replacePrefixes(data.subject!!)
                 data.predicate = prefixService.replacePrefixes(data.predicate!!)
-                data.predicate = PropertyNormaller.targetProperty(data.predicate!!)
+                data.predicate = PropertyNormaller.removeDigits(data.predicate!!)
                 data.objekt = prefixService.replacePrefixes(data.objekt!!)
 
 //              logger.info("3: " + (System.currentTimeMillis() - start))
@@ -133,7 +136,7 @@ class TripleImporter {
                 if (data.predicate!!.contains(":"))
                   templatePredicate = data.predicate!!.substringAfter(':')
                 else templatePredicate = data.predicate!!
-                templatePredicate = PropertyNormaller.targetProperty(templatePredicate)
+                templatePredicate = PropertyNormaller.removeDigits(templatePredicate)
                 logger.trace("template predicate is $templatePredicate")
 //              logger.info("4: " + (System.currentTimeMillis() - start))
                 /**
@@ -141,7 +144,7 @@ class TripleImporter {
                  * template_property_mapping
                  */
                 val notTranslatedTemplatePredicate: String
-                val templateMapping = wikiPropertyTranslationDao.readByEnTitle(englishTemplateType, templatePredicate, false)
+                val templateMapping = wikiPropertyTranslationDao.readByEnTitle(englishTemplateName, templatePredicate, false)
                 if (templateMapping.isNotEmpty()) {
                   notTranslatedTemplatePredicate = templatePredicate
                   templatePredicate = templateMapping[0].faProperty!!
@@ -151,7 +154,7 @@ class TripleImporter {
                 logger.trace("not translated template predicate is $notTranslatedTemplatePredicate")
 //              logger.info("5: " + (System.currentTimeMillis() - start))
                 val s = StoreData(store = store, rawProperty = rawProperty, data = data)
-                if (!findMap(s, englishTemplateType, templatePredicate, notTranslatedTemplatePredicate)) {
+                if (!findMap(s, englishTemplateName, templatePredicate, notTranslatedTemplatePredicate)) {
 //                logger.info("6: " + (System.currentTimeMillis() - start))
                   createTriple(s, null, MappingStatus.NotMapped)
                 }
@@ -217,6 +220,7 @@ class TripleImporter {
 
   data class StoreData(val store: FkgTripleDao?, val rawProperty: String, val data: TripleData)
 
+  val MULTI_SPACES = Regex("\\s+")
   fun createTriple(triple: StoreData, mapping: FkgPropertyMapping?, status: MappingStatus?) {
     with(triple) {
       // predicate = ontology property if existed. data.predicate if not.
@@ -227,15 +231,15 @@ class TripleImporter {
 
       // we add dbp to predicate if it is not a URL or prefix
       if (!predicate!!.contains(":") && !predicate.contains("//"))
-        predicate = "dbp:" + PropertyNormaller.targetProperty(predicate).replace(" ", "_")
+        predicate = "dbp:" + PropertyNormaller.removeDigits(predicate).replace(" ", "_")
 
       try {
         val t = FkgTriple(
                 source = data.source,
                 subject = data.subject, predicate = predicate, objekt = data.objekt,
-                status = status ?: mapping!!.status, templateType = data.templateType,
+                status = status ?: mapping!!.status ?: MappingStatus.NotMapped, templateName = data.templateName,
                 rawProperty = rawProperty,
-                language = if (data.templateName == "infobox") "en" else "fa"
+                language = if (data.templateType == "infobox") "en" else "fa"
         )
 
         if (store is VirtuosoFkgTripleDaoImpl) {
@@ -246,11 +250,11 @@ class TripleImporter {
 
         store?.save(t)
 
-        eventDao.propertyUsed(t.predicate!!)
+        eventDao.propertyUsed(PropertyNormaller.removeDigits(t.rawProperty!!).replace(MULTI_SPACES, "_"))
         eventDao.statusGenerated(t.status!!)
-        eventDao.typeUsed(t.templateType!!)
-        eventDao.typeAndEntityUsed(t.templateType!!, t.subject!!)
-        eventDao.typeAndPropertyUsed(t.templateType!!, t.predicate!!)
+        eventDao.typeUsed(t.templateName!!)
+        eventDao.typeAndEntityUsed(t.templateName!!, t.subject!!)
+        eventDao.typeAndPropertyUsed(t.templateName!!, t.predicate!!)
 
       } catch (e: Throwable) {
         logger.error("error create triple $data:", e)
