@@ -82,93 +82,101 @@ class TripleImporter {
     store?.deleteAll()
     val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
     val startTime = System.currentTimeMillis()
+    var tripleNumber = 0
+    var numberOfEndedFiles = 0
     result.forEachIndexed { index, p ->
-      eventDao.fileProcessed(p.toString())
-      var tripleNumber = 0
-      try {
-        TripleJsonFileReader(p).use { reader ->
-          while (reader.hasNext()) {
-            try {
-              eventDao.tripleRead()
-              val data = reader.next()
-              tripleNumber++
-              if (data.templateName == null) continue
-              if (data.templateName != "infobox" && !data.templateName!!.startsWith("جعبه")) continue
+      Thread({
+        eventDao.fileProcessed(p.toString())
+        try {
+          TripleJsonFileReader(p).use { reader ->
+            while (reader.hasNext()) {
+              try {
+                eventDao.tripleRead()
+                val data = reader.next()
+                tripleNumber++
+                if (data.templateName == null) continue
+                if (data.templateName != "infobox" && !data.templateName!!.startsWith("جعبه")) continue
 //              val start = System.currentTimeMillis()
-              eventDao.tripleProcessed()
-              if (tripleNumber % 100 == 0)
-                logger.trace("triple number is $tripleNumber")
+                eventDao.tripleProcessed()
+                if (tripleNumber % 100 == 0)
+                  logger.trace("triple number is $tripleNumber")
 
-              if (tripleNumber % 1000 == 0)
-                logger.info("triple number is $tripleNumber. $index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
+                if (tripleNumber % 1000 == 0)
+                  logger.info("triple number is $tripleNumber. $index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
 
-              if (tripleNumber % 10000 == 0) {
-                logger.info("triple number is $tripleNumber. saving log")
-                saveLog(path)
-              }
+                if (tripleNumber % 10000 == 0) {
+                  logger.info("triple number is $tripleNumber. saving log")
+                  saveLog(path)
+                }
 //              logger.info("1: " + (System.currentTimeMillis() - start))
-              /**
-               * we like to change persian template name to english template name. because we have
-               * mapping for english template names in tables of
-               * template_property_mapping and dbpedia_property_mapping
-               */
-              val templateRedirects = wikiTemplateRedirectDao.read(nameFa = data.templateType!!)
-              val englishTemplateType =
-                      if (templateRedirects.isNotEmpty()) templateRedirects[0].typeEn!!
-                      else data.templateType!!
-              logger.trace("english template type is $englishTemplateType (if we have english type)")
+                /**
+                 * we like to change persian template name to english template name. because we have
+                 * mapping for english template names in tables of
+                 * template_property_mapping and dbpedia_property_mapping
+                 */
+                val templateRedirects = wikiTemplateRedirectDao.read(nameFa = data.templateType!!)
+                val englishTemplateType =
+                        if (templateRedirects.isNotEmpty()) templateRedirects[0].typeEn!!
+                        else data.templateType!!
+                logger.trace("english template type is $englishTemplateType (if we have english type)")
 //              logger.info("2: " + (System.currentTimeMillis() - start))
-              // replace URIs by prefixes
-              val rawProperty = data.predicate!!
-              data.subject = prefixService.replacePrefixes(data.subject!!)
-              data.predicate = prefixService.replacePrefixes(data.predicate!!)
-              data.predicate = PropertyNormaller.targetProperty(data.predicate!!)
-              data.objekt = prefixService.replacePrefixes(data.objekt!!)
+                // replace URIs by prefixes
+                val rawProperty = data.predicate!!
+                data.subject = prefixService.replacePrefixes(data.subject!!)
+                data.predicate = prefixService.replacePrefixes(data.predicate!!)
+                data.predicate = PropertyNormaller.targetProperty(data.predicate!!)
+                data.objekt = prefixService.replacePrefixes(data.objekt!!)
 
 //              logger.info("3: " + (System.currentTimeMillis() - start))
-              // template predicate is predicate without URI for example dbo:writer -> writer
-              var templatePredicate: String
-              if (data.predicate!!.contains(":"))
-                templatePredicate = data.predicate!!.substringAfter(':')
-              else templatePredicate = data.predicate!!
-              templatePredicate = PropertyNormaller.targetProperty(templatePredicate)
-              logger.trace("template predicate is $templatePredicate")
+                // template predicate is predicate without URI for example dbo:writer -> writer
+                var templatePredicate: String
+                if (data.predicate!!.contains(":"))
+                  templatePredicate = data.predicate!!.substringAfter(':')
+                else templatePredicate = data.predicate!!
+                templatePredicate = PropertyNormaller.targetProperty(templatePredicate)
+                logger.trace("template predicate is $templatePredicate")
 //              logger.info("4: " + (System.currentTimeMillis() - start))
-              /**
-               * we change template predicate to translated template predicate by table
-               * template_property_mapping
-               */
-              val notTranslatedTemplatePredicate: String
-              val templateMapping = wikiPropertyTranslationDao.readByEnTitle(englishTemplateType, templatePredicate, false)
-              if (templateMapping.isNotEmpty()) {
-                notTranslatedTemplatePredicate = templatePredicate
-                templatePredicate = templateMapping[0].faProperty!!
-              } else {
-                notTranslatedTemplatePredicate = templatePredicate
-              }
-              logger.trace("not translated template predicate is $notTranslatedTemplatePredicate")
+                /**
+                 * we change template predicate to translated template predicate by table
+                 * template_property_mapping
+                 */
+                val notTranslatedTemplatePredicate: String
+                val templateMapping = wikiPropertyTranslationDao.readByEnTitle(englishTemplateType, templatePredicate, false)
+                if (templateMapping.isNotEmpty()) {
+                  notTranslatedTemplatePredicate = templatePredicate
+                  templatePredicate = templateMapping[0].faProperty!!
+                } else {
+                  notTranslatedTemplatePredicate = templatePredicate
+                }
+                logger.trace("not translated template predicate is $notTranslatedTemplatePredicate")
 //              logger.info("5: " + (System.currentTimeMillis() - start))
-              val s = StoreData(store = store, rawProperty = rawProperty, data = data)
-              if (!findMap(s, englishTemplateType, templatePredicate, notTranslatedTemplatePredicate)) {
+                val s = StoreData(store = store, rawProperty = rawProperty, data = data)
+                if (!findMap(s, englishTemplateType, templatePredicate, notTranslatedTemplatePredicate)) {
 //                logger.info("6: " + (System.currentTimeMillis() - start))
-                createTriple(s, null, MappingStatus.NotMapped)
-              }
+                  createTriple(s, null, MappingStatus.NotMapped)
+                }
 //              logger.info("7: " + (System.currentTimeMillis() - start))
-            } catch (th: Throwable) {
-              logger.error(th)
+              } catch (th: Throwable) {
+                logger.error(th)
+              }
             }
           }
+        } catch (th: Throwable) {
+          logger.error(th)
+        } finally {
+          numberOfEndedFiles++
         }
-      } catch (th: Throwable) {
-        logger.error(th)
-      }
+      }).start()
     }
+    while (numberOfEndedFiles < result.size) Thread.sleep(10000)
     saveLog(path)
     println(eventDao.log())
   }
 
   private fun saveLog(path: Path) {
-    Files.write(path.resolve("mapped").resolve("stats.txt"), eventDao.log().toByteArray(Charset.forName("UTF-8")))
+    synchronized(this) {
+      Files.write(path.resolve("mapped").resolve("stats.txt"), eventDao.log().toByteArray(Charset.forName("UTF-8")))
+    }
   }
 
   fun findMap(s: StoreData, englishTemplateType: String,
