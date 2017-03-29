@@ -49,7 +49,7 @@ open class FkgPropertyMappingDaoImpl : FkgPropertyMappingDao {
             noUpdateEpoch != null && noUpdateEpoch, Restrictions.isNull("updateEpoch"),
             noUpdateEpoch != null && !noUpdateEpoch, Restrictions.isNotNull("updateEpoch")
     )
-    val list = SqlJpaTools.page(FkgPropertyMapping::class.java, page, pageSize, session, listOf(Order.desc("approved"), Order.desc("tupleCount")), *c)
+    val list = SqlJpaTools.page(FkgPropertyMapping::class.java, page, pageSize, session, listOf(Order.desc("tupleCount")), *c)
     session.close()
     return list
   }

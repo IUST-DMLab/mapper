@@ -3,7 +3,10 @@ package ir.ac.iust.dml.kg.access.dao.hibernate
 import ir.ac.iust.dml.kg.access.dao.FkgTripleStatisticsDao
 import ir.ac.iust.dml.kg.access.entities.FkgTripleStatistics
 import ir.ac.iust.dml.kg.access.entities.enumerations.TripleStatisticsType
+import ir.ac.iust.dml.kg.utils.PagedData
+import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
 import org.hibernate.SessionFactory
+import org.hibernate.criterion.Order
 import org.hibernate.criterion.Restrictions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
@@ -69,5 +72,13 @@ open class FkgTripleStatisticsDaoImpl : FkgTripleStatisticsDao {
     val triple = criteria.uniqueResult() as FkgTripleStatistics?
     session.close()
     return triple
+  }
+
+  override fun search(page: Int, pageSize: Int, countType: TripleStatisticsType?): PagedData<FkgTripleStatistics> {
+    val session = this.sessionFactory.openSession()
+    val criteria = SqlJpaTools.conditionalCriteria(countType != null, Restrictions.eq("countType", countType))
+    val list = SqlJpaTools.page(FkgTripleStatistics::class.java, page, pageSize, session, listOf(Order.desc("count")), *criteria)
+    session.close()
+    return list
   }
 }

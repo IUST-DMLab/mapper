@@ -5,7 +5,7 @@ import org.hibernate.annotations.Index
 import javax.persistence.*
 
 @Entity
-@Table(name = "dbpedia_property_mapping")
+@Table(name = "fkg_mapping_property")
 data class FkgPropertyMapping(
         @Id
         @Column(name = "id")

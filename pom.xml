@@ -27,6 +27,23 @@
     <sweble.version>2.2.0</sweble.version>
   </properties>
 
+  <repositories>
+    <repository>
+      <id>central</id>
+      <url>http://194.225.227.161:8083/artifactory/libs-release</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  <distributionManagement>
+    <repository>
+      <id>central</id>
+      <name>38c51b48d203-releases</name>
+      <url>http://194.225.227.161:8083/artifactory/libs-release</url>
+    </repository>
+  </distributionManagement>
+
   <build>
     <plugins>
       <plugin>
