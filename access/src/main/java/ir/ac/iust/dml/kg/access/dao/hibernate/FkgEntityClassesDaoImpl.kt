@@ -3,7 +3,7 @@ package ir.ac.iust.dml.kg.access.dao.hibernate
 import ir.ac.iust.dml.kg.access.dao.FkgEntityClassesDao
 import ir.ac.iust.dml.kg.access.entities.FkgEntityClasses
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
-import ir.ac.iust.dml.kg.utils.PagedData
+import ir.ac.iust.dml.kg.raw.utils.PagedData
 import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
 import org.hibernate.SessionFactory
 import org.hibernate.criterion.Projections

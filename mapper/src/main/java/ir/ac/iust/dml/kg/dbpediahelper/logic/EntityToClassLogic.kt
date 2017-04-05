@@ -8,8 +8,8 @@ import ir.ac.iust.dml.kg.access.entities.FkgEntityClasses
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.dbpediahelper.logic.data.FkgEntityClassesData
 import ir.ac.iust.dml.kg.dbpediahelper.logic.dump.EntityDataDumpReader
-import ir.ac.iust.dml.kg.utils.ConfigReader
-import ir.ac.iust.dml.kg.utils.PathWalker
+import ir.ac.iust.dml.kg.raw.utils.ConfigReader
+import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -25,9 +25,7 @@ class EntityToClassLogic {
    private val treeCache = mutableMapOf<String, String>()
 
    fun load() {
-      val EntityTypesFolder = "entity.types.folder"
-      val config = ConfigReader.getConfig(mapOf(EntityTypesFolder to "~/.pkg/data/entity_types_folder"))
-      val path = ConfigReader.getPath(config[EntityTypesFolder]!! as String)
+      val path = ConfigReader.getPath("entity.types.folder", "~/.pkg/data/entity_types_folder")
       Files.createDirectories(path.parent)
       if (!Files.exists(path)) {
          throw Exception("There is no file ${path.toAbsolutePath()} existed.")

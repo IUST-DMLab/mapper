@@ -2,7 +2,7 @@ package ir.ac.iust.dml.kg.access.dao
 
 import ir.ac.iust.dml.kg.access.entities.FkgTripleStatistics
 import ir.ac.iust.dml.kg.access.entities.enumerations.TripleStatisticsType
-import ir.ac.iust.dml.kg.utils.PagedData
+import ir.ac.iust.dml.kg.raw.utils.PagedData
 
 interface FkgTripleStatisticsDao {
 

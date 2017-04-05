@@ -9,8 +9,10 @@ import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.access.entities.enumerations.TripleStatisticsType
 import ir.ac.iust.dml.kg.dbpediahelper.logic.PrefixService
-import ir.ac.iust.dml.kg.utils.ConfigReader
-import ir.ac.iust.dml.kg.utils.PathWalker
+import ir.ac.iust.dml.kg.raw.utils.ConfigReader
+import ir.ac.iust.dml.kg.raw.utils.PathWalker
+import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleData
+import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -36,9 +38,7 @@ class TripleImporter {
 
   @Throws(Exception::class)
   fun writeStats() {
-    val WIKI_DUMP_ARTICLE = "mapped.triple.stats.file"
-    val config = ConfigReader.getConfig(mapOf(WIKI_DUMP_ARTICLE to "~/.pkg/data/triples/mapped/stats.txt"))
-    val path = ConfigReader.getPath(config[WIKI_DUMP_ARTICLE]!! as String)
+     val path = ConfigReader.getPath("mapped.triple.stats.file", "~/.pkg/data/triples/mapped/stats.txt")
     Files.createDirectories(path.parent)
     if (!Files.exists(path)) {
       throw Exception("There is no file ${path.toAbsolutePath()} existed.")

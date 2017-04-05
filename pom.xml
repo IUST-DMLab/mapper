@@ -4,9 +4,9 @@
                              http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>ir.ac.iust.dml.kg</groupId>
-  <artifactId>mapping-services</artifactId>
-  <version>0.1.0</version>
+  <groupId>ir.ac.iust.dml.kg.mapping</groupId>
+  <artifactId>parent</artifactId>
+  <version>0.2.0</version>
   <packaging>pom</packaging>
   <name>Mapping service Parent Project</name>
 
@@ -64,6 +64,11 @@
   </build>
 
   <dependencies>
+    <dependency>
+      <groupId>ir.ac.iust.dml.kg</groupId>
+      <artifactId>utils</artifactId>
+      <version>0.1.0</version>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
