@@ -39,7 +39,7 @@ public class TemplateRestServices {
   public List<WikipediaPropertyTranslation> readByLang(@PathVariable String lang,
                                                        @PathVariable String title) {
     if (lang.equals("fa")) return dao.readByFaTitle(null, title);
-    return dao.readByEnTitle(null, title);
+    return dao.readByEnTitle(null, title, true);
   }
 
   @RequestMapping(value = "/rest/v1/mapping/{lang}/{type}/{title}", method = RequestMethod.GET)
@@ -48,7 +48,7 @@ public class TemplateRestServices {
                                                               @PathVariable String type,
                                                               @PathVariable String title) {
     if (lang.equals("fa")) return dao.readByFaTitle(type, title);
-    return dao.readByEnTitle(type, title);
+    return dao.readByEnTitle(type, title, true);
   }
 
   @RequestMapping(value = "/rest/v1/mapping", method = RequestMethod.GET)
@@ -57,7 +57,7 @@ public class TemplateRestServices {
                                                  @RequestParam(required = false) String type,
                                                  @RequestParam String title) {
     if (lang.equals("fa")) return dao.readByFaTitle(type, title);
-    return dao.readByEnTitle(type, title);
+    return dao.readByEnTitle(type, title, true);
   }
 
 }

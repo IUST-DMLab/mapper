@@ -10,5 +10,5 @@ interface WikipediaPropertyTranslationDao {
 
     fun readByFaTitle(type: String? = null, faProperty: String): MutableList<WikipediaPropertyTranslation>
 
-    fun readByEnTitle(type: String? = null, enProperty: String): MutableList<WikipediaPropertyTranslation>
+    fun readByEnTitle(type: String? = null, enProperty: String, like: Boolean = true): MutableList<WikipediaPropertyTranslation>
 }

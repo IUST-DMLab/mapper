@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 import java.nio.file.Files
 
 @Service
-class DbpediaHelperLoader {
+class MappingLoader {
 
    @Autowired lateinit var dao: FkgPropertyMappingDao
    @Autowired lateinit var wikiPropertyTranslationDao: WikipediaPropertyTranslationDao

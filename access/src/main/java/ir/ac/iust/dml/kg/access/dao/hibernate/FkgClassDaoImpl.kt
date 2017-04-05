@@ -73,7 +73,7 @@ open class FkgClassDaoImpl : FkgClassDao {
             hasFarsi != null && hasFarsi, Restrictions.isNotNull("faLabel"),
             hasFarsi != null && !hasFarsi, Restrictions.isNull("faLabel")
       )
-      val list = SqlJpaTools.page(FkgClass::class.java, page, pageSize, session, *criteria)
+      val list = SqlJpaTools.page(FkgClass::class.java, page, pageSize, session, null, *criteria)
       session.close()
       return list
    }

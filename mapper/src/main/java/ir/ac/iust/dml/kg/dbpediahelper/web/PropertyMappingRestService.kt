@@ -19,6 +19,10 @@ class PropertyMappingRestService {
    fun exportAll(@RequestParam(required = false) after: Long?)
          = propertyMappingLogic.exportAll(after)
 
+   @RequestMapping("updateCounts", method = arrayOf(RequestMethod.GET))
+   @ResponseBody
+   fun exportAll() = propertyMappingLogic.updateCounts()
+
    @RequestMapping("search", method = arrayOf(RequestMethod.GET))
    @ResponseBody
    fun search(@RequestParam(required = false, defaultValue = "0") page: Int?,

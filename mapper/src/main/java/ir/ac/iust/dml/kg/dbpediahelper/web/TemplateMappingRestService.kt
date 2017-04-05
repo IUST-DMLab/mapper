@@ -18,6 +18,10 @@ class TemplateMappingRestService {
    fun exportAll(@RequestParam(required = false) after: Long?)
          = templateMappingLogic.exportAll(after)
 
+   @RequestMapping("updateCounts", method = arrayOf(RequestMethod.GET))
+   @ResponseBody
+   fun exportAll() = templateMappingLogic.updateCounts()
+
    @RequestMapping("search", method = arrayOf(RequestMethod.GET))
    @ResponseBody
    fun search(@RequestParam(required = false, defaultValue = "0") page: Int?,

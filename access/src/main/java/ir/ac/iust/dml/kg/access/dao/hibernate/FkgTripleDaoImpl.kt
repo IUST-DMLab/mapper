@@ -34,7 +34,7 @@ open class FkgTripleDaoImpl : FkgTripleDao {
    override fun list(pageSize: Int, page: Int): PagedData<FkgTriple> {
       val session = this.sessionFactory.openSession()
 //      val criteria = SqlJpaTools.conditionalCriteria(hasClass, Restrictions.isNotNull("ontologyClass"))
-      val list = SqlJpaTools.page(FkgTriple::class.java, page, pageSize, session)
+      val list = SqlJpaTools.page(FkgTriple::class.java, page, pageSize, session, null)
       session.close()
       return list
    }
