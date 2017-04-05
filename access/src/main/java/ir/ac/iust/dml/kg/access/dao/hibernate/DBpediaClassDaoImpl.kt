@@ -2,7 +2,7 @@ package ir.ac.iust.dml.kg.access.dao.hibernate
 
 import ir.ac.iust.dml.kg.access.dao.DBpediaClassDao
 import ir.ac.iust.dml.kg.access.entities.DBpediaClass
-import ir.ac.iust.dml.kg.utils.PagedData
+import ir.ac.iust.dml.kg.raw.utils.PagedData
 import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
 import org.hibernate.SessionFactory
 import org.hibernate.criterion.Restrictions

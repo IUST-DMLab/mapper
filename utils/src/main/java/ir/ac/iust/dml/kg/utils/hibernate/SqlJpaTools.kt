@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.utils.hibernate
 
-import ir.ac.iust.dml.kg.utils.PagedData
+import ir.ac.iust.dml.kg.raw.utils.PagedData
 import org.hibernate.Criteria
 import org.hibernate.Session
 import org.hibernate.criterion.Criterion

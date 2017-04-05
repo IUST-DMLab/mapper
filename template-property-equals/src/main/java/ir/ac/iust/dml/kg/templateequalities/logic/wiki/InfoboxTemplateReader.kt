@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.templateequalities.logic.wiki
 
-import ir.ac.iust.dml.kg.utils.dump.WikiDumpReader
+import ir.ac.iust.dml.kg.raw.utils.dump.wiki.WikiDumpReader
 import org.sweble.wikitext.parser.nodes.WtName
 import org.sweble.wikitext.parser.nodes.WtTemplateArgument
 import org.sweble.wikitext.parser.nodes.WtText

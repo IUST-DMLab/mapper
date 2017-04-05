@@ -6,7 +6,7 @@ import ir.ac.iust.dml.kg.ontologytranslator.logic.Translator;
 import ir.ac.iust.dml.kg.ontologytranslator.logic.export.ExportData;
 import ir.ac.iust.dml.kg.ontologytranslator.logic.export.FkgClassData;
 import ir.ac.iust.dml.kg.ontologytranslator.logic.export.FkgClassExporter;
-import ir.ac.iust.dml.kg.utils.PagedData;
+import ir.ac.iust.dml.kg.raw.utils.PagedData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

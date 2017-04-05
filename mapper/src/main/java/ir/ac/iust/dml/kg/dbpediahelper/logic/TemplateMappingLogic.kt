@@ -3,7 +3,7 @@ package ir.ac.iust.dml.kg.dbpediahelper.logic
 import ir.ac.iust.dml.kg.access.dao.FkgTemplateMappingDao
 import ir.ac.iust.dml.kg.access.entities.FkgTemplateMapping
 import ir.ac.iust.dml.kg.dbpediahelper.logic.data.FkgTemplateMappingData
-import ir.ac.iust.dml.kg.utils.LanguageChecker
+import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import javax.annotation.PostConstruct

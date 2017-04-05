@@ -1,7 +1,7 @@
 package ir.ac.iust.dml.kg.utils
 
 import com.google.gson.GsonBuilder
-import org.apache.log4j.Logger
+import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import java.io.BufferedWriter
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -16,14 +16,12 @@ object DataExporter {
         json, xml
     }
 
-    private val logger = Logger.getLogger(this.javaClass)!!
     private val gson = GsonBuilder().setPrettyPrinting().create()
 
     @Throws(Exception::class)
     fun <T> export(type: ExportTypes, pathKey: String, pathDefaultValue: String,
                    data: Any, clazz: Class<T>) {
-        val config = ConfigReader.getConfig(mapOf(pathKey to pathDefaultValue))
-        val path = ConfigReader.getPath(config[pathKey]!! as String)
+        val path = ConfigReader.getPath(pathKey, pathDefaultValue)
         Files.createDirectories(path.parent)
         if (!Files.exists(path)) {
             throw Exception("There is no file ${path.toAbsolutePath()} existed.")

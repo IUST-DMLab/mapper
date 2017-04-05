@@ -5,7 +5,7 @@ import com.hp.hpl.jena.graph.Triple
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
-import ir.ac.iust.dml.kg.utils.PagedData
+import ir.ac.iust.dml.kg.raw.utils.PagedData
 import virtuoso.jena.driver.VirtGraph
 
 class VirtuosoFkgTripleDaoImpl : FkgTripleDao {

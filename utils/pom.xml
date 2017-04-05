@@ -7,9 +7,9 @@
 
     <parent>
         <relativePath>../</relativePath>
-        <groupId>ir.ac.iust.dml.kg</groupId>
-        <artifactId>mapping-services</artifactId>
-        <version>0.1.0</version>
+        <groupId>ir.ac.iust.dml.kg.mapping</groupId>
+        <artifactId>parent</artifactId>
+        <version>0.2.0</version>
     </parent>
 
     <properties>

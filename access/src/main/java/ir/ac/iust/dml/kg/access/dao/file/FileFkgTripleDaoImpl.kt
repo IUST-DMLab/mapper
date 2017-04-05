@@ -4,7 +4,7 @@ import com.google.gson.GsonBuilder
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
-import ir.ac.iust.dml.kg.utils.PagedData
+import ir.ac.iust.dml.kg.raw.utils.PagedData
 import org.apache.commons.io.FileUtils
 import java.io.BufferedWriter
 import java.io.FileOutputStream

@@ -1,7 +1,7 @@
 package ir.ac.iust.dml.kg.access.dao
 
 import ir.ac.iust.dml.kg.access.entities.FkgClass
-import ir.ac.iust.dml.kg.utils.PagedData
+import ir.ac.iust.dml.kg.raw.utils.PagedData
 
 interface FkgClassDao {
    fun save(p: FkgClass)

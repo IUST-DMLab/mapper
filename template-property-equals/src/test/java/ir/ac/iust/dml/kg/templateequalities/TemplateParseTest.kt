@@ -1,16 +1,13 @@
 package ir.ac.iust.dml.kg.templateequalities
 
+import ir.ac.iust.dml.kg.raw.utils.ConfigReader
+import ir.ac.iust.dml.kg.raw.utils.dump.wiki.WikiArticle
 import ir.ac.iust.dml.kg.templateequalities.logic.wiki.InfoboxTemplateReader
 import ir.ac.iust.dml.kg.templateequalities.logic.wiki.MappingDiscoveryListener
-import ir.ac.iust.dml.kg.utils.ConfigReader
-import ir.ac.iust.dml.kg.utils.dump.WikiArticle
 import java.nio.file.Files
 
 fun main(args: Array<String>) {
-
-    val WIKI_DUMP_ARTICLE = "wiki.template.dump.article"
-   val config = ConfigReader.getConfig(mapOf(WIKI_DUMP_ARTICLE to "~/.pkg/data/just_templates.xml"))
-    val path = ConfigReader.getPath(config[WIKI_DUMP_ARTICLE]!! as String)
+   val path = ConfigReader.getPath("wiki.template.dump.article", "~/.pkg/data/just_templates.xml")
     Files.createDirectories(path.parent)
     if (!Files.exists(path)) {
         throw Exception("There is no file ${path.toAbsolutePath()} existed.")

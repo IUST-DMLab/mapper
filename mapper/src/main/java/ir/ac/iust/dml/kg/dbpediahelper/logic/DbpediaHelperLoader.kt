@@ -4,8 +4,8 @@ import ir.ac.iust.dml.kg.access.dao.FkgPropertyMappingDao
 import ir.ac.iust.dml.kg.access.dao.WikipediaPropertyTranslationDao
 import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
-import ir.ac.iust.dml.kg.dbpediahelper.logic.dump.OwlDumpReader
-import ir.ac.iust.dml.kg.utils.ConfigReader
+import ir.ac.iust.dml.kg.raw.utils.ConfigReader
+import ir.ac.iust.dml.kg.raw.utils.dump.owl.OwlDumpReader
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -21,9 +21,7 @@ class DbpediaHelperLoader {
 
    @Throws(Exception::class)
    fun writeDbpediaEnglishMapping() {
-      val ONTOLOGY_DUMP = "ontology.dump.en"
-      val config = ConfigReader.getConfig(mapOf(ONTOLOGY_DUMP to "~/.pkg/data/dbpedia_mapping.owl"))
-      val path = ConfigReader.getPath(config[ONTOLOGY_DUMP]!! as String)
+      val path = ConfigReader.getPath("ontology.dump.en", "~/.pkg/data/dbpedia_mapping.owl")
       Files.createDirectories(path.parent)
       if (!Files.exists(path)) {
          throw Exception("There is no file ${path.toAbsolutePath()} existed.")
