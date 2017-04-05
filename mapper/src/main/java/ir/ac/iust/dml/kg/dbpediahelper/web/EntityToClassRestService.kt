@@ -6,6 +6,7 @@ import ir.ac.iust.dml.kg.dbpediahelper.logic.EntityToClassLogic
 import ir.ac.iust.dml.kg.dbpediahelper.logic.data.FkgEntityClassesData
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
+import javax.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/entityType/rest/v1/")
@@ -14,10 +15,15 @@ class EntityToClassRestService {
 
    @Autowired lateinit var logic: EntityToClassLogic
 
+   @RequestMapping("exportTypes", method = arrayOf(RequestMethod.GET))
+   fun exportTypes(@RequestParam(required = false) after: Long?,
+                   response: HttpServletResponse)
+         = logic.exportTypes(after, response)
+
    @RequestMapping("exportAll", method = arrayOf(RequestMethod.GET))
    @ResponseBody
    fun exportAll(@RequestParam(required = false) after: Long?)
-           = logic.search(page = 0, pageSize = 0, after = after).data
+         = logic.search(page = 0, pageSize = 0, after = after).data
 
    @RequestMapping("search", method = arrayOf(RequestMethod.GET))
    @ResponseBody
@@ -29,9 +35,9 @@ class EntityToClassRestService {
               @RequestParam(required = false) approved: Boolean?,
               @RequestParam(required = false) status: MappingStatus?,
               @RequestParam(required = false) after: Long? = null)
-           = logic.search(page = page!!, pageSize = pageSize!!,
-           entity = entity, className = className, like = like!!,
-           approved = approved, after = after, status = status)
+         = logic.search(page = page!!, pageSize = pageSize!!,
+         entity = entity, className = className, like = like!!,
+         approved = approved, after = after, status = status)
 
    @RequestMapping("data", method = arrayOf(RequestMethod.GET))
    @ResponseBody
@@ -48,8 +54,8 @@ class EntityToClassRestService {
                 @RequestParam(required = false) className: String?,
                 @RequestParam approved: Boolean,
                 @RequestParam(required = false) status: MappingStatus?) =
-           logic.edit(FkgEntityClassesData(id = id, entity = entity, className = className,
-                   approved = approved, status = status))
+         logic.edit(FkgEntityClassesData(id = id, entity = entity, className = className,
+               approved = approved, status = status))
 
    @RequestMapping("edit", method = arrayOf(RequestMethod.POST))
    @ResponseBody
