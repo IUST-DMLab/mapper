@@ -39,8 +39,11 @@ open class FkgPropertyMappingDaoImpl : FkgPropertyMappingDao {
                     Restrictions.eq("templateProperty", templateProperty),
                     Restrictions.eq("templateProperty", secondTemplateProperty)),
 
-            type != null, Restrictions.eq("templateName", type),
-            clazz != null, Restrictions.eq("ontologyClass", clazz),
+          type != null && !like, Restrictions.eq("templateName", type),
+          type != null && like, Restrictions.like("templateName", "%$type%"),
+          clazz != null && !like, Restrictions.eq("ontologyClass", clazz),
+          clazz != null && like, Restrictions.like("ontologyClass", "%$clazz%"),
+
             hasClass, Restrictions.isNotNull("ontologyClass"),
             language != null, Restrictions.eq("language", language),
             status != null, Restrictions.eq("status", status),

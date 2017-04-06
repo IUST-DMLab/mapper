@@ -107,7 +107,7 @@ class PropertyMappingLogic {
           val exact = dao.search(page = 0, pageSize = 0, language = "en", templateProperty = p,
                   clazz = classMapping.ontologyClass)
           if (exact.data.isNotEmpty()) {
-            mapping.status = MappingStatus.NearlyApproved
+             mapping.status = MappingStatus.NearlyMapped
             mapping.ontologyProperty = exact.data[0].ontologyProperty
             dao.save(mapping)
           } else {

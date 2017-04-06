@@ -54,10 +54,10 @@ class EntityToClassLogic {
                      } else {
                         entityClass.className = mapping.ontologyClass
                         entityClass.classTree = treeCache[mapping.ontologyClass]
-                        entityClass.status = MappingStatus.NearlyApproved
+                        entityClass.status = MappingStatus.NearlyMapped
                      }
                      val old = dao.read(entityClass.entity!!, entityClass.className!!)
-                     if (old == null || (entityClass.status == MappingStatus.NearlyApproved
+                     if (old == null || (entityClass.status == MappingStatus.NearlyMapped
                            && old.classTree != treeCache[old.className])) {
                         entityClass.updateEpoch = System.currentTimeMillis()
                         dao.save(entityClass)

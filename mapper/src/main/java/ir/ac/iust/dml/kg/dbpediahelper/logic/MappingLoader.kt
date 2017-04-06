@@ -58,7 +58,7 @@ class MappingLoader {
                         ontologyClass = ontologyClass,
                         templateProperty = templateProperty,
                         ontologyProperty = ontologyProperty,
-                        status = MappingStatus.NearlyApproved))
+                        status = MappingStatus.NearlyMapped))
                   templateProperty = null
                   ontologyProperty = null
                }
@@ -83,7 +83,7 @@ class MappingLoader {
                      templateName = type, ontologyClass = dbpediaEnglishMapping[0].ontologyClass,
                      templateProperty = faProperty,
                      ontologyProperty = dbpediaEnglishMapping[0].ontologyProperty,
-                     status = MappingStatus.NearlyApproved)
+                     status = MappingStatus.NearlyMapped)
                logger.info("persian mapping found: $persianMapping")
                dao.save(persianMapping)
             } else {
