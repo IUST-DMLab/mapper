@@ -105,9 +105,9 @@ class EntityToClassLogic {
       do {
          val pages = dao.search(page++, 1000, after = after)
          pages.data.forEachIndexed { index, d ->
-            stream.print("\"${d.entity!!}\":[")
+            stream.print("\"${d.entity!!}\":")
             if (d.classTree != null) stream.print(gson.toJson(d.classTree!!.split('/')))
-            stream.print("]")
+            else stream.print("[]")
             if (pages.page < pages.pageCount - 1 || index < pages.data.size - 1) stream.println(",")
             else stream.println()
          }
