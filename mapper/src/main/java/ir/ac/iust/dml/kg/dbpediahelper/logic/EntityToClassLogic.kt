@@ -1,6 +1,5 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic
 
-import com.google.gson.Gson
 import ir.ac.iust.dml.kg.access.dao.FkgClassDao
 import ir.ac.iust.dml.kg.access.dao.FkgEntityClassesDao
 import ir.ac.iust.dml.kg.access.dao.FkgTemplateMappingDao
@@ -15,7 +14,6 @@ import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.nio.file.Files
-import javax.servlet.http.HttpServletResponse
 
 
 @Service
@@ -94,25 +92,39 @@ class EntityToClassLogic {
 
    @Throws(Exception::class)
    fun exportAll(after: Long?) = dao.search(page = 0, pageSize = 0, after = after).data
+//
+//   fun exportTypes(after: Long?, response: HttpServletResponse) {
+//      val gson = Gson()
+//      response.contentType = "text/html; charset=UTF-8"
+//      response.characterEncoding = "UTF-8"
+//      val stream = response.writer
+//      stream.println("{")
+//      var page = 0
+//      do {
+//         val pages = dao.search(page++, 1000, after = after)
+//         pages.data.forEachIndexed { index, d ->
+//            if(d.entity!!.contains("\"")) return
+//            if(d.classTree != null && d.classTree!!.contains("\"")) return
+//            stream.print("\"${d.entity!!}\":")
+//            if (d.classTree != null) stream.print(gson.toJson(d.classTree!!.split('/')))
+//            else stream.print("[]")
+//            if (pages.page < pages.pageCount - 1 || index < pages.data.size - 1) stream.println(",")
+//            else stream.println()
+//         }
+//      } while (pages.data.isNotEmpty())
+//      stream.println("}")
+//   }
 
-   fun exportTypes(after: Long?, response: HttpServletResponse) {
-      val gson = Gson()
-      response.contentType = "text/html; charset=UTF-8"
-      response.characterEncoding = "UTF-8"
-      val stream = response.writer
-      stream.println("{")
+   fun exportTypes(after: Long?): Map<String, List<String>> {
+      val result = mutableMapOf<String, List<String>>()
       var page = 0
       do {
          val pages = dao.search(page++, 1000, after = after)
-         pages.data.forEachIndexed { index, d ->
-            stream.print("\"${d.entity!!}\":")
-            if (d.classTree != null) stream.print(gson.toJson(d.classTree!!.split('/')))
-            else stream.print("[]")
-            if (pages.page < pages.pageCount - 1 || index < pages.data.size - 1) stream.println(",")
-            else stream.println()
+         pages.data.forEach {
+            result[it.entity!!] = if (it.classTree == null) mutableListOf() else it.classTree!!.split('/')
          }
       } while (pages.data.isNotEmpty())
-      stream.println("}")
+      return result
    }
 
    fun search(page: Int = 0, pageSize: Int = 20,

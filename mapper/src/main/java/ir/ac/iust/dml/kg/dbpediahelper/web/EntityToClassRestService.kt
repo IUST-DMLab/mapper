@@ -6,7 +6,6 @@ import ir.ac.iust.dml.kg.dbpediahelper.logic.EntityToClassLogic
 import ir.ac.iust.dml.kg.dbpediahelper.logic.data.FkgEntityClassesData
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
-import javax.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/entityType/rest/v1/")
@@ -15,10 +14,14 @@ class EntityToClassRestService {
 
    @Autowired lateinit var logic: EntityToClassLogic
 
+//   @RequestMapping("exportTypes", method = arrayOf(RequestMethod.GET))
+//   fun exportTypes(@RequestParam(required = false) after: Long?,
+//                   response: HttpServletResponse)
+//         = logic.exportTypes(after, response)
+
    @RequestMapping("exportTypes", method = arrayOf(RequestMethod.GET))
-   fun exportTypes(@RequestParam(required = false) after: Long?,
-                   response: HttpServletResponse)
-         = logic.exportTypes(after, response)
+   @ResponseBody
+   fun exportTypes(@RequestParam(required = false) after: Long?) = logic.exportTypes(after)
 
    @RequestMapping("exportAll", method = arrayOf(RequestMethod.GET))
    @ResponseBody
