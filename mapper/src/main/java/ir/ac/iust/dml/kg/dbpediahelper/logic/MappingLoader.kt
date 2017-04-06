@@ -98,7 +98,7 @@ class MappingLoader {
                      if (checked.contains(ontologyProperty)) continue
                      val persianMapping = FkgPropertyMapping(language = "fa", templateName = type,
                            ontologyClass = null, templateProperty = faProperty, ontologyProperty = ontologyProperty,
-                           status = MappingStatus.NotApproved)
+                           status = MappingStatus.NotMapped)
                      checked.add(ontologyProperty)
                      logger.info("not accurate persian mapping found: $persianMapping")
                      dao.save(persianMapping)
