@@ -23,6 +23,10 @@ class EntityToClassRestService {
    @ResponseBody
    fun exportTypes(@RequestParam(required = false) after: Long?) = logic.exportTypes(after)
 
+   @RequestMapping("classParents", method = arrayOf(RequestMethod.GET))
+   @ResponseBody
+   fun classParents() = logic.classParents()
+
    @RequestMapping("exportAll", method = arrayOf(RequestMethod.GET))
    @ResponseBody
    fun exportAll(@RequestParam(required = false) after: Long?)

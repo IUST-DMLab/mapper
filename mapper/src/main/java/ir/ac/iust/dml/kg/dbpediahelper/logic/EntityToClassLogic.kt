@@ -163,4 +163,11 @@ class EntityToClassLogic {
       return getEditData(entity.id)
    }
 
+   fun classParents(): Map<String, List<String>> {
+      reloadTreeCache()
+      val result = mutableMapOf<String, List<String>>()
+      treeCache.keys.forEach { key -> result[key] = treeCache[key]!!.split("/").filter { key != it } }
+      return result
+   }
+
 }
