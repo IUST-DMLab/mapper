@@ -91,4 +91,14 @@ class PropertyMappingRestService {
                                   @RequestParam(required = false, defaultValue = "20") pageSize: Int?,
                                   @RequestParam keyword: String?) =
          propertyMappingLogic.searchOntologyPropertyName(page!!, pageSize!!, keyword)
+
+   @RequestMapping("predicateExport", method = arrayOf(RequestMethod.GET))
+   @ResponseBody
+   fun predicateExport(@RequestParam(required = false, defaultValue = "0") page: Int?,
+                       @RequestParam(required = false, defaultValue = "20") pageSize: Int?,
+                       @RequestParam(required = false) keyword: String?,
+                       @RequestParam(required = false) ontologyClass: String?,
+                       @RequestParam(required = false) templateName: String?,
+                       @RequestParam(required = false) status: MappingStatus?) =
+         propertyMappingLogic.predicateExport(page!!, pageSize!!, keyword, ontologyClass, templateName, status)
 }

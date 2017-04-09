@@ -150,10 +150,16 @@ open class FkgPropertyMappingDaoImpl : FkgPropertyMappingDao {
   }
 
   @Suppress("UNCHECKED_CAST")
-  override fun listUniqueProperties(language: String?, pageSize: Int, page: Int): List<String> {
+  override fun listUniqueProperties(page: Int, pageSize: Int, language: String?,
+                                    keyword: String?, ontologyClass: String?,
+                                    templateName: String?, status: MappingStatus?, order: Boolean): List<String> {
     val session = this.sessionFactory.openSession()
     val criteria = session.createCriteria(FkgPropertyMapping::class.java)
-    if (language != null) criteria.add(Restrictions.like("language", language))
+     if (language != null) criteria.add(Restrictions.eq("language", language))
+     if (keyword != null) criteria.add(Restrictions.like("templateProperty", "%$keyword%"))
+     if (ontologyClass != null) criteria.add(Restrictions.eq("ontologyClass", ontologyClass))
+     if (templateName != null) criteria.add(Restrictions.eq("templateName", templateName))
+     if (status != null) criteria.add(Restrictions.eq("status", status))
     criteria.setProjection(Projections.distinct(Projections.property("templateProperty")))
     criteria.setFirstResult(page * pageSize)
     criteria.setMaxResults(pageSize)
