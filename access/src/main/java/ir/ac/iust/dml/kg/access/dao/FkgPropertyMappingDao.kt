@@ -18,7 +18,7 @@ interface FkgPropertyMappingDao {
               hasClass: Boolean = false, templateProperty: String? = null,
               secondTemplateProperty: String? = null, ontologyProperty: String? = null,
               status: MappingStatus? = null, approved: Boolean? = null,
-              after: Long? = null, noUpdateEpoch: Boolean? = null):
+              after: Long? = null, noUpdateEpoch: Boolean? = null, noTemplatePropertyLanguage: Boolean? = null):
          PagedData<FkgPropertyMapping>
 
    fun readOntologyProperty(templateProperty: String): List<String>
@@ -26,7 +26,7 @@ interface FkgPropertyMappingDao {
    fun listUniqueProperties(page: Int = 0, pageSize: Int = 20, language: String?,
                             keyword: String? = null, ontologyClass: String? = null,
                             templateName: String? = null, status: MappingStatus? = null,
-                            order: Boolean = true): List<String>
+                            templatePropertyLanguage: String? = null): List<String>
 
    fun listUniqueOntologyProperties(templateProperty: String): List<String>
    fun countTemplateProperties(templateProperty: String): Long

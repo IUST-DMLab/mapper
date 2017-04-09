@@ -97,8 +97,9 @@ class PropertyMappingRestService {
    fun predicateExport(@RequestParam(required = false, defaultValue = "0") page: Int?,
                        @RequestParam(required = false, defaultValue = "20") pageSize: Int?,
                        @RequestParam(required = false) keyword: String?,
+                       @RequestParam(required = false) language: String?,
                        @RequestParam(required = false) ontologyClass: String?,
                        @RequestParam(required = false) templateName: String?,
                        @RequestParam(required = false) status: MappingStatus?) =
-         propertyMappingLogic.predicateExport(page!!, pageSize!!, keyword, ontologyClass, templateName, status)
+         propertyMappingLogic.predicateExport(page!!, pageSize!!, keyword, ontologyClass, templateName, status, language)
 }

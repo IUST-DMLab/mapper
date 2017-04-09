@@ -26,14 +26,21 @@ class PropertyMappingLogic {
 
    @PostConstruct
    fun fillUpdateEpoch() {
-      var page = 0
       do {
-         val pages = dao.search(pageSize = 100, page = page++, noUpdateEpoch = true, language = null)
+         val pages = dao.search(pageSize = 100, page = 0, noUpdateEpoch = true, language = null)
          val now = System.currentTimeMillis()
          pages.data.forEach {
             it.updateEpoch = now
             dao.save(it)
          }
+      } while (pages.data.isNotEmpty())
+   }
+
+   @PostConstruct
+   fun fillTemplatePropertyLanguage() {
+      do {
+         val pages = dao.search(pageSize = 100, page = 0, noTemplatePropertyLanguage = true, language = null)
+         pages.data.forEach { dao.save(it) }
       } while (pages.data.isNotEmpty())
    }
 
@@ -128,10 +135,11 @@ class PropertyMappingLogic {
       return true
    }
 
-   fun predicateExport(page: Int, pageSize: Int, keyword: String?, ontologyClass: String?, templateName: String?,
-                       status: MappingStatus?):
+   fun predicateExport(page: Int, pageSize: Int, keyword: String?,
+                       ontologyClass: String?, templateName: String?,
+                       status: MappingStatus?, language: String?):
          Map<String, List<FkgPropertyMapping>> {
-      val uniqueProperties = dao.listUniqueProperties(page, pageSize, "fa", keyword, ontologyClass, templateName, status)
+      val uniqueProperties = dao.listUniqueProperties(page, pageSize, "fa", keyword, ontologyClass, templateName, status, language)
       val result = mutableMapOf<String, List<FkgPropertyMapping>>()
       uniqueProperties.forEach { templateProperty ->
          result[templateProperty] = dao.search(page = 0, pageSize = 0, language = "fa", clazz = ontologyClass,
