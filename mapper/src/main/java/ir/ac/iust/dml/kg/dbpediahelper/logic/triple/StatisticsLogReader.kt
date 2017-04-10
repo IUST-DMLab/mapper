@@ -44,15 +44,15 @@ class StatisticsLogReader(path: Path) : Iterator<FkgTripleStatistics>, Closeable
 
          val stats: FkgTripleStatistics
          if (lastType == TripleStatisticsType.type) {
-            stats = FkgTripleStatistics(templateType = splits[1])
+            stats = FkgTripleStatistics(templateName = splits[1])
          } else if (lastType == TripleStatisticsType.property) {
             stats = FkgTripleStatistics(property = splits[1])
          } else if (lastType == TripleStatisticsType.typedProperty) {
             val typeAndProperty = splits[1].split(" >> ")
-            stats = FkgTripleStatistics(templateType = typeAndProperty[0], property = typeAndProperty[1])
+            stats = FkgTripleStatistics(templateName = typeAndProperty[0], property = typeAndProperty[1])
          } else { //if(lastType == TripleStatisticsType.typedEntity) {
             val typeAndEntity = splits[1].split(" >> ")
-            stats = FkgTripleStatistics(templateType = typeAndEntity[0], entity = typeAndEntity[1])
+            stats = FkgTripleStatistics(templateName = typeAndEntity[0], entity = typeAndEntity[1])
          }
          stats.countType = lastType
          stats.count = count

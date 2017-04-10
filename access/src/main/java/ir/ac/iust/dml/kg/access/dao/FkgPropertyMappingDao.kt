@@ -9,6 +9,7 @@ interface FkgPropertyMappingDao {
    fun deleteAll()
    fun list(pageSize: Int = 20, page: Int = 10, hasClass: Boolean = true): PagedData<FkgPropertyMapping>
    fun read(id: Long): FkgPropertyMapping?
+   fun read(templateName: String, templateProperty: String): FkgPropertyMapping?
    fun searchTemplateName(page: Int, pageSize: Int, keyword: String?): List<String>
    fun searchOntologyClass(page: Int, pageSize: Int, keyword: String?): List<String>
    fun searchTemplatePropertyName(page: Int, pageSize: Int, keyword: String?): List<String>

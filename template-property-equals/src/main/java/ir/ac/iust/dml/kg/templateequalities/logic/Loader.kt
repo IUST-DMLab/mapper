@@ -29,10 +29,10 @@ class Loader {
 
       InfoboxTemplateReader.read(path, object : MappingDiscoveryListener {
          override fun discovered(article: WikiArticle, mappings: MutableMap<String, String>) {
-            val name = article.title!!.substringAfter("الگو:").trim().substringAfter("Infobox").trim()
+            val name = article.title!!.substringAfter("الگو:").trim().toLowerCase()
             for ((key, value) in mappings) {
                if (value.length < 20 && key.length < 20)
-                  dao.save(WikipediaPropertyTranslation(type = name, enProperty = value, faProperty = key,
+                  dao.save(WikipediaPropertyTranslation(templateName = name, enProperty = value, faProperty = key,
                         notTranslated = LanguageChecker.isEnglish(key)))
             }
             println("${article.title}: ${mappings.size} mappings")

@@ -60,11 +60,27 @@ open class FkgPropertyMappingDaoImpl : FkgPropertyMappingDao {
       return list
    }
 
-
    override fun read(id: Long): FkgPropertyMapping? {
       val session = this.sessionFactory.openSession()
       val criteria = session.createCriteria(FkgPropertyMapping::class.java)
       criteria.add(Restrictions.eq("id", id))
+      val mapping = criteria.uniqueResult() as FkgPropertyMapping?
+      session.close()
+      return mapping
+   }
+
+   override fun read(templateName: String, templateProperty: String): FkgPropertyMapping? {
+      val session = this.sessionFactory.openSession()
+      val criteria = session.createCriteria(FkgPropertyMapping::class.java)
+      criteria.add(Restrictions.eq("templateProperty", templateProperty))
+      criteria.add(Restrictions.or(
+            Restrictions.eq("templateName", templateName),
+            Restrictions.eq("templateName", "جعبه " + templateName),
+            Restrictions.eq("templateName", "جعبه اطلاعات " + templateName),
+            Restrictions.eq("templateName", "infobox " + templateName),
+            Restrictions.eq("templateName", "Infobox " + templateName),
+            Restrictions.eq("templateName", "chembox " + templateName)
+      ))
       val mapping = criteria.uniqueResult() as FkgPropertyMapping?
       session.close()
       return mapping

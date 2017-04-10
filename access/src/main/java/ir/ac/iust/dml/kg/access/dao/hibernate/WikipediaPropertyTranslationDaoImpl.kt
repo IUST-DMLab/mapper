@@ -16,7 +16,7 @@ open class WikipediaPropertyTranslationDaoImpl : WikipediaPropertyTranslationDao
   override fun readByFaTitle(type: String?, faProperty: String): MutableList<WikipediaPropertyTranslation> {
     val session = this.sessionFactory.openSession()
     val criteria = session.createCriteria(WikipediaPropertyTranslation::class.java)
-    if (type != null) criteria.add(Restrictions.like("type", "%$type%"))
+     if (type != null) criteria.add(Restrictions.like("templateName", "%$type%"))
     criteria.add(Restrictions.like("faProperty", "%$faProperty%"))
     val mapping = criteria.list() as MutableList<WikipediaPropertyTranslation>
     session.close()
@@ -29,7 +29,7 @@ open class WikipediaPropertyTranslationDaoImpl : WikipediaPropertyTranslationDao
     val criteria = session.createCriteria(WikipediaPropertyTranslation::class.java)
     if (like) criteria.add(Restrictions.like("enProperty", "%$enProperty%"))
     else criteria.add(Restrictions.eq("enProperty", enProperty))
-    if (type != null) criteria.add(Restrictions.like("type", "%$type%"))
+     if (type != null) criteria.add(Restrictions.like("templateName", "%$type%"))
     val mapping = criteria.list() as MutableList<WikipediaPropertyTranslation>
     session.close()
     return mapping

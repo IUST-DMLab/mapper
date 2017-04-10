@@ -61,11 +61,9 @@ class StatsLogic {
                      }
 
                      if (triple.subject == null) continue
-                     val subject = prefixService.replacePrefixes(triple.subject!!)
+//                     val subject = prefixService.replacePrefixes(triple.subject!!)
                      val predicate = PropertyNormaller.removeDigits(triple.predicate!!)
-                     val type =
-                           if (triple.templateNameFull == triple.templateType) triple.templateType!!
-                           else triple.templateNameFull!!.substring(triple.templateType!!.length + 1).trim()
+                     val type = triple.templateNameFull!!
                      eventDao.propertyUsed(triple.predicate!!)
                      eventDao.typeUsed(type)
 //                     eventDao.typeAndEntityUsed(type, subject)

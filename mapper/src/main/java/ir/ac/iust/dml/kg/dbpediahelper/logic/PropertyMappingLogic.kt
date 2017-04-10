@@ -102,15 +102,17 @@ class PropertyMappingLogic {
          val pagedData = statsDao.search(page = page++, pageSize = 100, countType = TripleStatisticsType.typedProperty)
          logger.info("processing page $page")
          pagedData.data.forEach {
-            val classMapping = templateDao.read(it.templateType!!, null, true)
+            val classMapping = templateDao.read(templateName = it.templateName!!, className = null)
             if (classMapping != null) {
-               val noURI = if (it.property!!.contains(":")) it.property!!.substringAfter(':') else it.property!!
-               val mapping = FkgPropertyMapping(language = "fa", templateName = it.templateType,
-                     templateProperty = noURI, status = MappingStatus.NotMapped, approved = false,
-                     tupleCount = it.count!!.toLong(), ontologyClass = classMapping.ontologyClass,
-                     updateEpoch = System.currentTimeMillis())
-               val translations = wikiPropertyTranslationDao.readByFaTitle(type = null, faProperty = noURI)
-               val p = if (translations.isNotEmpty()) translations[0].enProperty!! else noURI
+               val rawProperty = it.property!!
+               val mapping
+                     = dao.read(templateName = it.templateName!!, templateProperty = rawProperty) ?:
+                     FkgPropertyMapping(language = "fa", templateName = it.templateName,
+                           templateProperty = rawProperty, status = MappingStatus.NotMapped, approved = false,
+                           tupleCount = it.count!!.toLong(), ontologyClass = classMapping.ontologyClass,
+                           updateEpoch = System.currentTimeMillis())
+               val translations = wikiPropertyTranslationDao.readByFaTitle(type = null, faProperty = rawProperty)
+               val p = if (translations.isNotEmpty()) translations[0].enProperty!! else rawProperty
                val exact = dao.search(page = 0, pageSize = 0, language = "en", templateProperty = p,
                      clazz = classMapping.ontologyClass)
                if (exact.data.isNotEmpty()) {
@@ -118,14 +120,14 @@ class PropertyMappingLogic {
                   mapping.ontologyProperty = exact.data[0].ontologyProperty
                   dao.save(mapping)
                } else {
-                  val l = dao.listUniqueOntologyProperties(noURI)
+                  val l = dao.listUniqueOntologyProperties(rawProperty)
                   if (l.isNotEmpty() && l.size < 3) {
                      mapping.status = if (l.size == 1) MappingStatus.Translated else MappingStatus.Multiple
                      l.forEach {
                         dao.save(mapping.copy(ontologyProperty = it))
                      }
                   } else {
-                     mapping.ontologyProperty = "dbp:" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, noURI)
+                     mapping.ontologyProperty = "dbp:" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, rawProperty)
                      dao.save(mapping)
                   }
                }
