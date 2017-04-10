@@ -27,15 +27,15 @@
     <sweble.version>2.2.0</sweble.version>
   </properties>
 
-  <repositories>
-    <repository>
-      <id>central</id>
-      <url>http://194.225.227.161:8083/artifactory/libs-release</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
+  <!--<repositories>-->
+  <!--<repository>-->
+  <!--<id>central</id>-->
+  <!--<url>http://194.225.227.161:8083/artifactory/libs-release</url>-->
+  <!--<snapshots>-->
+  <!--<enabled>false</enabled>-->
+  <!--</snapshots>-->
+  <!--</repository>-->
+  <!--</repositories>-->
   <distributionManagement>
     <repository>
       <id>central</id>
