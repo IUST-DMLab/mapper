@@ -25,6 +25,8 @@ public class MappingHelperUIController {
           "<br/>" +
           "To Generate Triples on mysql, click <a href='helper/triples?type=mysql'>here</a>" +
           "<br/>" +
+            "To generate statistical data to file <a href='helper/createStatsFile'>here</a>" +
+            "<br/>" +
           "To write statistical data to mysql <a href='helper/writeStats'>here</a>" +
           "<br/>" +
           "write classes of entities to database <a href='helper/loadTypes'>here</a>" +

@@ -3,6 +3,7 @@ package ir.ac.iust.dml.kg.dbpediahelper.web;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.EntityToClassLogic;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.MappingLoader;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.PrefixService;
+import ir.ac.iust.dml.kg.dbpediahelper.logic.StatsLogic;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.ExportData;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.TemplateToOntologyExporter;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.triple.TripleImporter;
@@ -19,6 +20,8 @@ public class MappingHelperRestServices {
   private PrefixService prefixService;
   @Autowired
   private MappingLoader helperLoader;
+  @Autowired
+  private StatsLogic statsLogic;
   @Autowired
   private TripleImporter tripleImporter;
   @Autowired
@@ -57,9 +60,15 @@ public class MappingHelperRestServices {
     return "Fixed!";
   }
 
+  @RequestMapping("/createStatsFile")
+  public String createStatsFile() throws Exception {
+    statsLogic.createStatsFile();
+    return "Stats created!";
+  }
+
   @RequestMapping("/writeStats")
-  public String triples() throws Exception {
-    tripleImporter.writeStats();
+  public String writeStats() throws Exception {
+    statsLogic.writeStats();
     return "Stats created!";
   }
 

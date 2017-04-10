@@ -36,34 +36,42 @@ open class StatisticalEventDaoImpl : StatisticalEventDao {
       return builder.toString()
    }
 
+   @Synchronized
    override fun statusGenerated(status: MappingStatus) {
       statusStore.count(status)
    }
 
+   @Synchronized
    override fun tripleRead() {
       numberOfTriples++
    }
 
+   @Synchronized
    override fun tripleProcessed() {
       numberOfProcessedTriples++
    }
 
+   @Synchronized
    override fun fileProcessed(address: String) {
       this.address = address
    }
 
+   @Synchronized
    override fun typeUsed(type: String) {
       typeStore.count(type)
    }
 
+   @Synchronized
    override fun propertyUsed(property: String) {
       propertyStore.count(property)
    }
 
+   @Synchronized
    override fun typeAndPropertyUsed(type: String, property: String) {
       typeAndPropertyStore.count(TypedString(type = type, string = property))
    }
 
+   @Synchronized
    override fun typeAndEntityUsed(type: String, entity: String) {
       typeAndEntityStore.count(TypedString(type = type, string = entity))
    }

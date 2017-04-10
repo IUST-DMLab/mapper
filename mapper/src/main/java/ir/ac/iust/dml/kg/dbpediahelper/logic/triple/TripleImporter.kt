@@ -1,13 +1,15 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic.triple
 
-import ir.ac.iust.dml.kg.access.dao.*
+import ir.ac.iust.dml.kg.access.dao.FkgPropertyMappingDao
+import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
+import ir.ac.iust.dml.kg.access.dao.WikipediaPropertyTranslationDao
+import ir.ac.iust.dml.kg.access.dao.WikipediaTemplateRedirectDao
 import ir.ac.iust.dml.kg.access.dao.file.FileFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.memory.StatisticalEventDaoImpl
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
-import ir.ac.iust.dml.kg.access.entities.enumerations.TripleStatisticsType
 import ir.ac.iust.dml.kg.dbpediahelper.logic.PrefixService
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
@@ -28,38 +30,11 @@ class TripleImporter {
   @Autowired lateinit var mappingDao: FkgPropertyMappingDao
   @Autowired lateinit var wikiTemplateRedirectDao: WikipediaTemplateRedirectDao
   @Autowired lateinit var wikiPropertyTranslationDao: WikipediaPropertyTranslationDao
-  @Autowired lateinit var fkgTripleStatisticsDao: FkgTripleStatisticsDao
   @Autowired lateinit var prefixService: PrefixService
   @Autowired lateinit var eventDao: StatisticalEventDaoImpl
 
   enum class StoreType {
     none, file, mysql, virtuoso
-  }
-
-  @Throws(Exception::class)
-  fun writeStats() {
-     val path = ConfigReader.getPath("mapped.triple.stats.file", "~/.pkg/data/triples/mapped/stats.txt")
-    Files.createDirectories(path.parent)
-    if (!Files.exists(path)) {
-      throw Exception("There is no file ${path.toAbsolutePath()} existed.")
-    }
-
-    fkgTripleStatisticsDao.deleteAll()
-
-    StatisticsLogReader(path).use {
-      var lineNumber = 0
-      while (it.hasNext()) {
-        lineNumber++
-        if (lineNumber % 1000 == 0) logger.info("line number $lineNumber processed")
-        val stats = it.next()
-        try {
-          if (stats.countType == TripleStatisticsType.typedEntity) break
-          fkgTripleStatisticsDao.save(stats)
-        } catch (e: Throwable) {
-          logger.error("error in $stats", e)
-        }
-      }
-    }
   }
 
   @Throws(Exception::class)
@@ -78,7 +53,6 @@ class TripleImporter {
 
   @Throws(Exception::class)
   fun processTripleInputFiles(storeType: StoreType = StoreType.none) {
-
     val WIKI_DUMP_ARTICLE = "wiki.triple.input.folder"
     val config = ConfigReader.getConfig(mapOf(WIKI_DUMP_ARTICLE to "~/.pkg/data/triples"))
     val path = ConfigReader.getPath(config[WIKI_DUMP_ARTICLE]!! as String)

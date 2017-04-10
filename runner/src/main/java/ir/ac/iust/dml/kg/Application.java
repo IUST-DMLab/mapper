@@ -12,17 +12,17 @@ import org.springframework.context.annotation.ImportResource;
 
 @SpringBootApplication
 @ImportResource(value = {
-      "classpath:access-context.xml",
-      "classpath:template-equals-context.xml",
-      "classpath:dbpedia-helper-context.xml",
-      "classpath:ontology-translation-context.xml"
+        "classpath:access-context.xml",
+        "classpath:template-equals-context.xml",
+        "classpath:mapper-context.xml",
+        "classpath:ontology-translation-context.xml"
 })
 @EnableAutoConfiguration(exclude = {
         Jackson2ObjectMapperPrettier.class,
-      FilterRegistrationConfiguration.class,
-      DataSourceAutoConfiguration.class,
-      DataSourceTransactionManagerAutoConfiguration.class,
-      HibernateJpaAutoConfiguration.class})
+        FilterRegistrationConfiguration.class,
+        DataSourceAutoConfiguration.class,
+        DataSourceTransactionManagerAutoConfiguration.class,
+        HibernateJpaAutoConfiguration.class})
 public class Application {
 
   public static void main(String[] args) {
