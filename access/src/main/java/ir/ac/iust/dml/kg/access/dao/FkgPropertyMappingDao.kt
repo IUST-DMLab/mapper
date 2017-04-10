@@ -6,10 +6,11 @@ import ir.ac.iust.dml.kg.raw.utils.PagedData
 
 interface FkgPropertyMappingDao {
    fun save(p: FkgPropertyMapping)
+   fun delete(p: FkgPropertyMapping)
    fun deleteAll()
    fun list(pageSize: Int = 20, page: Int = 10, hasClass: Boolean = true): PagedData<FkgPropertyMapping>
    fun read(id: Long): FkgPropertyMapping?
-   fun read(templateName: String, templateProperty: String): FkgPropertyMapping?
+   fun read(templateName: String, nearTemplateNames: Boolean = false, templateProperty: String): FkgPropertyMapping?
    fun searchTemplateName(page: Int, pageSize: Int, keyword: String?): List<String>
    fun searchOntologyClass(page: Int, pageSize: Int, keyword: String?): List<String>
    fun searchTemplatePropertyName(page: Int, pageSize: Int, keyword: String?): List<String>

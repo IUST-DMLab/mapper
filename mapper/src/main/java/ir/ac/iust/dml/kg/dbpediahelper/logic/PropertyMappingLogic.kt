@@ -98,44 +98,66 @@ class PropertyMappingLogic {
 
    fun updateCounts(): Boolean {
       var page = 0
+      val old = dao.search(page = 0, pageSize = 0, language = "fa",
+            status = MappingStatus.Multiple, approved = false)
+      old.data.forEach { dao.delete(it) }
       do {
-         val pagedData = statsDao.search(page = page++, pageSize = 100, countType = TripleStatisticsType.typedProperty)
+         val pagedData = statsDao.search(page = page++, pageSize = 100,
+               countType = TripleStatisticsType.typedProperty)
          logger.info("processing page $page")
-         pagedData.data.forEach {
+         for (it in pagedData.data) {
             val classMapping = templateDao.read(templateName = it.templateName!!, className = null)
             if (classMapping != null) {
                val rawProperty = it.property!!
-               val mapping
-                     = dao.read(templateName = it.templateName!!, templateProperty = rawProperty) ?:
-                     FkgPropertyMapping(language = "fa", templateName = it.templateName,
-                           templateProperty = rawProperty, status = MappingStatus.NotMapped, approved = false,
-                           tupleCount = it.count!!.toLong(), ontologyClass = classMapping.ontologyClass,
-                           updateEpoch = System.currentTimeMillis())
-               val translations = wikiPropertyTranslationDao.readByFaTitle(type = null, faProperty = rawProperty)
+               // nearTemplateNames is for backward compatibility
+               var mapping = dao.read(templateName = it.templateName!!, nearTemplateNames = true,
+                     templateProperty = rawProperty)
+               if (mapping == null)
+                  mapping = FkgPropertyMapping(language = "fa", templateName = it.templateName,
+                        templateProperty = rawProperty, status = MappingStatus.NotMapped, approved = false,
+                        tupleCount = it.count!!.toLong(), ontologyClass = classMapping.ontologyClass,
+                        updateEpoch = System.currentTimeMillis())
+               else {
+                  logger.info("repeated property: ${it.templateName}/$rawProperty")
+                  // backward compatibility
+                  if (mapping.templateName != it.templateName || mapping.templateProperty != it.property) {
+                     mapping.templateName = it.templateName
+                     mapping.templateProperty = it.property
+                     dao.save(mapping)
+                  }
+                  continue
+               }
+
+               var translations
+                     = wikiPropertyTranslationDao.readByFaTitle(type = it.templateName!!, faProperty = rawProperty)
+               if (translations.isEmpty())
+                  translations = wikiPropertyTranslationDao.readByFaTitle(type = null, faProperty = rawProperty)
                val p = if (translations.isNotEmpty()) translations[0].enProperty!! else rawProperty
+               // searching in english dbpedia mappings
                val exact = dao.search(page = 0, pageSize = 0, language = "en", templateProperty = p,
-                     clazz = classMapping.ontologyClass)
+                     secondTemplateProperty = p.replace(' ', '_'), clazz = classMapping.ontologyClass)
                if (exact.data.isNotEmpty()) {
                   mapping.status = MappingStatus.NearlyMapped
                   mapping.ontologyProperty = exact.data[0].ontologyProperty
                   dao.save(mapping)
                } else {
-                  val l = dao.listUniqueOntologyProperties(rawProperty)
-                  if (l.isNotEmpty() && l.size < 3) {
+                  val l = dao.listUniqueOntologyProperties(rawProperty).filter { !it.startsWith("dbp") }
+                  if (l.isNotEmpty() && l.size < 4) {
                      mapping.status = if (l.size == 1) MappingStatus.Translated else MappingStatus.Multiple
-                     l.forEach {
-                        dao.save(mapping.copy(ontologyProperty = it))
-                     }
-                  } else {
-                     mapping.ontologyProperty = "dbp:" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, rawProperty)
-                     dao.save(mapping)
-                  }
+                     mapping.ontologyProperty = l.joinToString(",")
+                  } else
+                     mapping.ontologyProperty = generateOntologyProperty(rawProperty)
+                  dao.save(mapping)
                }
             }
          }
+         Thread.sleep(500)
       } while (pagedData.data.isNotEmpty() && page < 50)
       return true
    }
+
+   private fun generateOntologyProperty(rawProperty: String)
+         = "dbp:" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, rawProperty.replace(' ', '_'))
 
    fun predicateExport(page: Int, pageSize: Int, keyword: String?,
                        ontologyClass: String?, templateName: String?,

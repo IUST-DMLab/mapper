@@ -1,5 +1,6 @@
 package ir.ac.iust.dml.kg.access.dao.hibernate
 
+import ir.ac.iust.dml.kg.access.TemplateNameConverter
 import ir.ac.iust.dml.kg.access.dao.FkgPropertyMappingDao
 import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
@@ -69,21 +70,33 @@ open class FkgPropertyMappingDaoImpl : FkgPropertyMappingDao {
       return mapping
    }
 
-   override fun read(templateName: String, templateProperty: String): FkgPropertyMapping? {
+   /**
+    * nearTemplateNames is for backward compatibilities
+    */
+
+   @Suppress("UNCHECKED_CAST")
+   override fun read(templateName: String, nearTemplateNames: Boolean, templateProperty: String): FkgPropertyMapping? {
       val session = this.sessionFactory.openSession()
       val criteria = session.createCriteria(FkgPropertyMapping::class.java)
-      criteria.add(Restrictions.eq("templateProperty", templateProperty))
-      criteria.add(Restrictions.or(
-            Restrictions.eq("templateName", templateName),
-            Restrictions.eq("templateName", "جعبه " + templateName),
-            Restrictions.eq("templateName", "جعبه اطلاعات " + templateName),
-            Restrictions.eq("templateName", "infobox " + templateName),
-            Restrictions.eq("templateName", "Infobox " + templateName),
-            Restrictions.eq("templateName", "chembox " + templateName)
-      ))
-      val mapping = criteria.uniqueResult() as FkgPropertyMapping?
+      if (nearTemplateNames) {
+         criteria.add(Restrictions.or(
+               Restrictions.eq("templateProperty", templateProperty),
+               Restrictions.eq("templateProperty", templateProperty.replace(' ', '_'))
+         ))
+         val secondName = TemplateNameConverter.convert(templateName)
+         if (secondName != null) {
+            criteria.add(Restrictions.or(
+                  Restrictions.eq("templateName", templateName),
+                  Restrictions.eq("templateName", secondName)))
+         } else Restrictions.eq("templateName", templateName)
+      } else {
+         criteria.add(Restrictions.eq("templateProperty", templateProperty))
+         Restrictions.eq("templateName", templateName)
+      }
+      val mapping = criteria.list() as List<FkgPropertyMapping>
+      if (mapping.isEmpty()) return null
       session.close()
-      return mapping
+      return mapping[0]
    }
 
    @Suppress("UNCHECKED_CAST")
@@ -138,6 +151,14 @@ open class FkgPropertyMappingDaoImpl : FkgPropertyMappingDao {
       val tx = session.beginTransaction()
       p.templatePropertyLanguage = LanguageChecker.detectLanguage(p.templateProperty)
       session.saveOrUpdate(p)
+      tx.commit()
+      session.close()
+   }
+
+   override fun delete(p: FkgPropertyMapping) {
+      val session = this.sessionFactory.openSession()
+      val tx = session.beginTransaction()
+      session.delete(p)
       tx.commit()
       session.close()
    }
