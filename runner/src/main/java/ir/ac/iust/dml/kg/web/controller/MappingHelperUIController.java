@@ -31,6 +31,8 @@ public class MappingHelperUIController {
             "<br/>" +
             "To Generate Triples on knowledge store, click <a href='helper/triples?type=knowledgeStore'>here</a>" +
             "<br/>" +
+            "To write redirects and disambiguations on knowledge store, click <a href='helper/redirects'>here</a>" +
+            "<br/>" +
             "write classes of entities to database <a href='helper/loadTypes'>here</a>" +
             "<br/>" +
 //                "Reload prefixes by clicking <a href='helper/prefixes'>here</a>" +

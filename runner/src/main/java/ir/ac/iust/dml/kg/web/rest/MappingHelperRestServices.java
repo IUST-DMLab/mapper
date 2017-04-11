@@ -25,6 +25,8 @@ public class MappingHelperRestServices {
   private EntityToClassLogic entityToClassLogic;
   @Autowired
   private PropertyMappingLogic propertyMappingLogic;
+  @Autowired
+  private RedirectAmbigutyLogic redirectAmbigutyLogic;
 
   @RequestMapping("/prefixes")
   public String prefixes() throws Exception {
@@ -65,6 +67,12 @@ public class MappingHelperRestServices {
   @RequestMapping("/triples")
   public String triples(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
     tripleImporter.processTripleInputFiles(type);
+    return "Imported!";
+  }
+
+  @RequestMapping("/redirects")
+  public String redirects() throws Exception {
+    redirectAmbigutyLogic.write();
     return "Imported!";
   }
 
