@@ -1,14 +1,12 @@
-package ir.ac.iust.dml.kg.dbpediahelper.logic
+package ir.ac.iust.dml.kg.utils
 
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import org.apache.log4j.Logger
-import org.springframework.stereotype.Service
 import java.io.FileInputStream
 import java.nio.file.Files
 import java.util.*
 
-@Service
-class PrefixService {
+object PrefixService {
 
    val logger = Logger.getLogger(this.javaClass)!!
    val prefixNames = mutableMapOf<String, String>()
@@ -21,7 +19,7 @@ class PrefixService {
    fun reload() {
       val path = ConfigReader.getPath("dbpedia.prefixes", "~/.pkg/data/prefixes.properties")
       Files.createDirectories(path.parent)
-      if (!Files.exists(path)) Files.copy(this.javaClass.getResourceAsStream("/prefixes.properties"), path)
+      if (!Files.exists(path)) Files.copy(this.javaClass.getResourceAsStream("/src/main/resources/prefixes.properties"), path)
       val prefixServices = Properties()
       prefixServices.load(FileInputStream(path.toFile()))
       prefixServices.keys.forEach {

@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.access
+package ir.ac.iust.dml.kg.utils
 
 object TemplateNameConverter {
    val TEMPLATE_REGEX = Regex("(infobox|Infobox|جعبه|chembox) (اطلاعات )*(.*)")

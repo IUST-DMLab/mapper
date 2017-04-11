@@ -3,11 +3,11 @@ package ir.ac.iust.dml.kg.dbpediahelper.logic
 import ir.ac.iust.dml.kg.access.dao.FkgTripleStatisticsDao
 import ir.ac.iust.dml.kg.access.dao.memory.StatisticalEventDaoImpl
 import ir.ac.iust.dml.kg.access.entities.enumerations.TripleStatisticsType
-import ir.ac.iust.dml.kg.dbpediahelper.logic.triple.PropertyNormaller
-import ir.ac.iust.dml.kg.dbpediahelper.logic.triple.StatisticsLogReader
+import ir.ac.iust.dml.kg.dbpediahelper.logic.dump.StatisticsLogReader
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
+import ir.ac.iust.dml.kg.utils.PropertyNormaller
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
@@ -23,12 +23,11 @@ class StatsLogic {
    val logger = Logger.getLogger(this.javaClass)!!
    @Autowired lateinit var eventDao: StatisticalEventDaoImpl
    @Autowired lateinit var fkgTripleStatisticsDao: FkgTripleStatisticsDao
-   @Autowired lateinit var taskExecutor: ThreadPoolTaskExecutor
-   @Autowired lateinit var prefixService: PrefixService
+   @Autowired lateinit var statsGenerationTaskExecutor: ThreadPoolTaskExecutor
 
    @PreDestroy
    fun shutdown() {
-      taskExecutor.shutdown()
+      statsGenerationTaskExecutor.shutdown()
    }
 
    fun createStatsFile() {
@@ -42,7 +41,7 @@ class StatsLogic {
       val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
       var tripleNumber = 0
       result.forEachIndexed { index, p ->
-         taskExecutor.execute {
+         statsGenerationTaskExecutor.execute {
             eventDao.fileProcessed(p.toString())
             TripleJsonFileReader(p).use { reader ->
                while (reader.hasNext()) {
@@ -79,7 +78,7 @@ class StatsLogic {
       }
       do {
          Thread.sleep(10000)
-      } while (taskExecutor.activeCount > 0)
+      } while (statsGenerationTaskExecutor.activeCount > 0)
       saveLog(path)
       println(eventDao.log())
    }

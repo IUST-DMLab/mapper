@@ -1,4 +1,4 @@
-import ir.ac.iust.dml.kg.dbpediahelper.logic.triple.PropertyNormaller
+import ir.ac.iust.dml.kg.utils.PropertyNormaller
 
 fun main(vararg args: String) {
   println(PropertyNormaller.removeDigits("دست راست۲"))

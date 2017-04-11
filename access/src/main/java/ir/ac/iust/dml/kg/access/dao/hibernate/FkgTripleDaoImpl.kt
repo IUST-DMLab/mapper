@@ -1,6 +1,7 @@
 package ir.ac.iust.dml.kg.access.dao.hibernate
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
+import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.raw.utils.PagedData
@@ -16,7 +17,7 @@ open class FkgTripleDaoImpl : FkgTripleDao {
    @Autowired
    lateinit var sessionFactory: SessionFactory
 
-   override fun save(t: FkgTriple) {
+   override fun save(t: FkgTriple, mapping: FkgPropertyMapping?) {
       val session = this.sessionFactory.openSession()
       val tx = session.beginTransaction()
       session.saveOrUpdate(t)

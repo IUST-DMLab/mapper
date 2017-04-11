@@ -6,6 +6,7 @@ import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.dump.owl.OwlDumpReader
+import ir.ac.iust.dml.kg.utils.PrefixService
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -16,7 +17,6 @@ class MappingLoader {
 
    @Autowired lateinit var dao: FkgPropertyMappingDao
    @Autowired lateinit var wikiPropertyTranslationDao: WikipediaPropertyTranslationDao
-   @Autowired lateinit var prefixService: PrefixService
    val logger = Logger.getLogger(this.javaClass)!!
 
    @Throws(Exception::class)
@@ -28,7 +28,7 @@ class MappingLoader {
       }
 
       dao.deleteAll()
-      prefixService.reload()
+      PrefixService.reload()
       OwlDumpReader(path).use {
          owlDumpReader ->
          var ontologyClass: String? = null
@@ -38,9 +38,9 @@ class MappingLoader {
          while (owlDumpReader.hasNext()) {
             val triples = owlDumpReader.next()
             for (triple in triples) {
-               triple.subject = prefixService.replacePrefixes(triple.subject)
-               triple.predicate = prefixService.replacePrefixes(triple.predicate)
-               triple.objekt = prefixService.replacePrefixes(triple.objekt)
+               triple.subject = PrefixService.replacePrefixes(triple.subject)
+               triple.predicate = PrefixService.replacePrefixes(triple.predicate)
+               triple.objekt = PrefixService.replacePrefixes(triple.objekt)
                if (triple.objekt == "rr:TriplesMap" && triple.subject.startsWith("<dboeni:"))
                   infoboxType = triple.subject.substringAfter(":").substringBeforeLast(">")
                if (triple.predicate == "rr:class" && triple.objekt.startsWith("<"))

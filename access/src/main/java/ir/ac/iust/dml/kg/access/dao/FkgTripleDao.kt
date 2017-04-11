@@ -1,11 +1,12 @@
 package ir.ac.iust.dml.kg.access.dao
 
+import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.raw.utils.PagedData
 
 interface FkgTripleDao {
-   fun save(t: FkgTriple)
+   fun save(t: FkgTriple, mapping: FkgPropertyMapping?)
 
    fun deleteAll()
 

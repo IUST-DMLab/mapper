@@ -2,6 +2,7 @@ package ir.ac.iust.dml.kg.access.dao.file
 
 import com.google.gson.GsonBuilder
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
+import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.raw.utils.PagedData
@@ -22,7 +23,7 @@ class FileFkgTripleDaoImpl(val path: Path, val flushSize: Int = 1000) : FkgTripl
   var notFlushedTriples = mutableListOf<FkgTriple>()
   var gson = GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create()
 
-  override fun save(t: FkgTriple) {
+   override fun save(t: FkgTriple, mapping: FkgPropertyMapping?) {
     synchronized(notFlushedTriples) {
       notFlushedTriples.add(t)
       if (notFlushedTriples.size > flushSize) {

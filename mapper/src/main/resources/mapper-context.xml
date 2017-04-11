@@ -9,9 +9,16 @@
   <import resource="classpath*:access-context.xml"/>
   <context:component-scan base-package="ir.ac.iust.dml.kg.dbpediahelper"/>
 
-  <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+  <bean id="statsGenerationTaskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
     <property name="corePoolSize" value="20"/>
     <property name="maxPoolSize" value="40"/>
     <property name="WaitForTasksToCompleteOnShutdown" value="false"/>
   </bean>
+
+  <bean id="tripleGenerationTaskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+    <property name="corePoolSize" value="20"/>
+    <property name="maxPoolSize" value="40"/>
+    <property name="WaitForTasksToCompleteOnShutdown" value="false"/>
+  </bean>
+
 </beans>

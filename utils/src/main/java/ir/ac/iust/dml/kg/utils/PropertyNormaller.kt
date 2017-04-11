@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.dbpediahelper.logic.triple
+package ir.ac.iust.dml.kg.utils
 
 object PropertyNormaller {
   val DIGIT_END_REGEX = Regex("([ابپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی\\w: ]+)([۰۱۲۳۴۵۶۷۸۹\\d]+)")

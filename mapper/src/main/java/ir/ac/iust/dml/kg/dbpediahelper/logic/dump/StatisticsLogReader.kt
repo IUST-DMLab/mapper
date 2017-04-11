@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.dbpediahelper.logic.triple
+package ir.ac.iust.dml.kg.dbpediahelper.logic.dump
 
 import ir.ac.iust.dml.kg.access.entities.FkgTripleStatistics
 import ir.ac.iust.dml.kg.access.entities.enumerations.TripleStatisticsType

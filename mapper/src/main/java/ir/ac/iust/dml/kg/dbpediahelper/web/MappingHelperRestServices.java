@@ -3,7 +3,7 @@ package ir.ac.iust.dml.kg.dbpediahelper.web;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.*;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.ExportData;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.TemplateToOntologyExporter;
-import ir.ac.iust.dml.kg.dbpediahelper.logic.triple.TripleImporter;
+import ir.ac.iust.dml.kg.utils.PrefixService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/helper")
 public class MappingHelperRestServices {
-  @Autowired
-  private PrefixService prefixService;
   @Autowired
   private MappingLoader helperLoader;
   @Autowired
@@ -30,7 +28,7 @@ public class MappingHelperRestServices {
 
   @RequestMapping("/prefixes")
   public String prefixes() throws Exception {
-    prefixService.reload();
+    PrefixService.INSTANCE.reload();
     return "Reloaded!";
   }
 
