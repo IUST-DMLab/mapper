@@ -120,13 +120,16 @@ class PropertyMappingLogic {
                else {
                   logger.info("repeated property: ${it.templateName}/$rawProperty")
                   // backward compatibility
+                  val count = (it.count ?: 0).toLong()
                   if (mapping.templateName != it.templateName
                         || mapping.templateProperty != it.property
-                        || !mapping.ontologyClass!!.startsWith("dbo")) {
+                        || !mapping.ontologyClass!!.startsWith("dbo")
+                        || mapping.tupleCount == count) {
                      mapping.templateName = it.templateName
                      mapping.templateProperty = it.property
                      if (!mapping.ontologyClass!!.startsWith("dbo"))
                         mapping.ontologyClass = "dbo:" + mapping.ontologyClass
+                     mapping.tupleCount = count
                      dao.save(mapping)
                   }
                   continue
@@ -156,7 +159,7 @@ class PropertyMappingLogic {
             }
          }
          Thread.sleep(500)
-      } while (pagedData.data.isNotEmpty() && page < 50)
+      } while (pagedData.data.isNotEmpty() && page < 100)
       return true
    }
 

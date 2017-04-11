@@ -10,6 +10,7 @@ import ir.ac.iust.dml.kg.services.client.ApiClient
 import ir.ac.iust.dml.kg.services.client.swagger.V1triplesApi
 import ir.ac.iust.dml.kg.services.client.swagger.model.TripleData
 import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValueData
+import ir.ac.iust.dml.kg.utils.PrefixService
 import java.util.*
 
 class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
@@ -23,23 +24,32 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
    }
 
    override fun save(t: FkgTriple, mapping: FkgPropertyMapping?) {
+      if (t.objekt == null || t.objekt!!.trim().isEmpty()) {
+         println("long triple here: $t")
+         return
+      }
       val data = TripleData()
-      data.context = "default"
-      data.module = "web"
+      data.context = "http://fkg.iust.ac.ir/"
+      data.module = "wiki"
       data.urls = Collections.singletonList(t.source)
       data.subject = t.subject
-      data.predicate = t.predicate
+      data.predicate = PrefixService.prefixToUri(t.predicate)
+      if (!data.predicate.contains("://")) {
+         println(data.predicate + ": " + t.predicate)
+         System.exit(1)
+      }
 
       val objectData = TypedValueData()
       objectData.lang = "fa"
       objectData.type =
-            if (t.objekt!!.contains("://")) TypedValueData.TypeEnum.RESOURCE
+            if (t.objekt!!.contains("://") && !t.objekt!!.contains(' '))
+               TypedValueData.TypeEnum.RESOURCE
             else TypedValueData.TypeEnum.STRING
       objectData.value = t.objekt
       data.`object` = objectData
 
       if (mapping != null) {
-         data.precession = mapping.status?.getPrecession()
+         data.precession = if (mapping.language == "en") 1.0 else mapping.status?.getPrecession()
          data.parameters = mapOf(
                "templateName" to mapping.templateName.toString(),
                "templateProperty" to mapping.templateProperty.toString(),

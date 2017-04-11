@@ -75,28 +75,30 @@ open class FkgPropertyMappingDaoImpl : FkgPropertyMappingDao {
     */
 
    @Suppress("UNCHECKED_CAST")
+   @Synchronized
    override fun read(templateName: String, nearTemplateNames: Boolean, templateProperty: String): FkgPropertyMapping? {
       val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(FkgPropertyMapping::class.java)
-      if (nearTemplateNames) {
-         criteria.add(Restrictions.or(
-               Restrictions.eq("templateProperty", templateProperty),
-               Restrictions.eq("templateProperty", templateProperty.replace(' ', '_'))
-         ))
-         val secondName = TemplateNameConverter.convert(templateName)
-         if (secondName != null) {
+      session.use { session ->
+         val criteria = session.createCriteria(FkgPropertyMapping::class.java)
+         if (nearTemplateNames) {
             criteria.add(Restrictions.or(
-                  Restrictions.eq("templateName", templateName),
-                  Restrictions.eq("templateName", secondName)))
-         } else Restrictions.eq("templateName", templateName)
-      } else {
-         criteria.add(Restrictions.eq("templateProperty", templateProperty))
-         Restrictions.eq("templateName", templateName)
+                  Restrictions.eq("templateProperty", templateProperty),
+                  Restrictions.eq("templateProperty", templateProperty.replace(' ', '_'))
+            ))
+            val secondName = TemplateNameConverter.convert(templateName)
+            if (secondName != null) {
+               criteria.add(Restrictions.or(
+                     Restrictions.eq("templateName", templateName),
+                     Restrictions.eq("templateName", secondName)))
+            } else Restrictions.eq("templateName", templateName)
+         } else {
+            criteria.add(Restrictions.eq("templateProperty", templateProperty))
+            Restrictions.eq("templateName", templateName)
+         }
+         val mapping = criteria.list() as List<FkgPropertyMapping>
+         if (mapping.isEmpty()) return null
+         return mapping[0]
       }
-      val mapping = criteria.list() as List<FkgPropertyMapping>
-      if (mapping.isEmpty()) return null
-      session.close()
-      return mapping[0]
    }
 
    @Suppress("UNCHECKED_CAST")

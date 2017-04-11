@@ -9,6 +9,7 @@ import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
+import ir.ac.iust.dml.kg.services.client.ApiException
 import ir.ac.iust.dml.kg.utils.PropertyNormaller
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -88,19 +89,22 @@ class TripleImporter {
                               "time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
 
                      val predicate = PropertyNormaller.removeDigits(triple.predicate!!)
-                     val mapping = mappingDao.read(templateName = triple.templateNameFull!!, nearTemplateNames = false,
-                           templateProperty = predicate)
+                     val mapping = mappingDao.read(
+                           templateName = PropertyNormaller.removeDigits(triple.templateNameFull!!),
+                           nearTemplateNames = false, templateProperty = predicate)
                      if (mapping != null) {
-                        tripleDao.save(FkgTriple(
+                        logger.trace("save mapping for $triple")
+                        store?.save(FkgTriple(
                               source = triple.source, subject = triple.source, predicate = mapping.ontologyProperty!!,
                               objekt = triple.objekt, status = mapping.status, language = mapping.language!!,
                               rawProperty = triple.predicate, templateName = triple.templateName
                         ), mapping)
                      } else
-                        logger.error("Mapping not found for $triple. " +
+                        logger.error("$predicate: Mapping not found for $triple. " +
                               "Did you write mappings to database by precessing stats??")
 
                   } catch (th: Throwable) {
+                     if (th is ApiException) th.printStackTrace()
                      logger.info("triple: $triple")
                      logger.error(th)
                   }
