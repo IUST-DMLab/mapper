@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.dbpediahelper.web;
+package ir.ac.iust.dml.kg.web.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,6 +28,8 @@ public class MappingHelperUIController {
             "To Generate Triples on json files, click <a href='helper/triples?type=file'>here</a>" +
             "<br/>" +
             "To Generate Triples on mysql, click <a href='helper/triples?type=mysql'>here</a>" +
+            "<br/>" +
+            "To Generate Triples on knowledge store, click <a href='helper/triples?type=knowledgeStore'>here</a>" +
             "<br/>" +
             "write classes of entities to database <a href='helper/loadTypes'>here</a>" +
             "<br/>" +

@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg;
 
-import ir.ac.iust.dml.kg.utils.Jackson2ObjectMapperPrettier;
+import ir.ac.iust.dml.kg.web.Jackson2ObjectMapperPrettier;
 import ir.ac.iust.dml.kg.web.filter.FilterRegistrationConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.dbpediahelper.web
+package ir.ac.iust.dml.kg.web.controller
 
 import io.swagger.annotations.Api
 import ir.ac.iust.dml.kg.dbpediahelper.logic.StatsLogic

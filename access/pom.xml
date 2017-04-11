@@ -116,6 +116,12 @@
       <groupId>ir.ac.iust.dml.kg.services</groupId>
       <artifactId>knowledge-store-client</artifactId>
       <version>0.1.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>io.swagger</groupId>
+          <artifactId>swagger-codegen-cli</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!--<dependency>-->
     <!--<groupId>xml-apis</groupId>-->
@@ -146,14 +152,6 @@
     <!--<groupId>args4j</groupId>-->
     <!--<artifactId>args4j</artifactId>-->
     <!--</dependency>-->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-    </dependency>
   </dependencies>
 
 </project>

@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.templateequalities.web;
+package ir.ac.iust.dml.kg.web.rest;
 
 import io.swagger.annotations.Api;
 import ir.ac.iust.dml.kg.access.dao.WikipediaPropertyTranslationDao;

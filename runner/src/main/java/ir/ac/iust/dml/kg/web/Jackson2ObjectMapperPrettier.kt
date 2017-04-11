@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.utils
+package ir.ac.iust.dml.kg.web
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

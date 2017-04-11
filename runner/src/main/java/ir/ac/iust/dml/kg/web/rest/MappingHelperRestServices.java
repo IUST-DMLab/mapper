@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.dbpediahelper.web;
+package ir.ac.iust.dml.kg.web.rest;
 
 import ir.ac.iust.dml.kg.dbpediahelper.logic.*;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.ExportData;

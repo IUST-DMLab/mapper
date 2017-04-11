@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.ontologytranslator.web;
+package ir.ac.iust.dml.kg.web.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

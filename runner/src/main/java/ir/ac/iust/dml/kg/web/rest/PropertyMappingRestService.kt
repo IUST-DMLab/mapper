@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.dbpediahelper.web
+package ir.ac.iust.dml.kg.web.rest
 
 import io.swagger.annotations.Api
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
