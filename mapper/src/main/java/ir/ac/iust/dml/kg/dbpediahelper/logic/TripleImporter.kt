@@ -83,6 +83,9 @@ class TripleImporter {
                      if (triple.templateType == null || triple.templateNameFull == null) continue
                      if (triple.templateType != "infobox" && !triple.templateType!!.startsWith("جعبه")) continue
                      triple.templateName = triple.templateNameFull!!.substring(triple.templateType!!.length + 1).trim()
+                     // TODO mastmall
+                     if (triple.objekt!!.startsWith("fa.wikipedia.org/wiki"))
+                        triple.objekt = "http://" + triple.objekt
 
                      if (tripleNumber % 1000 == 0)
                         logger.info("triple number is $tripleNumber. $index file is $p. " +
