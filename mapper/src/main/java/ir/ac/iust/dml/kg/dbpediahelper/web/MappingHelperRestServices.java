@@ -1,9 +1,6 @@
 package ir.ac.iust.dml.kg.dbpediahelper.web;
 
-import ir.ac.iust.dml.kg.dbpediahelper.logic.EntityToClassLogic;
-import ir.ac.iust.dml.kg.dbpediahelper.logic.MappingLoader;
-import ir.ac.iust.dml.kg.dbpediahelper.logic.PrefixService;
-import ir.ac.iust.dml.kg.dbpediahelper.logic.StatsLogic;
+import ir.ac.iust.dml.kg.dbpediahelper.logic.*;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.ExportData;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.TemplateToOntologyExporter;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.triple.TripleImporter;
@@ -28,6 +25,8 @@ public class MappingHelperRestServices {
   private TemplateToOntologyExporter templateToOntologyExporter;
   @Autowired
   private EntityToClassLogic entityToClassLogic;
+  @Autowired
+  private PropertyMappingLogic propertyMappingLogic;
 
   @RequestMapping("/prefixes")
   public String prefixes() throws Exception {
@@ -48,18 +47,6 @@ public class MappingHelperRestServices {
     return "Loaded!";
   }
 
-  @RequestMapping("/triples")
-  public String triples(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
-    tripleImporter.processTripleInputFiles(type);
-    return "Imported!";
-  }
-
-  @RequestMapping("/fixWikiTemplateMapping")
-  public String fixWikiTemplateMapping() throws Exception {
-    tripleImporter.fixWikiTemplateMapping();
-    return "Fixed!";
-  }
-
   @RequestMapping("/createStatsFile")
   public String createStatsFile() throws Exception {
     statsLogic.createStatsFile();
@@ -70,6 +57,23 @@ public class MappingHelperRestServices {
   public String writeStats() throws Exception {
     statsLogic.writeStats();
     return "Stats created!";
+  }
+
+  @RequestMapping("/generateMapping")
+  public String generateMapping() {
+    return String.valueOf(propertyMappingLogic.generateMapping());
+  }
+
+  @RequestMapping("/triples")
+  public String triples(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
+    tripleImporter.processTripleInputFiles(type);
+    return "Imported!";
+  }
+
+  @RequestMapping("/fixWikiTemplateMapping")
+  public String fixWikiTemplateMapping() throws Exception {
+    tripleImporter.fixWikiTemplateMapping();
+    return "Fixed!";
   }
 
   @RequestMapping("/generate")

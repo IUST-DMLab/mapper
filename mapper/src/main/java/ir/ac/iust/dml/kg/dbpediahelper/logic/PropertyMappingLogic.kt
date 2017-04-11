@@ -96,7 +96,7 @@ class PropertyMappingLogic {
    fun searchOntologyPropertyName(page: Int, pageSize: Int, keyword: String?)
          = dao.searchOntologyPropertyName(page, pageSize, keyword)
 
-   fun updateCounts(): Boolean {
+   fun generateMapping(): Boolean {
       var page = 0
       val old = dao.search(page = 0, pageSize = 0, language = "fa",
             status = MappingStatus.Multiple, approved = false)
@@ -120,9 +120,13 @@ class PropertyMappingLogic {
                else {
                   logger.info("repeated property: ${it.templateName}/$rawProperty")
                   // backward compatibility
-                  if (mapping.templateName != it.templateName || mapping.templateProperty != it.property) {
+                  if (mapping.templateName != it.templateName
+                        || mapping.templateProperty != it.property
+                        || !mapping.ontologyClass!!.startsWith("dbo")) {
                      mapping.templateName = it.templateName
                      mapping.templateProperty = it.property
+                     if (!mapping.ontologyClass!!.startsWith("dbo"))
+                        mapping.ontologyClass = "dbo:" + mapping.ontologyClass
                      dao.save(mapping)
                   }
                   continue
@@ -135,7 +139,7 @@ class PropertyMappingLogic {
                val p = if (translations.isNotEmpty()) translations[0].enProperty!! else rawProperty
                // searching in english dbpedia mappings
                val exact = dao.search(page = 0, pageSize = 0, language = "en", templateProperty = p,
-                     secondTemplateProperty = p.replace(' ', '_'), clazz = classMapping.ontologyClass)
+                     secondTemplateProperty = p.replace(' ', '_'), clazz = "dbo:" + classMapping.ontologyClass)
                if (exact.data.isNotEmpty()) {
                   mapping.status = MappingStatus.NearlyMapped
                   mapping.ontologyProperty = exact.data[0].ontologyProperty

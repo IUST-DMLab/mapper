@@ -36,7 +36,7 @@ open class FkgPropertyMappingDaoImpl : FkgPropertyMappingDao {
             templateProperty != null && !like && !twoTemplateProperties,
             Restrictions.eq("templateProperty", templateProperty),
 
-            templateProperty != null && !like && !twoTemplateProperties,
+            templateProperty != null && !like && twoTemplateProperties,
             Restrictions.or(
                   Restrictions.eq("templateProperty", templateProperty),
                   Restrictions.eq("templateProperty", secondTemplateProperty)),
