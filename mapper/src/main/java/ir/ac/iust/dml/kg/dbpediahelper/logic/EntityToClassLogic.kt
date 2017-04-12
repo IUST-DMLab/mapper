@@ -102,7 +102,7 @@ class EntityToClassLogic {
 //      response.contentType = "text/html; charset=UTF-8"
 //      response.characterEncoding = "UTF-8"
 //      val stream = response.writer
-//      stream.println("{")
+//      stream.printlnprintln("{")
 //      var page = 0
 //      do {
 //         val pages = dao.search(page++, 1000, after = after)
@@ -176,6 +176,9 @@ class EntityToClassLogic {
 
    fun writeEntityTypesToKnowledgeStore() {
       val startTime = System.currentTimeMillis()
+
+      val maxNumberOfFiles = ConfigReader.getInt("entity.process.max.files", "30")
+
       val path = ConfigReader.getPath("wiki.triple.input.folder", "~/.pkg/data/triples")
       Files.createDirectories(path.parent)
       if (!Files.exists(path)) {
@@ -197,30 +200,41 @@ class EntityToClassLogic {
 
       val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
       var tripleNumber = 0
-      result.forEachIndexed { index, p ->
+      var entityNumber = 0
+      result.subList(0, Math.min(result.size, maxNumberOfFiles)).forEachIndexed { index, p ->
          TripleJsonFileReader(p).use { reader ->
             while (reader.hasNext()) {
+               val s = System.currentTimeMillis()
                val triple = reader.next()
                try {
                   tripleNumber++
-                  if (tripleNumber % 2000 == 0)
-                     logger.info("triple number is $tripleNumber. $index file is $p. " +
-                           "time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} secs")
+                  if (tripleNumber % 5000 == 0)
+                     logger.info("triple number is $tripleNumber. \tfile: $index\t" +
+                           "time: ${(System.currentTimeMillis() - startTime) / 1000}\tsecs")
 
                   if (triple.subject == null) continue
                   if (!triple.subject!!.contains("://")) continue
                   val entity = triple.subject!!.substringAfterLast('/').replace('_', ' ')
                   if (addedEntities.contains(entity)) continue
+                  entityNumber++
+                  if (entityNumber % 1000 == 0)
+                     logger.info("entity number is $entityNumber.")
                   addedEntities.add(entity)
+
+                  knowledgeStoreDao.save(FkgTriple(
+                        subject = triple.subject!!,
+                        predicate = "rdfs:label",
+                        objekt = entity
+                  ), null)
+
                   val mapping = templateDao.read(triple.templateNameFull!!, null)
                   if (mapping != null) {
-                     println("$entity is ${mapping.ontologyClass}")
                      knowledgeStoreDao.save(FkgTriple(
                            subject = triple.subject!!,
                            predicate = "fkg:instanceOf",
-                           objekt = mapping.ontologyClass
+                           objekt = "http://dbpedia.org/ontology/" + mapping.ontologyClass
                      ), null)
-                     treeCache.get(mapping.ontologyClass)!!.split("/").forEach {
+                     treeCache[mapping.ontologyClass]!!.split("/").forEach {
                         knowledgeStoreDao.save(FkgTriple(
                               subject = triple.subject!!,
                               predicate = "rdf:type",
