@@ -215,6 +215,11 @@ class EntityToClassLogic {
                   val mapping = templateDao.read(triple.templateNameFull!!, null)
                   if (mapping != null) {
                      println("$entity is ${mapping.ontologyClass}")
+                     knowledgeStoreDao.save(FkgTriple(
+                           subject = triple.subject!!,
+                           predicate = "fkg:instanceOf",
+                           objekt = mapping.ontologyClass
+                     ), null)
                      treeCache.get(mapping.ontologyClass)!!.split("/").forEach {
                         knowledgeStoreDao.save(FkgTriple(
                               subject = triple.subject!!,
