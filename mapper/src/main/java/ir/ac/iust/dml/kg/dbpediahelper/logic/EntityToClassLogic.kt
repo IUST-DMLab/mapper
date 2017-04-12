@@ -3,13 +3,16 @@ package ir.ac.iust.dml.kg.dbpediahelper.logic
 import ir.ac.iust.dml.kg.access.dao.FkgClassDao
 import ir.ac.iust.dml.kg.access.dao.FkgEntityClassesDao
 import ir.ac.iust.dml.kg.access.dao.FkgTemplateMappingDao
+import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgClass
 import ir.ac.iust.dml.kg.access.entities.FkgEntityClasses
+import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.dbpediahelper.logic.data.FkgEntityClassesData
 import ir.ac.iust.dml.kg.dbpediahelper.logic.dump.EntityDataDumpReader
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
+import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -24,6 +27,7 @@ class EntityToClassLogic {
    @Autowired lateinit var classDao: FkgClassDao
    private val logger = Logger.getLogger(this.javaClass)!!
    private val treeCache = mutableMapOf<String, String>()
+   val knowledgeStoreDao = KnowledgeStoreFkgTripleDaoImpl()
 
    fun load() {
       val path = ConfigReader.getPath("entity.types.folder", "~/.pkg/data/entity_types_folder")
@@ -170,4 +174,73 @@ class EntityToClassLogic {
       return result
    }
 
+   fun writeEntityTypesToKnowledgeStore() {
+      val startTime = System.currentTimeMillis()
+      val path = ConfigReader.getPath("wiki.triple.input.folder", "~/.pkg/data/triples")
+      Files.createDirectories(path.parent)
+      if (!Files.exists(path)) {
+         throw Exception("There is no file ${path.toAbsolutePath()} existed.")
+      }
+
+      val addedEntities = mutableSetOf<String>()
+      reloadTreeCache()
+
+      treeCache.forEach { key, value ->
+         val splits = value.split("/")
+         if (splits.size > 1)
+            knowledgeStoreDao.save(FkgTriple(
+                  subject = "http://dbpedia.org/ontology/" + key,
+                  predicate = "rdfs:subClassOf",
+                  objekt = "http://dbpedia.org/ontology/" + splits[1]
+            ), null)
+      }
+
+      val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
+      var tripleNumber = 0
+      result.forEachIndexed { index, p ->
+         TripleJsonFileReader(p).use { reader ->
+            while (reader.hasNext()) {
+               val triple = reader.next()
+               try {
+                  tripleNumber++
+                  if (tripleNumber % 2000 == 0)
+                     logger.info("triple number is $tripleNumber. $index file is $p. " +
+                           "time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} secs")
+
+                  if (triple.subject == null) continue
+                  if (!triple.subject!!.contains("://")) continue
+                  val entity = triple.subject!!.substringAfterLast('/').replace('_', ' ')
+                  if (addedEntities.contains(entity)) continue
+                  addedEntities.add(entity)
+                  val mapping = templateDao.read(triple.templateNameFull!!, null)
+                  if (mapping != null) {
+                     println("$entity is ${mapping.ontologyClass}")
+                     treeCache.get(mapping.ontologyClass)!!.split("/").forEach {
+                        knowledgeStoreDao.save(FkgTriple(
+                              subject = triple.subject!!,
+                              predicate = "rdf:type",
+                              objekt = "http://dbpedia.org/ontology/" + it
+                        ), null)
+                     }
+                  } else {
+                     val typeUrl = "http://fa.wikipedia.org/wiki/template/" + triple.templateNameFull!!.replace(' ', '_')
+                     knowledgeStoreDao.save(FkgTriple(
+                           subject = triple.subject!!,
+                           predicate = "fkg:instanceOf",
+                           objekt = typeUrl
+                     ), null)
+                     knowledgeStoreDao.save(FkgTriple(
+                           subject = triple.subject!!,
+                           predicate = "rdf:type",
+                           objekt = typeUrl
+                     ), null)
+                  }
+               } catch (th: Throwable) {
+                  logger.info("triple: $triple")
+                  logger.error(th)
+               }
+            }
+         }
+      }
+   }
 }

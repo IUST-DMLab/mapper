@@ -12,10 +12,10 @@ public class MappingHelperUIController {
     return "Greetings from Spring Boot! " +
             "<br/>" +
             "Put the dbpedia english mapping dump file in ~/.pkg/dbpedia_mapping.owl " +
-            "and writeDbpediaEnglishMapping data <a href='helper/writeDbpediaEnglishMapping'>here</a>" +
+            "and writeDbpediaEnglishMapping data <a href='helper/load'>here</a>" +
             "<br/>" +
-            "To Generate Persian mapping, click <a href='helper/generate'>here</a>" +
-            "<br/>" +
+//            "To Generate Persian mapping, click <a href='helper/generate'>here</a>" +
+//            "<br/>" +
             "To generate statistical data to file <a href='helper/createStatsFile'>here</a>" +
             "<br/>" +
             "To write statistical data to mysql <a href='helper/writeStats'>here</a>" +
@@ -30,6 +30,8 @@ public class MappingHelperUIController {
             "To Generate Triples on mysql, click <a href='helper/triples?type=mysql'>here</a>" +
             "<br/>" +
             "To Generate Triples on knowledge store, click <a href='helper/triples?type=knowledgeStore'>here</a>" +
+            "<br/>" +
+            "To write entities and their types on knowledge store, click <a href='helper/entities'>here</a>" +
             "<br/>" +
             "To write redirects and disambiguations on knowledge store, click <a href='helper/redirects'>here</a>" +
             "<br/>" +
