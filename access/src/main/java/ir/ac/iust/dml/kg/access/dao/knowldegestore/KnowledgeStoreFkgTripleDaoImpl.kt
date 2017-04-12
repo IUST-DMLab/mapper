@@ -19,7 +19,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
 
    init {
       val client = ApiClient()
-      client.basePath = ConfigReader.getString("knowledge.store.url", "http://localhost:8080/rs")
+      client.basePath = ConfigReader.getString("knowledge.store.url", "http://localhost:8091/rs")
       tripleApi = V1triplesApi(client)
    }
 

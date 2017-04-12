@@ -32,8 +32,8 @@ object PrefixService {
    fun replacePrefixes(text: String): String {
       var result = text
       prefixAddresses.keys.asSequence()
-              .filter { result.contains(it) }
-              .forEach { result = result.replace(it, prefixAddresses[it]!! + ":") }
+            .filter { result.contains(it) }
+            .forEach { result = result.replace(it, prefixAddresses[it]!! + ":") }
       return result
    }
 
@@ -41,7 +41,8 @@ object PrefixService {
       if (source == null || !source.contains(':')) return source
       val splits = source.split(":")
       var address = prefixNames[splits[0]]
-      if (address != null && !address.startsWith("http://")) address = "http://" + address
+      if (address != null && !address.startsWith("http://") && !address.startsWith("https://"))
+         address = "http://" + address
       return if (address == null) splits[1] else address + splits[1]
    }
 }
