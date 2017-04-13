@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.web.rest;
+package ir.ac.iust.dml.kg.mapper.runner.web.rest;
 
 import io.swagger.annotations.Api;
 import ir.ac.iust.dml.kg.access.dao.WikipediaPropertyTranslationDao;

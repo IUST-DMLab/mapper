@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.web.filter
+package ir.ac.iust.dml.kg.mapper.runner.web.filter
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean

@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.web
+package ir.ac.iust.dml.kg.mapper.runner.web
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

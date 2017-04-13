@@ -25,7 +25,7 @@
                <archive>
                   <manifest>
                      <addClasspath>true</addClasspath>
-                     <mainClass>ir.ac.iust.dml.kg.Application</mainClass>
+                    <mainClass>ir.ac.iust.dml.kg.mapper.runner.Application</mainClass>
                      <classpathPrefix>lib/</classpathPrefix>
                   </manifest>
                </archive>
