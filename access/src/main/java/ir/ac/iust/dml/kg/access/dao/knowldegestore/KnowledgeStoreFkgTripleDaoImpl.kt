@@ -63,7 +63,9 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
          )
       }
 
+      val start = System.currentTimeMillis()
       tripleApi.insert1(data)
+      println((System.currentTimeMillis() - start))
    }
 
    override fun deleteAll() {

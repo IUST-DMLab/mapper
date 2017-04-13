@@ -34,27 +34,34 @@ class RedirectAmbigutyLogic {
          throw Exception("There is no file ${redirectsFolder.toAbsolutePath()} existed.")
       }
 
-      val disambiguatyFolder = ConfigReader.getPath("extractor.disambiguations.folder", "~/.pkg/data/disambiguations")
-      Files.createDirectories(disambiguatyFolder.parent)
-      if (!Files.exists(disambiguatyFolder)) {
-         throw Exception("There is no file ${disambiguatyFolder.toAbsolutePath()} existed.")
+      val disambiguationFolder = ConfigReader.getPath("extractor.disambiguations.folder", "~/.pkg/data/disambiguations")
+      Files.createDirectories(disambiguationFolder.parent)
+      if (!Files.exists(disambiguationFolder)) {
+         throw Exception("There is no file ${disambiguationFolder.toAbsolutePath()} existed.")
       }
 
       val gson = Gson()
       var type = object : TypeToken<Map<String, String>>() {}.type
 
+      val maxNumberOfRedirects = ConfigReader.getInt("test.mode.max.redirects", "10000000")
+      val maxNumberOfDisambiguation = ConfigReader.getInt("test.mode.max.disambiguation", "10000000")
+
       var files = PathWalker.getPath(redirectsFolder)
+      var i = 0
       files.forEach {
          try {
             BufferedReader(InputStreamReader(FileInputStream(it.toFile()), "UTF8")).use { reader ->
                val map: Map<String, String> = gson.fromJson(reader, type)
                map.forEach { t, u ->
-                  logger.info("writing redirect $t to $u")
-                  knowledgeStoreDao.save(FkgTriple(
-                        subject = PrefixService.getFkgResourceUrl(u),
-                        predicate = "dbo:wikiPageRedirects",
-                        objekt = t
-                  ), null)
+                  i++
+                  if (i < maxNumberOfRedirects) {
+                     if (i % 1000 == 0) logger.info("writing redirect $i: $t to $u")
+                     knowledgeStoreDao.save(FkgTriple(
+                           subject = PrefixService.getFkgResourceUrl(u),
+                           predicate = "dbo:wikiPageRedirects",
+                           objekt = t
+                     ), null)
+                  }
                }
             }
          } catch (th: Throwable) {
@@ -63,18 +70,23 @@ class RedirectAmbigutyLogic {
       }
 
       type = object : TypeToken<List<Ambiguity>>() {}.type
-      files = PathWalker.getPath(disambiguatyFolder)
+      files = PathWalker.getPath(disambiguationFolder)
+      i = 0
       files.forEach {
          try {
             BufferedReader(InputStreamReader(FileInputStream(it.toFile()), "UTF8")).use { reader ->
                val map: List<Ambiguity> = gson.fromJson(reader, type)
                map.forEach { a ->
                   a.field.forEach { f ->
-                     knowledgeStoreDao.save(FkgTriple(
-                           subject = PrefixService.getFkgResourceUrl(f),
-                           predicate = "dbo:wikiDisambiguatedFrom",
-                           objekt = a.title
-                     ), null)
+                     i++
+                     if (i < maxNumberOfDisambiguation) {
+                        if (i % 1000 == 0) logger.info("writing disambiguation $i: $a to $f")
+                        knowledgeStoreDao.save(FkgTriple(
+                              subject = PrefixService.getFkgResourceUrl(f),
+                              predicate = "dbo:wikiDisambiguatedFrom",
+                              objekt = a.title
+                        ), null)
+                     }
                   }
                }
             }

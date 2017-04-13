@@ -178,7 +178,7 @@ class EntityToClassLogic {
    fun writeEntityTypesToKnowledgeStore() {
       val startTime = System.currentTimeMillis()
 
-      val maxNumberOfFiles = ConfigReader.getInt("entity.process.max.files", "30")
+      val maxNumberOfEntities = ConfigReader.getInt("test.mode.max.entities", "1000000")
 
       val path = ConfigReader.getPath("wiki.triple.input.folder", "~/.pkg/data/triples")
       Files.createDirectories(path.parent)
@@ -202,17 +202,16 @@ class EntityToClassLogic {
       val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
       var tripleNumber = 0
       var entityNumber = 0
-      result.subList(0, Math.min(result.size, maxNumberOfFiles)).forEachIndexed { index, p ->
+      result.forEachIndexed { index, p ->
          TripleJsonFileReader(p).use { reader ->
             while (reader.hasNext()) {
-               val s = System.currentTimeMillis()
                val triple = reader.next()
                try {
                   tripleNumber++
                   if (tripleNumber % 5000 == 0)
                      logger.info("triple number is $tripleNumber. \tfile: $index\t" +
                            "time: ${(System.currentTimeMillis() - startTime) / 1000}\tsecs")
-
+                  if (tripleNumber > maxNumberOfEntities) break
                   if (triple.subject == null) continue
                   if (!triple.subject!!.contains("://")) continue
                   val entity = triple.subject!!.substringAfterLast('/').replace('_', ' ')
@@ -223,7 +222,7 @@ class EntityToClassLogic {
                   addedEntities.add(entity)
 
                   knowledgeStoreDao.save(FkgTriple(
-                        subject = triple.subject!!,
+                        subject = PrefixService.convertFkgResource(triple.subject!!),
                         predicate = "rdfs:label",
                         objekt = entity
                   ), null)
