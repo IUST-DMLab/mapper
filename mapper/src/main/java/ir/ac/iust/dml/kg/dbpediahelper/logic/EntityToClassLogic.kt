@@ -13,6 +13,7 @@ import ir.ac.iust.dml.kg.dbpediahelper.logic.dump.EntityDataDumpReader
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
+import ir.ac.iust.dml.kg.utils.PrefixService
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -230,13 +231,13 @@ class EntityToClassLogic {
                   val mapping = templateDao.read(triple.templateNameFull!!, null)
                   if (mapping != null) {
                      knowledgeStoreDao.save(FkgTriple(
-                           subject = triple.subject!!,
+                           subject = PrefixService.convertFkgResource(triple.subject!!),
                            predicate = "fkg:instanceOf",
                            objekt = "http://dbpedia.org/ontology/" + mapping.ontologyClass
                      ), null)
                      treeCache[mapping.ontologyClass]!!.split("/").forEach {
                         knowledgeStoreDao.save(FkgTriple(
-                              subject = triple.subject!!,
+                              subject = PrefixService.convertFkgResource(triple.subject!!),
                               predicate = "rdf:type",
                               objekt = "http://dbpedia.org/ontology/" + it
                         ), null)
@@ -244,12 +245,12 @@ class EntityToClassLogic {
                   } else {
                      val typeUrl = "http://fa.wikipedia.org/wiki/template/" + triple.templateNameFull!!.replace(' ', '_')
                      knowledgeStoreDao.save(FkgTriple(
-                           subject = triple.subject!!,
+                           subject = PrefixService.convertFkgResource(triple.subject!!),
                            predicate = "fkg:instanceOf",
                            objekt = typeUrl
                      ), null)
                      knowledgeStoreDao.save(FkgTriple(
-                           subject = triple.subject!!,
+                           subject = PrefixService.convertFkgResource(triple.subject!!),
                            predicate = "rdf:type",
                            objekt = typeUrl
                      ), null)

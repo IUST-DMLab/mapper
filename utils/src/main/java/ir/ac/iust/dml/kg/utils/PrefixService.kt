@@ -45,4 +45,13 @@ object PrefixService {
          address = "http://" + address
       return if (address == null) splits[1] else address + splits[1]
    }
+
+   fun getFkgResourceUrl(name: String) = prefixNames["fkg"] + name.replace(' ', '_')
+
+   fun convertFkgResource(url: String): String {
+      if (url.startsWith("http://fa.wikipedia.org/wiki/")
+            || url.startsWith("fa.wikipedia.org/wiki/"))
+         return prefixNames["fkg"] + url.substringAfterLast("/")
+      return url
+   }
 }

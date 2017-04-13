@@ -9,7 +9,8 @@ import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
-import ir.ac.iust.dml.kg.services.client.ApiException
+import ir.ac.iust.dml.kg.utils.PrefixService
+//import ir.ac.iust.dml.kg.services.client.ApiException
 import ir.ac.iust.dml.kg.utils.PropertyNormaller
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -98,8 +99,11 @@ class TripleImporter {
                      if (mapping != null) {
                         logger.trace("save mapping for $triple")
                         store?.save(FkgTriple(
-                              source = triple.source, subject = triple.source, predicate = mapping.ontologyProperty!!,
-                              objekt = triple.objekt, status = mapping.status, language = mapping.language!!,
+                              source = triple.source,
+                              subject = PrefixService.convertFkgResource(triple.source!!),
+                              predicate = mapping.ontologyProperty!!,
+                              objekt = PrefixService.convertFkgResource(triple.objekt!!),
+                              status = mapping.status, language = mapping.language!!,
                               rawProperty = triple.predicate, templateName = triple.templateName
                         ), mapping)
                      } else
@@ -107,7 +111,7 @@ class TripleImporter {
                               "Did you write mappings to database by precessing stats??")
 
                   } catch (th: Throwable) {
-                     if (th is ApiException) th.printStackTrace()
+//                     if (th is ApiException) th.printStackTrace()
                      logger.info("triple: $triple")
                      logger.error(th)
                   }

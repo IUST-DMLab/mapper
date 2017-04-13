@@ -6,6 +6,7 @@ import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImp
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
+import ir.ac.iust.dml.kg.utils.PrefixService
 import org.apache.log4j.Logger
 import org.springframework.stereotype.Service
 import java.io.BufferedReader
@@ -50,7 +51,7 @@ class RedirectAmbigutyLogic {
                map.forEach { t, u ->
                   logger.info("writing redirect $t to $u")
                   knowledgeStoreDao.save(FkgTriple(
-                        subject = "http://fa.wikipedia.org/wiki/${u.replace(' ', '_')}",
+                        subject = PrefixService.getFkgResourceUrl(u),
                         predicate = "dbo:wikiPageRedirects",
                         objekt = t
                   ), null)
@@ -70,8 +71,8 @@ class RedirectAmbigutyLogic {
                map.forEach { a ->
                   a.field.forEach { f ->
                      knowledgeStoreDao.save(FkgTriple(
-                           subject = "http://fa.wikipedia.org/wiki/${f.replace(' ', '_')}",
-                           predicate = "dbo:wikiDisambiguityFrom",
+                           subject = PrefixService.getFkgResourceUrl(f),
+                           predicate = "dbo:wikiDisambiguatedFrom",
                            objekt = a.title
                      ), null)
                   }
