@@ -69,6 +69,8 @@ class TripleImporter {
          else -> null
       }
 
+      val maxNumberOfTriples = ConfigReader.getInt("test.mode.max.triples", "10000000")
+
       // deletes all old triples
       store?.deleteAll()
       val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
@@ -80,6 +82,7 @@ class TripleImporter {
                while (reader.hasNext()) {
                   val triple = reader.next()
                   tripleNumber++
+                  if (tripleNumber > maxNumberOfTriples) break
                   try {
                      if (triple.templateType == null || triple.templateNameFull == null) continue
                      if (triple.templateType != "infobox" && !triple.templateType!!.startsWith("جعبه")) continue
