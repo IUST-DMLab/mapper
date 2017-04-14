@@ -219,7 +219,7 @@ class PropertyMappingLogic {
                val propertyAndLabel = property + "~" + label
                if (!addedLabels.contains(propertyAndLabel)) {
                   knowledgeStoreDao.save(FkgTriple(
-                        subject = uri, predicate = "fkg:propertyLabel", objekt = label,
+                        subject = uri, predicate = "fkg:variantLabel", objekt = label,
                         language = relation.templatePropertyLanguage
                   ), null)
                   addedRelations.add(property)

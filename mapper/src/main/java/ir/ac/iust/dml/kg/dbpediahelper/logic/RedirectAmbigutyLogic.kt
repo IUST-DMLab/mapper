@@ -61,6 +61,11 @@ class RedirectAmbigutyLogic {
                            predicate = "dbo:wikiPageRedirects",
                            objekt = "http://fa.wikipedia.org/wiki/" + t.replace(' ', '_')
                      ), null)
+                     knowledgeStoreDao.save(FkgTriple(
+                           subject = PrefixService.getFkgResourceUrl(u),
+                           predicate = "fkg:variantLabel",
+                           objekt = t.replace('_', ' ')
+                     ), null)
                   }
                }
             }
