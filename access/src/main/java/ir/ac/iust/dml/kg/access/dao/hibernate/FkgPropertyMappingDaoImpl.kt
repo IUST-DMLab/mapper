@@ -19,7 +19,8 @@ import org.springframework.stereotype.Repository
 open class FkgPropertyMappingDaoImpl : FkgPropertyMappingDao {
 
    @Suppress("UNCHECKED_CAST")
-   override fun search(page: Int, pageSize: Int, language: String?, clazz: String?, type: String?,
+   override fun search(page: Int, pageSize: Int, language: String?, templatePropertyLanguage: String?,
+                       clazz: String?, type: String?,
                        like: Boolean, hasClass: Boolean, templateProperty: String?,
                        secondTemplateProperty: String?, ontologyProperty: String?, status: MappingStatus?,
                        approved: Boolean?, after: Long?, noUpdateEpoch: Boolean?, noTemplatePropertyLanguage: Boolean?):
@@ -48,6 +49,7 @@ open class FkgPropertyMappingDaoImpl : FkgPropertyMappingDao {
 
             hasClass, Restrictions.isNotNull("ontologyClass"),
             language != null, Restrictions.eq("language", language),
+            templatePropertyLanguage != null, Restrictions.eq("templatePropertyLanguage", templatePropertyLanguage),
             status != null, Restrictions.eq("status", status),
             approved != null, Restrictions.eq("approved", approved),
             after != null, Restrictions.gt("updateEpoch", after),

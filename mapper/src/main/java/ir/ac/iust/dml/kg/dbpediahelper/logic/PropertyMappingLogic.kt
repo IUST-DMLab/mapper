@@ -180,6 +180,8 @@ class PropertyMappingLogic {
       val startTime = System.currentTimeMillis()
       logger.info("starting at ${Date()}")
       val maxNumberOfRelations = ConfigReader.getInt("test.mode.max.relations", "50000")
+      val language = if (maxNumberOfRelations != 50000) "fa" else null
+      val approved = if (maxNumberOfRelations != 50000) true else null
       logger.info("max number of relations is $maxNumberOfRelations")
 
       val knowledgeStoreDao = KnowledgeStoreFkgTripleDaoImpl()
@@ -189,7 +191,8 @@ class PropertyMappingLogic {
       val PROPERTY_URI = PrefixService.prefixToUri("owl:DatatypeProperty")
       var page = 0
       do {
-         val data = dao.list(pageSize = 100, page = page++)
+         val data = dao.search(pageSize = 100, page = page++, language = null,
+               templatePropertyLanguage = language, approved = approved)
          for (relation in data.data) {
             relationNumber++
             if (relationNumber > maxNumberOfRelations) break
@@ -206,20 +209,25 @@ class PropertyMappingLogic {
                   knowledgeStoreDao.save(FkgTriple(
                         subject = uri, predicate = "rdf:type", objekt = PROPERTY_URI
                   ), null)
-                  addedRelations.add(property)
-               }
-
-               val propertyAndLabel = property + "~" + label
-               if (!addedLabels.contains(propertyAndLabel)) {
                   knowledgeStoreDao.save(FkgTriple(
                         subject = uri, predicate = "rdfs:label", objekt = label,
                         language = relation.templatePropertyLanguage
                   ), null)
                   addedRelations.add(property)
                }
+
+               val propertyAndLabel = property + "~" + label
+               if (!addedLabels.contains(propertyAndLabel)) {
+                  knowledgeStoreDao.save(FkgTriple(
+                        subject = uri, predicate = "fkg:propertyLabel", objekt = label,
+                        language = relation.templatePropertyLanguage
+                  ), null)
+                  addedRelations.add(property)
+               }
                knowledgeStoreDao.save(FkgTriple(
                      subject = uri, predicate = "rdfs:domain",
-                     objekt = PrefixService.prefixToUri("dbo:" + relation.ontologyClass)
+                     objekt = PrefixService.prefixToUri(
+                           relation.ontologyClass!!.replace("dbo", "fkg"))
                ), null)
             } catch (e: Throwable) {
                e.printStackTrace()

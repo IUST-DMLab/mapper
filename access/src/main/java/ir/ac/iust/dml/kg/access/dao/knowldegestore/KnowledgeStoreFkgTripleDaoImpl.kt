@@ -5,6 +5,7 @@ import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
+import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
 import ir.ac.iust.dml.kg.raw.utils.PagedData
 import ir.ac.iust.dml.kg.services.client.ApiClient
 import ir.ac.iust.dml.kg.services.client.swagger.V1triplesApi
@@ -40,12 +41,15 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
       }
 
       val objectData = TypedValueData()
-      objectData.lang = if (t.language == null) "fa" else t.language!!
       objectData.type =
             if (t.objekt!!.contains("://") && !t.objekt!!.contains(' '))
                TypedValueData.TypeEnum.RESOURCE
             else TypedValueData.TypeEnum.STRING
+
       objectData.value = t.objekt
+      objectData.lang =
+            if (t.language == null) LanguageChecker.detectLanguage(objectData.value)
+            else t.language!!
       data.`object` = objectData
 
       if (mapping != null) {

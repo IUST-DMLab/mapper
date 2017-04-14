@@ -15,7 +15,7 @@ interface FkgPropertyMappingDao {
    fun searchOntologyClass(page: Int, pageSize: Int, keyword: String?): List<String>
    fun searchTemplatePropertyName(page: Int, pageSize: Int, keyword: String?): List<String>
    fun searchOntologyPropertyName(page: Int, pageSize: Int, keyword: String?): List<String>
-   fun search(page: Int, pageSize: Int, language: String?,
+   fun search(page: Int, pageSize: Int, language: String?, templatePropertyLanguage: String? = null,
               clazz: String? = null, type: String? = null, like: Boolean = false,
               hasClass: Boolean = false, templateProperty: String? = null,
               secondTemplateProperty: String? = null, ontologyProperty: String? = null,

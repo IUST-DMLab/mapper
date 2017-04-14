@@ -59,13 +59,14 @@ class RedirectAmbigutyLogic {
                      knowledgeStoreDao.save(FkgTriple(
                            subject = PrefixService.getFkgResourceUrl(u),
                            predicate = "dbo:wikiPageRedirects",
-                           objekt = t
+                           objekt = "http://fa.wikipedia.org/wiki/" + t.replace(' ', '_')
                      ), null)
                   }
                }
             }
          } catch (th: Throwable) {
             logger.error(th)
+            th.printStackTrace()
          }
       }
 

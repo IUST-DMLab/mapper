@@ -193,9 +193,9 @@ class EntityToClassLogic {
          val splits = value.split("/")
          if (splits.size > 1)
             knowledgeStoreDao.save(FkgTriple(
-                  subject = PrefixService.prefixToUri("dbo:" + key),
+                  subject = PrefixService.prefixToUri("fkg:" + key),
                   predicate = "rdfs:subClassOf",
-                  objekt = PrefixService.prefixToUri("dbo:" + splits[1])
+                  objekt = PrefixService.prefixToUri("fkg:" + splits[1])
             ), null)
       }
       logger.info("writing tree ended.")
@@ -240,13 +240,13 @@ class EntityToClassLogic {
                      knowledgeStoreDao.save(FkgTriple(
                            subject = PrefixService.convertFkgResource(triple.subject!!),
                            predicate = "rdf:instanceOf",
-                           objekt = PrefixService.prefixToUri("dbo:" + mapping.ontologyClass)
+                           objekt = PrefixService.prefixToUri("fkg:" + mapping.ontologyClass)
                      ), null)
                      treeCache[mapping.ontologyClass]!!.split("/").forEach {
                         knowledgeStoreDao.save(FkgTriple(
                               subject = PrefixService.convertFkgResource(triple.subject!!),
                               predicate = "rdf:type",
-                              objekt = PrefixService.prefixToUri("dbo:" + it)
+                              objekt = PrefixService.prefixToUri("fkg:" + it)
                         ), null)
                      }
                   } else {
