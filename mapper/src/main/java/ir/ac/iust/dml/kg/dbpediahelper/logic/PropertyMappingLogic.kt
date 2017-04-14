@@ -111,59 +111,64 @@ class PropertyMappingLogic {
                countType = TripleStatisticsType.typedProperty)
          logger.info("processing page $page")
          for (it in pagedData.data) {
-            val classMapping = templateDao.read(templateName = it.templateName!!, className = null)
-            if (classMapping != null) {
-               val rawProperty = it.property!!
-               // nearTemplateNames is for backward compatibility
-               var mapping = dao.read(templateName = it.templateName!!, nearTemplateNames = true,
-                     templateProperty = rawProperty)
-               if (mapping == null)
-                  mapping = FkgPropertyMapping(language = "fa", templateName = it.templateName,
-                        templateProperty = rawProperty, status = MappingStatus.NotMapped, approved = false,
-                        tupleCount = it.count!!.toLong(), ontologyClass = classMapping.ontologyClass,
-                        updateEpoch = System.currentTimeMillis())
-               else {
-                  logger.info("repeated property: ${it.templateName}/$rawProperty")
-                  // backward compatibility
-                  val count = (it.count ?: 0).toLong()
-                  val language = LanguageChecker.detectLanguage(mapping.templateProperty)
-                  if (mapping.templateName != it.templateName
-                        || mapping.templateProperty != it.property
-                        || !mapping.ontologyClass!!.startsWith("dbo")
-                        || mapping.tupleCount == count
-                        || mapping.templatePropertyLanguage != language) {
-                     mapping.templateName = it.templateName
-                     mapping.templateProperty = it.property
-                     if (!mapping.ontologyClass!!.startsWith("dbo"))
-                        mapping.ontologyClass = "dbo:" + mapping.ontologyClass
-                     mapping.tupleCount = count
-                     mapping.templatePropertyLanguage = language
+            try {
+               val classMapping = templateDao.read(templateName = it.templateName!!, className = null)
+               if (classMapping != null) {
+                  val rawProperty = it.property!!
+                  // nearTemplateNames is for backward compatibility
+                  var mapping = dao.read(templateName = it.templateName!!, nearTemplateNames = true,
+                        templateProperty = rawProperty)
+                  if (mapping == null)
+                     mapping = FkgPropertyMapping(language = "fa", templateName = it.templateName,
+                           templateProperty = rawProperty, status = MappingStatus.NotMapped, approved = false,
+                           tupleCount = it.count!!.toLong(), ontologyClass = classMapping.ontologyClass,
+                           updateEpoch = System.currentTimeMillis())
+                  else {
+                     logger.info("repeated property: ${it.templateName}/$rawProperty")
+                     // backward compatibility
+                     val count = (it.count ?: 0).toLong()
+                     val language = LanguageChecker.detectLanguage(mapping.templateProperty)
+                     if (mapping.templateName != it.templateName
+                           || mapping.templateProperty != it.property
+                           || !mapping.ontologyClass!!.startsWith("dbo")
+                           || mapping.tupleCount == count
+                           || mapping.templatePropertyLanguage != language) {
+                        mapping.templateName = it.templateName
+                        mapping.templateProperty = it.property
+                        if (!mapping.ontologyClass!!.startsWith("dbo"))
+                           mapping.ontologyClass = "dbo:" + mapping.ontologyClass
+                        mapping.tupleCount = count
+                        mapping.templatePropertyLanguage = language
+                        dao.save(mapping)
+                     }
+                     continue
+                  }
+
+                  var translations
+                        = wikiPropertyTranslationDao.readByFaTitle(type = it.templateName!!, faProperty = rawProperty)
+                  if (translations.isEmpty())
+                     translations = wikiPropertyTranslationDao.readByFaTitle(type = null, faProperty = rawProperty)
+                  val p = if (translations.isNotEmpty()) translations[0].enProperty!! else rawProperty
+                  // searching in english dbpedia mappings
+                  val exact = dao.search(page = 0, pageSize = 0, language = "en", templateProperty = p,
+                        secondTemplateProperty = p.replace(' ', '_'), clazz = "dbo:" + classMapping.ontologyClass)
+                  if (exact.data.isNotEmpty()) {
+                     mapping.status = MappingStatus.NearlyMapped
+                     mapping.ontologyProperty = exact.data[0].ontologyProperty
+                     dao.save(mapping)
+                  } else {
+                     val l = dao.listUniqueOntologyProperties(rawProperty).filter { !it.startsWith("dbp") }
+                     if (l.isNotEmpty() && l.size < 4) {
+                        mapping.status = if (l.size == 1) MappingStatus.Translated else MappingStatus.Multiple
+                        mapping.ontologyProperty = l.joinToString(",")
+                     } else
+                        mapping.ontologyProperty = generateOntologyProperty(rawProperty)
                      dao.save(mapping)
                   }
-                  continue
                }
-
-               var translations
-                     = wikiPropertyTranslationDao.readByFaTitle(type = it.templateName!!, faProperty = rawProperty)
-               if (translations.isEmpty())
-                  translations = wikiPropertyTranslationDao.readByFaTitle(type = null, faProperty = rawProperty)
-               val p = if (translations.isNotEmpty()) translations[0].enProperty!! else rawProperty
-               // searching in english dbpedia mappings
-               val exact = dao.search(page = 0, pageSize = 0, language = "en", templateProperty = p,
-                     secondTemplateProperty = p.replace(' ', '_'), clazz = "dbo:" + classMapping.ontologyClass)
-               if (exact.data.isNotEmpty()) {
-                  mapping.status = MappingStatus.NearlyMapped
-                  mapping.ontologyProperty = exact.data[0].ontologyProperty
-                  dao.save(mapping)
-               } else {
-                  val l = dao.listUniqueOntologyProperties(rawProperty).filter { !it.startsWith("dbp") }
-                  if (l.isNotEmpty() && l.size < 4) {
-                     mapping.status = if (l.size == 1) MappingStatus.Translated else MappingStatus.Multiple
-                     mapping.ontologyProperty = l.joinToString(",")
-                  } else
-                     mapping.ontologyProperty = generateOntologyProperty(rawProperty)
-                  dao.save(mapping)
-               }
+            } catch (e: Throwable) {
+               e.printStackTrace()
+               logger.error(e)
             }
          }
          Thread.sleep(500)
@@ -192,29 +197,34 @@ class PropertyMappingLogic {
                logger.info("relation number is $relationNumber.\t" +
                      "time: ${(System.currentTimeMillis() - startTime) / 1000}\tsecs")
             if (relation.ontologyProperty == null) continue
-            val property = relation.ontologyProperty!!
-            val uri = PrefixService.prefixToUri(property)
-            if (uri!!.isBlank()) continue
-            val label = relation.templateProperty!!.replace('_', ' ')
-            if (!addedRelations.contains(property)) {
-               knowledgeStoreDao.save(FkgTriple(
-                     subject = uri, predicate = "rdf:type", objekt = PROPERTY_URI
-               ), null)
-               addedRelations.add(property)
-            }
+            try {
+               val property = relation.ontologyProperty!!
+               val uri = PrefixService.prefixToUri(property)
+               if (uri!!.isBlank()) continue
+               val label = relation.templateProperty!!.replace('_', ' ')
+               if (!addedRelations.contains(property)) {
+                  knowledgeStoreDao.save(FkgTriple(
+                        subject = uri, predicate = "rdf:type", objekt = PROPERTY_URI
+                  ), null)
+                  addedRelations.add(property)
+               }
 
-            val propertyAndLabel = property + "~" + label
-            if (!addedLabels.contains(propertyAndLabel)) {
+               val propertyAndLabel = property + "~" + label
+               if (!addedLabels.contains(propertyAndLabel)) {
+                  knowledgeStoreDao.save(FkgTriple(
+                        subject = uri, predicate = "rdfs:label", objekt = label,
+                        language = relation.templatePropertyLanguage
+                  ), null)
+                  addedRelations.add(property)
+               }
                knowledgeStoreDao.save(FkgTriple(
-                     subject = uri, predicate = "rdfs:label", objekt = label,
-                     language = relation.templatePropertyLanguage
+                     subject = uri, predicate = "rdfs:domain",
+                     objekt = PrefixService.prefixToUri("dbo:" + relation.ontologyClass)
                ), null)
-               addedRelations.add(property)
+            } catch (e: Throwable) {
+               e.printStackTrace()
+               logger.error(e)
             }
-            knowledgeStoreDao.save(FkgTriple(
-                  subject = uri, predicate = "rdfs:domain",
-                  objekt = PrefixService.prefixToUri("dbo:" + relation.ontologyClass)
-            ), null)
          }
       } while (data.page < data.pageCount && relationNumber <= maxNumberOfRelations)
    }

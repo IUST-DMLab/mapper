@@ -208,7 +208,6 @@ class EntityToClassLogic {
          TripleJsonFileReader(p).use { reader ->
             while (reader.hasNext()) {
                val triple = reader.next()
-               try {
                   tripleNumber++
                   if (tripleNumber % 5000 == 0)
                      logger.info("triple number is $tripleNumber. \tfile: $index\t" +
@@ -216,6 +215,7 @@ class EntityToClassLogic {
                   if (tripleNumber > maxNumberOfEntities) break
                   if (triple.subject == null) continue
                   if (!triple.subject!!.contains("://")) continue
+               try {
                   val entity = triple.subject!!.substringAfterLast('/').replace('_', ' ')
                   if (addedEntities.contains(entity)) continue
                   entityNumber++
@@ -265,6 +265,7 @@ class EntityToClassLogic {
                } catch (th: Throwable) {
                   logger.info("triple: $triple")
                   logger.error(th)
+                  th.printStackTrace()
                }
             }
          }
