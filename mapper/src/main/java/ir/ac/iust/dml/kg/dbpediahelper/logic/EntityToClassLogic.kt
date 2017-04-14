@@ -18,6 +18,7 @@ import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.nio.file.Files
+import java.util.*
 
 
 @Service
@@ -177,9 +178,9 @@ class EntityToClassLogic {
 
    fun writeEntityTypesToKnowledgeStore() {
       val startTime = System.currentTimeMillis()
-
+      logger.info("starting at ${Date()}")
       val maxNumberOfEntities = ConfigReader.getInt("test.mode.max.entities", "1000000")
-
+      logger.info("max number of entities is $maxNumberOfEntities")
       val path = ConfigReader.getPath("wiki.triple.input.folder", "~/.pkg/data/triples")
       Files.createDirectories(path.parent)
       if (!Files.exists(path)) {
@@ -189,6 +190,7 @@ class EntityToClassLogic {
       val addedEntities = mutableSetOf<String>()
       reloadTreeCache()
 
+      logger.info("writing tree started.")
       treeCache.forEach { key, value ->
          val splits = value.split("/")
          if (splits.size > 1)
@@ -198,6 +200,7 @@ class EntityToClassLogic {
                   objekt = "http://dbpedia.org/ontology/" + splits[1]
             ), null)
       }
+      logger.info("writing tree ended.")
 
       val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
       var tripleNumber = 0

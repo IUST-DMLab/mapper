@@ -32,8 +32,8 @@ class Commander {
          }
       } catch (th: Throwable) {
          logger.error(th)
-      } finally {
-         System.exit(0)
       }
+      logger.info("running command $command ended at ${Date()}. Bye bye!")
+      System.exit(0)
    }
 }
