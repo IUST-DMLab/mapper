@@ -14,8 +14,6 @@ public class MappingHelperUIController {
             "Put the dbpedia english mapping dump file in ~/.pkg/dbpedia_mapping.owl " +
             "and writeDbpediaEnglishMapping data <a href='helper/load'>here</a>" +
             "<br/>" +
-//            "To Generate Persian mapping, click <a href='helper/generate'>here</a>" +
-//            "<br/>" +
             "To generate statistical data to file <a href='helper/createStatsFile'>here</a>" +
             "<br/>" +
             "To write statistical data to mysql <a href='helper/writeStats'>here</a>" +
@@ -33,12 +31,12 @@ public class MappingHelperUIController {
             "<br/>" +
             "To write entities and their types on knowledge store, click <a href='helper/entities'>here</a>" +
             "<br/>" +
+            "To write relations on knowledge store, click <a href='helper/relations'>here</a>" +
+            "<br/>" +
             "To write redirects and disambiguations on knowledge store, click <a href='helper/redirects'>here</a>" +
             "<br/>" +
             "write classes of entities to database <a href='helper/loadTypes'>here</a>" +
             "<br/>" +
-//                "Reload prefixes by clicking <a href='helper/prefixes'>here</a>" +
-//                "<br/>" +
             "You can export data in <a href='helper/export.json'>json</a> or " +
             "<a href='helper/export.xml'>xml</a>.<br/>" +
             "You can export data in a specific language by sending language parameters to above services:<br/>" +

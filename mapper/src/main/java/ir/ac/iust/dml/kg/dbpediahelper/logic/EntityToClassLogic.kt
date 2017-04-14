@@ -186,8 +186,6 @@ class EntityToClassLogic {
       if (!Files.exists(path)) {
          throw Exception("There is no file ${path.toAbsolutePath()} existed.")
       }
-
-      val addedEntities = mutableSetOf<String>()
       reloadTreeCache()
 
       logger.info("writing tree started.")
@@ -195,13 +193,14 @@ class EntityToClassLogic {
          val splits = value.split("/")
          if (splits.size > 1)
             knowledgeStoreDao.save(FkgTriple(
-                  subject = "http://dbpedia.org/ontology/" + key,
+                  subject = PrefixService.prefixToUri("dbo:" + key),
                   predicate = "rdfs:subClassOf",
-                  objekt = "http://dbpedia.org/ontology/" + splits[1]
+                  objekt = PrefixService.prefixToUri("dbo:" + splits[1])
             ), null)
       }
       logger.info("writing tree ended.")
 
+      val addedEntities = mutableSetOf<String>()
       val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
       var tripleNumber = 0
       var entityNumber = 0
@@ -230,25 +229,31 @@ class EntityToClassLogic {
                         objekt = entity
                   ), null)
 
+                  knowledgeStoreDao.save(FkgTriple(
+                        subject = PrefixService.convertFkgResource(triple.subject!!),
+                        predicate = "rdf:type",
+                        objekt = PrefixService.prefixToUri("rdfs:Resource")
+                  ), null)
+
                   val mapping = templateDao.read(triple.templateNameFull!!, null)
                   if (mapping != null) {
                      knowledgeStoreDao.save(FkgTriple(
                            subject = PrefixService.convertFkgResource(triple.subject!!),
-                           predicate = "fkg:instanceOf",
-                           objekt = "http://dbpedia.org/ontology/" + mapping.ontologyClass
+                           predicate = "rdf:instanceOf",
+                           objekt = PrefixService.prefixToUri("dbo:" + mapping.ontologyClass)
                      ), null)
                      treeCache[mapping.ontologyClass]!!.split("/").forEach {
                         knowledgeStoreDao.save(FkgTriple(
                               subject = PrefixService.convertFkgResource(triple.subject!!),
                               predicate = "rdf:type",
-                              objekt = "http://dbpedia.org/ontology/" + it
+                              objekt = PrefixService.prefixToUri("dbo:" + it)
                         ), null)
                      }
                   } else {
                      val typeUrl = "http://fa.wikipedia.org/wiki/template/" + triple.templateNameFull!!.replace(' ', '_')
                      knowledgeStoreDao.save(FkgTriple(
                            subject = PrefixService.convertFkgResource(triple.subject!!),
-                           predicate = "fkg:instanceOf",
+                           predicate = "rdf:instanceOf",
                            objekt = typeUrl
                      ), null)
                      knowledgeStoreDao.save(FkgTriple(

@@ -40,7 +40,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
       }
 
       val objectData = TypedValueData()
-      objectData.lang = "fa"
+      objectData.lang = if (t.language == null) "fa" else t.language!!
       objectData.type =
             if (t.objekt!!.contains("://") && !t.objekt!!.contains(' '))
                TypedValueData.TypeEnum.RESOURCE

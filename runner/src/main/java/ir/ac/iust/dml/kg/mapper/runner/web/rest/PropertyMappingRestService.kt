@@ -4,6 +4,7 @@ import io.swagger.annotations.Api
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.dbpediahelper.logic.PropertyMappingLogic
 import ir.ac.iust.dml.kg.dbpediahelper.logic.data.FkgPropertyMappingData
+import ir.ac.iust.dml.kg.utils.PrefixService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 
@@ -87,6 +88,10 @@ class PropertyMappingRestService {
                                   @RequestParam(required = false, defaultValue = "20") pageSize: Int?,
                                   @RequestParam keyword: String?) =
          propertyMappingLogic.searchOntologyPropertyName(page!!, pageSize!!, keyword)
+
+   @RequestMapping("prefixes", method = arrayOf(RequestMethod.GET))
+   @ResponseBody
+   fun prefixes() = PrefixService.prefixAddresses
 
    @RequestMapping("predicateExport", method = arrayOf(RequestMethod.GET))
    @ResponseBody

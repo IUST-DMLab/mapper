@@ -5,14 +5,19 @@ import ir.ac.iust.dml.kg.access.dao.FkgPropertyMappingDao
 import ir.ac.iust.dml.kg.access.dao.FkgTemplateMappingDao
 import ir.ac.iust.dml.kg.access.dao.FkgTripleStatisticsDao
 import ir.ac.iust.dml.kg.access.dao.WikipediaPropertyTranslationDao
+import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
+import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.access.entities.enumerations.TripleStatisticsType
 import ir.ac.iust.dml.kg.dbpediahelper.logic.data.FkgPropertyMappingData
+import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
+import ir.ac.iust.dml.kg.utils.PrefixService
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.util.*
 import javax.annotation.PostConstruct
 
 @Service
@@ -121,15 +126,18 @@ class PropertyMappingLogic {
                   logger.info("repeated property: ${it.templateName}/$rawProperty")
                   // backward compatibility
                   val count = (it.count ?: 0).toLong()
+                  val language = LanguageChecker.detectLanguage(mapping.templateProperty)
                   if (mapping.templateName != it.templateName
                         || mapping.templateProperty != it.property
                         || !mapping.ontologyClass!!.startsWith("dbo")
-                        || mapping.tupleCount == count) {
+                        || mapping.tupleCount == count
+                        || mapping.templatePropertyLanguage != language) {
                      mapping.templateName = it.templateName
                      mapping.templateProperty = it.property
                      if (!mapping.ontologyClass!!.startsWith("dbo"))
                         mapping.ontologyClass = "dbo:" + mapping.ontologyClass
                      mapping.tupleCount = count
+                     mapping.templatePropertyLanguage = language
                      dao.save(mapping)
                   }
                   continue
@@ -161,6 +169,54 @@ class PropertyMappingLogic {
          Thread.sleep(500)
       } while (pagedData.data.isNotEmpty() && page < 100)
       return true
+   }
+
+   fun writeResourcesToKnowledgeStore() {
+      val startTime = System.currentTimeMillis()
+      logger.info("starting at ${Date()}")
+      val maxNumberOfRelations = ConfigReader.getInt("test.mode.max.relations", "50000")
+      logger.info("max number of relations is $maxNumberOfRelations")
+
+      val knowledgeStoreDao = KnowledgeStoreFkgTripleDaoImpl()
+      val addedRelations = mutableSetOf<String>()
+      val addedLabels = mutableSetOf<String>()
+      var relationNumber = 0
+      val PROPERTY_URI = PrefixService.prefixToUri("owl:DatatypeProperty")
+      var page = 0
+      do {
+         val data = dao.list(pageSize = 100, page = page++)
+         for (relation in data.data) {
+            relationNumber++
+            if (relationNumber > maxNumberOfRelations) break
+            if (relationNumber % 100 == 0)
+               logger.info("relation number is $relationNumber.\t" +
+                     "time: ${(System.currentTimeMillis() - startTime) / 1000}\tsecs")
+            if (relation.ontologyProperty == null) continue
+            val property = relation.ontologyProperty!!
+            val uri = PrefixService.prefixToUri(property)
+            if (uri!!.isBlank()) continue
+            val label = relation.templateProperty!!.replace('_', ' ')
+            if (!addedRelations.contains(property)) {
+               knowledgeStoreDao.save(FkgTriple(
+                     subject = uri, predicate = "rdf:type", objekt = PROPERTY_URI
+               ), null)
+               addedRelations.add(property)
+            }
+
+            val propertyAndLabel = property + "~" + label
+            if (!addedLabels.contains(propertyAndLabel)) {
+               knowledgeStoreDao.save(FkgTriple(
+                     subject = uri, predicate = "rdfs:label", objekt = label,
+                     language = relation.templatePropertyLanguage
+               ), null)
+               addedRelations.add(property)
+            }
+            knowledgeStoreDao.save(FkgTriple(
+                  subject = uri, predicate = "rdfs:domain",
+                  objekt = PrefixService.prefixToUri("dbo:" + relation.ontologyClass)
+            ), null)
+         }
+      } while (data.page < data.pageCount && relationNumber <= maxNumberOfRelations)
    }
 
    private fun generateOntologyProperty(rawProperty: String)

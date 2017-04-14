@@ -29,6 +29,7 @@ class Commander {
             "triples" -> services.triples(TripleImporter.StoreType.valueOf(arg!!))
             "redirects" -> services.redirects()
             "entities" -> services.entities()
+            "relations" -> services.relations()
          }
       } catch (th: Throwable) {
          logger.error(th)

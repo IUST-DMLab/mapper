@@ -82,6 +82,12 @@ public class MappingHelperRestServices {
     return "Imported!";
   }
 
+  @RequestMapping("/relations")
+  public String relations() throws Exception {
+    propertyMappingLogic.writeResourcesToKnowledgeStore();
+    return "Imported!";
+  }
+
   @RequestMapping("/fixWikiTemplateMapping")
   public String fixWikiTemplateMapping() throws Exception {
     tripleImporter.fixWikiTemplateMapping();
