@@ -6,6 +6,7 @@ import ir.ac.iust.dml.kg.access.dao.WikipediaTemplateRedirectDao
 import ir.ac.iust.dml.kg.access.dao.file.FileFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
+import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
@@ -65,14 +66,13 @@ class TripleImporter {
          StoreType.file -> FileFkgTripleDaoImpl(path.resolve("mapped"))
          StoreType.mysql -> tripleDao
 //      StoreType.virtuoso -> VirtuosoFkgTripleDaoImpl()
-         StoreType.knowledgeStore -> KnowledgeStoreFkgTripleDaoImpl()
-         else -> null
+         else -> KnowledgeStoreFkgTripleDaoImpl()
       }
 
       val maxNumberOfTriples = ConfigReader.getInt("test.mode.max.triples", "10000000")
 
       // deletes all old triples
-      store?.deleteAll()
+      store.deleteAll()
       val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
       val startTime = System.currentTimeMillis()
       var tripleNumber = 0
@@ -99,22 +99,26 @@ class TripleImporter {
                      val mapping = mappingDao.read(
                            templateName = PropertyNormaller.removeDigits(triple.templateNameFull!!),
                            nearTemplateNames = false, templateProperty = predicate)
-                     if (mapping != null) {
+                     if (mapping != null
+                           && mapping.status != MappingStatus.Multiple
+                           && mapping.ontologyProperty != null
+                           && mapping.ontologyProperty!!.contains(":")) {
                         logger.trace("save mapping for $triple")
-                        store?.save(FkgTriple(
-                              source = triple.source,
-                              subject = PrefixService.convertFkgResource(triple.source!!),
-                              predicate = mapping.ontologyProperty!!,
-                              objekt = PrefixService.convertFkgResource(triple.objekt!!),
-                              status = mapping.status, language = mapping.language!!,
-                              rawProperty = triple.predicate, templateName = triple.templateName
-                        ), mapping)
+                        synchronized(store) {
+                           store.save(FkgTriple(
+                                 source = triple.source,
+                                 subject = PrefixService.convertFkgResource(triple.source!!),
+                                 predicate = mapping.ontologyProperty!!,
+                                 objekt = PrefixService.convertFkgResource(triple.objekt!!),
+                                 status = mapping.status, language = mapping.language!!,
+                                 rawProperty = triple.predicate, templateName = triple.templateName
+                           ), mapping)
+                        }
                      } else
                         logger.error("$predicate: Mapping not found for $triple. " +
                               "Did you write mappings to database by precessing stats??")
 
                   } catch (th: Throwable) {
-//                     if (th is ApiException) th.printStackTrace()
                      logger.info("triple: $triple")
                      logger.error(th)
                   }
@@ -125,5 +129,6 @@ class TripleImporter {
       do {
          Thread.sleep(10000)
       } while (tripleGenerationTaskExecutor.activeCount > 0)
+      if (store is KnowledgeStoreFkgTripleDaoImpl) store.flush()
    }
 }

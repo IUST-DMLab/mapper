@@ -37,7 +37,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
 
    override fun save(t: FkgTriple, mapping: FkgPropertyMapping?) {
       if (t.objekt == null || t.objekt!!.trim().isEmpty()) {
-         println("long triple here: $t")
+         println("short triple here: ${t.source} ${t.predicate} ${t.objekt}")
          return
       }
       val data = TripleData()
@@ -47,7 +47,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
       data.subject = t.subject
       data.predicate = PrefixService.prefixToUri(t.predicate)
       if (!data.predicate.contains("://")) {
-         println(data.predicate + ": " + t.predicate)
+         println("error:: " + data.predicate + ": " + t.predicate)
          System.exit(1)
       }
 
