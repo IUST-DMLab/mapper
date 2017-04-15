@@ -90,7 +90,8 @@ class RedirectAmbigutyLogic {
                         knowledgeStoreDao.save(FkgTriple(
                               subject = PrefixService.getFkgResourceUrl(f),
                               predicate = "dbo:wikiDisambiguatedFrom",
-                              objekt = a.title
+                              objekt = if (a.title!!.contains("(ابهام زدایی)")) a.title!!.substringBefore("(ابهام زدایی)")
+                              else a.title
                         ), null)
                      }
                   }

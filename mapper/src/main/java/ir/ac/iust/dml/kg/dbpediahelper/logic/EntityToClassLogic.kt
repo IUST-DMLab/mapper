@@ -254,6 +254,13 @@ class EntityToClassLogic {
                            predicate = "rdf:instanceOf",
                            objekt = PrefixService.prefixToUri("fkg:" + mapping.ontologyClass)
                      ), null)
+
+                     knowledgeStoreDao.save(FkgTriple(
+                           subject = PrefixService.convertFkgResource(triple.subject!!),
+                           predicate = "pkg:classTree",
+                           objekt = treeCache[mapping.ontologyClass]
+                     ), null)
+
                      treeCache[mapping.ontologyClass]!!.split("/").forEach {
                         knowledgeStoreDao.save(FkgTriple(
                               subject = PrefixService.convertFkgResource(triple.subject!!),
