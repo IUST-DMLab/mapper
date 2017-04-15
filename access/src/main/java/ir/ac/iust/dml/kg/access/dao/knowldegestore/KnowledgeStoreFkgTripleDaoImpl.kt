@@ -17,11 +17,22 @@ import java.util.*
 class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
 
    val tripleApi: V1triplesApi
+   val buffer = mutableListOf<TripleData>()
 
    init {
       val client = ApiClient()
       client.basePath = ConfigReader.getString("knowledge.store.url", "http://localhost:8091/rs")
       tripleApi = V1triplesApi(client)
+   }
+
+   fun flush() {
+      while (buffer.isNotEmpty()) {
+         try {
+            tripleApi.batchInsert1(buffer)
+            buffer.clear()
+         } catch (e: Throwable) {
+         }
+      }
    }
 
    override fun save(t: FkgTriple, mapping: FkgPropertyMapping?) {
@@ -67,7 +78,15 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
          )
       }
 
-      tripleApi.insert1(data)
+      buffer.add(data)
+      if (buffer.size > 10000) {
+         try {
+            tripleApi.batchInsert1(buffer)
+            buffer.clear()
+         } catch (th: Throwable) {
+            th.printStackTrace()
+         }
+      }
    }
 
    override fun deleteAll() {

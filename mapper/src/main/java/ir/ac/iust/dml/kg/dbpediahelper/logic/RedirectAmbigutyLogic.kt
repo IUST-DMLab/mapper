@@ -100,6 +100,6 @@ class RedirectAmbigutyLogic {
             logger.error(th)
          }
       }
-
+      knowledgeStoreDao.flush()
    }
 }

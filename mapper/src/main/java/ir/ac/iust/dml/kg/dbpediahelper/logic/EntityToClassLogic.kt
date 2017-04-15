@@ -270,5 +270,6 @@ class EntityToClassLogic {
             }
          }
       }
+      knowledgeStoreDao.flush()
    }
 }

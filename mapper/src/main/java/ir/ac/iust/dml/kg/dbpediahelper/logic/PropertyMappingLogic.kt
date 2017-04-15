@@ -235,6 +235,7 @@ class PropertyMappingLogic {
             }
          }
       } while (data.page < data.pageCount && relationNumber <= maxNumberOfRelations)
+      knowledgeStoreDao.flush()
    }
 
    private fun generateOntologyProperty(rawProperty: String)
