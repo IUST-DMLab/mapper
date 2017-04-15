@@ -199,6 +199,7 @@ class PropertyMappingLogic {
             if (relationNumber % 100 == 0)
                logger.info("relation number is $relationNumber.\t" +
                      "time: ${(System.currentTimeMillis() - startTime) / 1000}\tsecs")
+            if (relation.status == MappingStatus.Multiple || relation.status == null) continue
             if (relation.ontologyProperty == null) continue
             try {
                val property = relation.ontologyProperty!!

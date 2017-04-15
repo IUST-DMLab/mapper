@@ -191,13 +191,25 @@ class EntityToClassLogic {
       logger.info("writing tree started.")
       treeCache.forEach { key, value ->
          val splits = value.split("/")
-         if (splits.size > 1)
+         val subjectUrl = PrefixService.prefixToUri("fkg:" + key)
+         if (splits.size > 1) {
             knowledgeStoreDao.save(FkgTriple(
-                  subject = PrefixService.prefixToUri("fkg:" + key),
+                  subject = subjectUrl,
                   predicate = "rdfs:subClassOf",
                   objekt = PrefixService.prefixToUri("fkg:" + splits[1])
             ), null)
+         }
       }
+
+      val classes = classDao.search(page = 0, pageSize = 0).data
+      classes.forEach {
+         val subjectUrl = PrefixService.prefixToUri("fkg:" + it.name)
+         knowledgeStoreDao.save(FkgTriple(subject = subjectUrl,
+               predicate = "rdfs:label", objekt = it.enLabel, language = "en"), null)
+         knowledgeStoreDao.save(FkgTriple(subject = subjectUrl,
+               predicate = "rdfs:label", objekt = it.faLabel, language = "fa"), null)
+      }
+
       logger.info("writing tree ended.")
 
       val addedEntities = mutableSetOf<String>()
