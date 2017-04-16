@@ -193,7 +193,7 @@ class PropertyMappingLogic {
       val RDFS_LABEL_URL = PrefixService.prefixToUri("rdfs:label")
       val RDFS_DOMAIN_URL = PrefixService.prefixToUri("rdfs:domain")
       val RDF_TYPE_URL = PrefixService.prefixToUri("rdf:type")
-      val VARIANT_LABEL_URL = PrefixService.getFkgOntologyPropertyUrl("variantLabel")
+      val VARIANT_LABEL_URL = PrefixService.getFkgOntologyPropertyUrl("variant_label")
 
       do {
          val data = dao.search(pageSize = 100, page = page++, language = null,
@@ -207,11 +207,11 @@ class PropertyMappingLogic {
             if (relation.status == MappingStatus.Multiple || relation.status == null) continue
             if (relation.ontologyProperty == null) continue
             try {
-               var property = relation.ontologyProperty!!
+               val property = relation.ontologyProperty!!.replace("dbo:", PrefixService.KG_ONTOLOGY_PREFIX + ":")
                //TODO: why?!
-               if (!property.contains(':')) property = PrefixService.KG_ONTOLOGY_PREFIX + property
-               val uri = PrefixService.prefixToUri(property)
-               if (uri!!.isBlank()) continue
+               var uri = PrefixService.prefixToUri(property)!!
+               if (uri.isBlank()) continue
+               if (!uri.contains(':')) uri = PrefixService.getFkgOntologyPropertyUrl(uri)
                val label = relation.templateProperty!!.replace('_', ' ')
                if (!addedRelations.contains(property)) {
                   knowledgeStoreDao.save(FkgTriple(

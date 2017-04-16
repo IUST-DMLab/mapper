@@ -46,7 +46,7 @@ class RedirectAmbigutyLogic {
       val maxNumberOfRedirects = ConfigReader.getInt("test.mode.max.redirects", "10000000")
       val maxNumberOfDisambiguation = ConfigReader.getInt("test.mode.max.disambiguation", "10000000")
 
-      val VARIANT_LABEL_URL = PrefixService.getFkgOntologyPropertyUrl("variantLabel")
+      val VARIANT_LABEL_URL = PrefixService.getFkgOntologyPropertyUrl("variant_label")
       val WIKI_PAGE_REDIRECT_URL = PrefixService.getFkgOntologyPropertyUrl("wikiPageRedirects")
       val DBO_WIKI_DISAMBIGUATED_FROM = PrefixService.prefixToUri("dbo:wikiDisambiguatedFrom")
 
