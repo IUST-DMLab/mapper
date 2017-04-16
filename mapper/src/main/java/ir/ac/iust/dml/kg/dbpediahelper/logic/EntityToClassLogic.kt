@@ -192,6 +192,7 @@ class EntityToClassLogic {
       val RDFS_RESOURCE_CLASS_URL = PrefixService.prefixToUri("rdfs:Resource")
       val RDFS_SUBCLASS_OF_URL = PrefixService.prefixToUri("rdfs:subClassOf")
       val RDF_TYPE_URL = PrefixService.prefixToUri("rdf:type")
+      val OWL_CLASS_URL = PrefixService.prefixToUri("owl:Class")
       val RDF_INSTANCE_OF_URL = PrefixService.prefixToUri("rdf:instanceOf")
       val CLASS_TREE_URL = PrefixService.getFkgOntologyPropertyUrl("classTree")
 
@@ -212,7 +213,9 @@ class EntityToClassLogic {
       classes.forEach {
          val subjectUrl = PrefixService.getFkgOntologyClassUrl(it.name!!)
          knowledgeStoreDao.save(FkgTriple(subject = subjectUrl,
-               predicate = RDFS_LABEL_URL, objekt = it.enLabel, language = "en"), null)
+               predicate = RDF_TYPE_URL, objekt = OWL_CLASS_URL), null)
+         knowledgeStoreDao.save(FkgTriple(subject = subjectUrl,
+               predicate = RDFS_LABEL_URL, objekt = it.faLabel, language = "fa"), null)
          knowledgeStoreDao.save(FkgTriple(subject = subjectUrl,
                predicate = RDFS_LABEL_URL, objekt = it.faLabel, language = "fa"), null)
       }
