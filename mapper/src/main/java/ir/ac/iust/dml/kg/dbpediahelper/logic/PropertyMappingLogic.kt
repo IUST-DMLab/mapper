@@ -1,6 +1,5 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic
 
-import com.google.common.base.CaseFormat
 import ir.ac.iust.dml.kg.access.dao.FkgPropertyMappingDao
 import ir.ac.iust.dml.kg.access.dao.FkgTemplateMappingDao
 import ir.ac.iust.dml.kg.access.dao.FkgTripleStatisticsDao
@@ -162,7 +161,7 @@ class PropertyMappingLogic {
                         mapping.status = if (l.size == 1) MappingStatus.Translated else MappingStatus.Multiple
                         mapping.ontologyProperty = l.joinToString(",")
                      } else
-                        mapping.ontologyProperty = generateOntologyProperty(rawProperty)
+                        mapping.ontologyProperty = PrefixService.generateOntologyProperty(rawProperty)
                      dao.save(mapping)
                   }
                }
@@ -238,9 +237,6 @@ class PropertyMappingLogic {
       } while (data.page < data.pageCount && relationNumber <= maxNumberOfRelations)
       knowledgeStoreDao.flush()
    }
-
-   private fun generateOntologyProperty(rawProperty: String)
-         = "dbp:" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, rawProperty.replace(' ', '_'))
 
    fun predicateExport(page: Int, pageSize: Int, keyword: String?,
                        ontologyClass: String?, templateName: String?,

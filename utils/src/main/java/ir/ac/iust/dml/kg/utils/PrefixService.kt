@@ -1,5 +1,6 @@
 package ir.ac.iust.dml.kg.utils
 
+import com.google.common.base.CaseFormat
 import org.apache.log4j.Logger
 import java.util.*
 
@@ -15,7 +16,7 @@ object PrefixService {
 
    fun reload() {
       val prefixServices = Properties()
-      prefixServices.load(this.javaClass.getResourceAsStream("/src/main/resources/prefixes.properties"))
+      prefixServices.load(this.javaClass.getResourceAsStream("/prefixes.properties"))
       prefixServices.keys.forEach {
          prefixNames[it as String] = prefixServices.getProperty(it)!!
          prefixAddresses[prefixServices.getProperty(it)!!] = it
@@ -49,8 +50,15 @@ object PrefixService {
       return url
    }
 
-   fun convertFkgProperty(predicate: String): String? {
-      if (predicate.contains(":")) return predicate
-      return prefixNames["fkgp"] + PropertyNormaller.removeDigits(predicate, false, true)
+
+   fun generateOntologyProperty(rawProperty: String, prefix: String = "dbo")
+         = prefix + ":" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, rawProperty.replace(' ', '_'))
+
+   fun convertFkgProperty(property: String): String? {
+      if (property.contains("://")) return property
+      val p =
+            if (!property.contains(":")) generateOntologyProperty(property, "fkgp")
+            else property
+      return prefixToUri(p)
    }
 }

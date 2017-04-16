@@ -103,12 +103,14 @@ class TripleImporter {
                         && mapping.ontologyProperty != null
                         && mapping.ontologyProperty!!.contains(":")) {
                      logger.trace("save mapping for $triple")
+                     if (mapping.status == null && mapping.language == "en") mapping.status = MappingStatus.Mapped
                      store.save(FkgTriple(
                            source = triple.source,
                            subject = PrefixService.convertFkgResource(triple.source!!),
-                           predicate = mapping.ontologyProperty!!,
+                           predicate = PrefixService.prefixToUri(mapping.ontologyProperty!!),
                            objekt = PrefixService.convertFkgResource(triple.objekt!!),
-                           status = mapping.status, language = mapping.language!!,
+                           status = mapping.status,
+                           language = mapping.language!!,
                            rawProperty = triple.predicate, templateName = triple.templateName
                      ), mapping)
                   } else {

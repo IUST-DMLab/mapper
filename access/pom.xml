@@ -39,6 +39,18 @@
       <groupId>ir.ac.iust.dml.kg.vituoso</groupId>
       <artifactId>connector</artifactId>
       <version>0.1.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>xerces</groupId>
+          <artifactId>xercesImpl</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>xerces</groupId>
+      <artifactId>xercesImpl</artifactId>
+      <version>2.11.0</version>
     </dependency>
 
     <!-- Hibernate -->
