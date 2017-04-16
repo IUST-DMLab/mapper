@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.utils
+package ir.ac.iust.dml.kg.access.utils
 
 import org.hibernate.dialect.MySQL5Dialect
 

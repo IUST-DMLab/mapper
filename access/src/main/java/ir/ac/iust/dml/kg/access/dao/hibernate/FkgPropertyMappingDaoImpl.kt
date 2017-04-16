@@ -3,10 +3,10 @@ package ir.ac.iust.dml.kg.access.dao.hibernate
 import ir.ac.iust.dml.kg.access.dao.FkgPropertyMappingDao
 import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
+import ir.ac.iust.dml.kg.access.utils.SqlJpaTools
 import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
 import ir.ac.iust.dml.kg.raw.utils.PagedData
 import ir.ac.iust.dml.kg.utils.TemplateNameConverter
-import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
 import org.hibernate.Criteria
 import org.hibernate.SessionFactory
 import org.hibernate.criterion.Order
@@ -80,7 +80,7 @@ open class FkgPropertyMappingDaoImpl : FkgPropertyMappingDao {
    @Synchronized
    override fun read(templateName: String, nearTemplateNames: Boolean, templateProperty: String): FkgPropertyMapping? {
       val session = this.sessionFactory.openSession()
-      session.use { session ->
+      try {
          val criteria = session.createCriteria(FkgPropertyMapping::class.java)
          if (nearTemplateNames) {
             criteria.add(Restrictions.or(
@@ -100,6 +100,11 @@ open class FkgPropertyMappingDaoImpl : FkgPropertyMappingDao {
          val mapping = criteria.list() as List<FkgPropertyMapping>
          if (mapping.isEmpty()) return null
          return mapping[0]
+      } finally {
+         try {
+            session.close()
+         } catch (e: Throwable) {
+         }
       }
    }
 

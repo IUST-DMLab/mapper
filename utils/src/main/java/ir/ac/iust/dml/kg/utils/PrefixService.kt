@@ -1,9 +1,6 @@
 package ir.ac.iust.dml.kg.utils
 
-import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import org.apache.log4j.Logger
-import java.io.FileInputStream
-import java.nio.file.Files
 import java.util.*
 
 object PrefixService {
@@ -17,11 +14,8 @@ object PrefixService {
    }
 
    fun reload() {
-      val path = ConfigReader.getPath("dbpedia.prefixes", "~/.pkg/data/prefixes.properties")
-      Files.createDirectories(path.parent)
-      if (!Files.exists(path)) Files.copy(this.javaClass.getResourceAsStream("/src/main/resources/prefixes.properties"), path)
       val prefixServices = Properties()
-      prefixServices.load(FileInputStream(path.toFile()))
+      prefixServices.load(this.javaClass.getResourceAsStream("/src/main/resources/prefixes.properties"))
       prefixServices.keys.forEach {
          prefixNames[it as String] = prefixServices.getProperty(it)!!
          prefixAddresses[prefixServices.getProperty(it)!!] = it
@@ -53,5 +47,10 @@ object PrefixService {
             || url.startsWith("fa.wikipedia.org/wiki/"))
          return prefixNames["fkgr"] + url.substringAfterLast("/")
       return url
+   }
+
+   fun convertFkgProperty(predicate: String): String? {
+      if (predicate.contains(":")) return predicate
+      return prefixNames["fkgp"] + PropertyNormaller.removeDigits(predicate, false, true)
    }
 }

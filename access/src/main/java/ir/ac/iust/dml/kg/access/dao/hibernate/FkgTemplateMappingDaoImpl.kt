@@ -2,8 +2,8 @@ package ir.ac.iust.dml.kg.access.dao.hibernate
 
 import ir.ac.iust.dml.kg.access.dao.FkgTemplateMappingDao
 import ir.ac.iust.dml.kg.access.entities.FkgTemplateMapping
+import ir.ac.iust.dml.kg.access.utils.SqlJpaTools
 import ir.ac.iust.dml.kg.raw.utils.PagedData
-import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
 import org.hibernate.SessionFactory
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Projections

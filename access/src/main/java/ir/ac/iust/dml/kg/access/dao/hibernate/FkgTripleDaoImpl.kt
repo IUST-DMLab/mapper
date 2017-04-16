@@ -4,8 +4,8 @@ import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
+import ir.ac.iust.dml.kg.access.utils.SqlJpaTools
 import ir.ac.iust.dml.kg.raw.utils.PagedData
-import ir.ac.iust.dml.kg.utils.hibernate.SqlJpaTools
 import org.hibernate.SessionFactory
 import org.hibernate.criterion.Restrictions
 import org.springframework.beans.factory.annotation.Autowired

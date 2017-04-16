@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.utils.hibernate
+package ir.ac.iust.dml.kg.access.utils
 
 import ir.ac.iust.dml.kg.raw.utils.PagedData
 import org.hibernate.Criteria

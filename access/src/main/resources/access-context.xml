@@ -17,7 +17,7 @@
     </property>
     <property name="hibernateProperties">
       <props>
-        <prop key="hibernate.dialect">ir.ac.iust.dml.kg.utils.UTF8MySQL5Dialect
+        <prop key="hibernate.dialect">ir.ac.iust.dml.kg.access.utils.UTF8MySQL5Dialect
         </prop>
         <prop key="cache.use_query_cache">true</prop>
         <prop key="cache.use_second_level_cache">true</prop>
