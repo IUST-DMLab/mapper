@@ -189,7 +189,7 @@ class PropertyMappingLogic {
       var relationNumber = 0
       var page = 0
 
-      val PROPERTY_URI = PrefixService.prefixToUri("rdf:property")
+      val PROPERTY_URI = PrefixService.prefixToUri("rdf:Property")
       val RDFS_LABEL_URL = PrefixService.prefixToUri("rdfs:label")
       val RDFS_DOMAIN_URL = PrefixService.prefixToUri("rdfs:domain")
       val RDF_TYPE_URL = PrefixService.prefixToUri("rdf:type")
