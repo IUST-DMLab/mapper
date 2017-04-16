@@ -46,6 +46,10 @@ class RedirectAmbigutyLogic {
       val maxNumberOfRedirects = ConfigReader.getInt("test.mode.max.redirects", "10000000")
       val maxNumberOfDisambiguation = ConfigReader.getInt("test.mode.max.disambiguation", "10000000")
 
+      val VARIANT_LABEL_URL = PrefixService.getFkgOntologyPropertyUrl("variantLabel")
+      val WIKI_PAGE_REDIRECT_URL = PrefixService.getFkgOntologyPropertyUrl("wikiPageRedirects")
+      val DBO_WIKI_DISAMBIGUATED_FROM = PrefixService.prefixToUri("dbo:wikiDisambiguatedFrom")
+
       var files = PathWalker.getPath(redirectsFolder)
       var i = 0
       files.forEach {
@@ -58,12 +62,12 @@ class RedirectAmbigutyLogic {
                      if (i % 1000 == 0) logger.info("writing redirect $i: $t to $u")
                      knowledgeStoreDao.save(FkgTriple(
                            subject = PrefixService.getFkgResourceUrl(u),
-                           predicate = "dbo:wikiPageRedirects",
+                           predicate = WIKI_PAGE_REDIRECT_URL,
                            objekt = "http://fa.wikipedia.org/wiki/" + t.replace(' ', '_')
                      ), null)
                      knowledgeStoreDao.save(FkgTriple(
                            subject = PrefixService.getFkgResourceUrl(u),
-                           predicate = "fkg:variantLabel",
+                           predicate = VARIANT_LABEL_URL,
                            objekt = t.replace('_', ' ')
                      ), null)
                   }
@@ -89,7 +93,7 @@ class RedirectAmbigutyLogic {
                         if (i % 1000 == 0) logger.info("writing disambiguation $i: $a to $f")
                         knowledgeStoreDao.save(FkgTriple(
                               subject = PrefixService.getFkgResourceUrl(f),
-                              predicate = "dbo:wikiDisambiguatedFrom",
+                              predicate = DBO_WIKI_DISAMBIGUATED_FROM,
                               objekt = if (a.title!!.contains("(ابهام زدایی)")) a.title!!.substringBefore("(ابهام زدایی)")
                               else a.title
                         ), null)

@@ -10,6 +10,10 @@ object PrefixService {
    val prefixNames = mutableMapOf<String, String>()
    val prefixAddresses = mutableMapOf<String, String>()
 
+   val KG_RESOURCE_PREFIX = "fkgr"
+   val KG_ONTOLOGY_PREFIX = "fkgo"
+   val KG_AUTO_PROPERTY_PREFIX = "fkgp"
+
    init {
       reload()
    }
@@ -41,15 +45,34 @@ object PrefixService {
       return if (address == null) splits[1] else address + splits[1]
    }
 
-   fun getFkgResourceUrl(name: String) = prefixNames["fkgr"] + name.replace(' ', '_')
+   fun getFkgResourceUrl(name: String) = prefixNames[KG_RESOURCE_PREFIX] + name.replace(' ', '_')
+
+   fun getFkgResource(name: String) = KG_RESOURCE_PREFIX + ":" + name.replace(' ', '_')
+
+   fun getFkgOntologyPropertyUrl(name: String) =
+         prefixNames[KG_ONTOLOGY_PREFIX] +
+               CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, name.replace(' ', '_'))
+
+   fun getFkgOntologyClassUrl(name: String) =
+         prefixNames[KG_ONTOLOGY_PREFIX] +
+               CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, name.replace(' ', '_'))
+
+   fun getFkgOntologyProperty(name: String) =
+         KG_ONTOLOGY_PREFIX + ":" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, name.replace(' ', '_'))
+
+   fun getFkgOntologyClass(name: String) =
+         KG_ONTOLOGY_PREFIX + ":" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, name.replace(' ', '_'))
 
    fun convertFkgResource(url: String): String {
       if (url.startsWith("http://fa.wikipedia.org/wiki/")
             || url.startsWith("fa.wikipedia.org/wiki/"))
-         return prefixNames["fkgr"] + url.substringAfterLast("/")
+         return prefixNames[KG_RESOURCE_PREFIX] + url.substringAfterLast("/")
       return url
    }
 
+   fun convertFkgOntology(url: String): String {
+      return prefixNames[KG_ONTOLOGY_PREFIX] + url.substringAfterLast("/")
+   }
 
    fun generateOntologyProperty(rawProperty: String, prefix: String = "dbo")
          = prefix + ":" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, rawProperty.replace(' ', '_'))
@@ -57,7 +80,7 @@ object PrefixService {
    fun convertFkgProperty(property: String): String? {
       if (property.contains("://")) return property
       val p =
-            if (!property.contains(":")) generateOntologyProperty(property, "fkgp")
+            if (!property.contains(":")) generateOntologyProperty(property, KG_AUTO_PROPERTY_PREFIX)
             else property
       return prefixToUri(p)
    }

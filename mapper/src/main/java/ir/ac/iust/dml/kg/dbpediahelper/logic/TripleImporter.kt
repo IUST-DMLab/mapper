@@ -108,7 +108,7 @@ class TripleImporter {
                            source = triple.source,
                            subject = PrefixService.convertFkgResource(triple.source!!),
                            predicate = PrefixService.prefixToUri(
-                                 mapping.ontologyProperty!!.replace("dbo:", "fkgo:")
+                                 mapping.ontologyProperty!!.replace("dbo:", PrefixService.KG_ONTOLOGY_PREFIX + ":")
                            ),
                            objekt = PrefixService.convertFkgResource(triple.objekt!!),
                            status = mapping.status,

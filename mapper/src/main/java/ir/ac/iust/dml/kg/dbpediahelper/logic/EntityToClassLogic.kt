@@ -188,26 +188,33 @@ class EntityToClassLogic {
       }
       reloadTreeCache()
 
+      val RDFS_LABEL_URL = PrefixService.prefixToUri("rdfs:label")
+      val RDFS_RESOURCE_CLASS_URL = PrefixService.prefixToUri("rdfs:Resource")
+      val RDFS_SUBCLASS_OF_URL = PrefixService.prefixToUri("rdfs:subClassOf")
+      val RDF_TYPE_URL = PrefixService.prefixToUri("rdf:type")
+      val RDF_INSTANCE_OF_URL = PrefixService.prefixToUri("rdf:instanceOf")
+      val CLASS_TREE_URL = PrefixService.getFkgOntologyPropertyUrl("classTree")
+
       logger.info("writing tree started.")
       treeCache.forEach { key, value ->
          val splits = value.split("/")
-         val subjectUrl = PrefixService.prefixToUri("fkg:" + key)
+         val subjectUrl = PrefixService.getFkgOntologyClassUrl(key)
          if (splits.size > 1) {
             knowledgeStoreDao.save(FkgTriple(
                   subject = subjectUrl,
-                  predicate = "rdfs:subClassOf",
-                  objekt = PrefixService.prefixToUri("fkg:" + splits[1])
+                  predicate = RDFS_SUBCLASS_OF_URL,
+                  objekt = PrefixService.getFkgOntologyClassUrl(splits[1])
             ), null)
          }
       }
 
       val classes = classDao.search(page = 0, pageSize = 0).data
       classes.forEach {
-         val subjectUrl = PrefixService.prefixToUri("fkg:" + it.name)
+         val subjectUrl = PrefixService.getFkgOntologyClassUrl(it.name!!)
          knowledgeStoreDao.save(FkgTriple(subject = subjectUrl,
-               predicate = "rdfs:label", objekt = it.enLabel, language = "en"), null)
+               predicate = RDFS_LABEL_URL, objekt = it.enLabel, language = "en"), null)
          knowledgeStoreDao.save(FkgTriple(subject = subjectUrl,
-               predicate = "rdfs:label", objekt = it.faLabel, language = "fa"), null)
+               predicate = RDFS_LABEL_URL, objekt = it.faLabel, language = "fa"), null)
       }
 
       logger.info("writing tree ended.")
@@ -237,47 +244,47 @@ class EntityToClassLogic {
 
                   knowledgeStoreDao.save(FkgTriple(
                         subject = PrefixService.convertFkgResource(triple.subject!!),
-                        predicate = "rdfs:label",
+                        predicate = RDFS_LABEL_URL,
                         objekt = entity
                   ), null)
 
                   knowledgeStoreDao.save(FkgTriple(
                         subject = PrefixService.convertFkgResource(triple.subject!!),
-                        predicate = "rdf:type",
-                        objekt = PrefixService.prefixToUri("rdfs:Resource")
+                        predicate = RDF_TYPE_URL,
+                        objekt = RDFS_RESOURCE_CLASS_URL
                   ), null)
 
                   val mapping = templateDao.read(triple.templateNameFull!!, null)
                   if (mapping != null) {
                      knowledgeStoreDao.save(FkgTriple(
                            subject = PrefixService.convertFkgResource(triple.subject!!),
-                           predicate = "rdf:instanceOf",
-                           objekt = PrefixService.prefixToUri("fkg:" + mapping.ontologyClass)
+                           predicate = RDF_INSTANCE_OF_URL,
+                           objekt = PrefixService.getFkgOntologyClassUrl(mapping.ontologyClass!!)
                      ), null)
 
                      knowledgeStoreDao.save(FkgTriple(
                            subject = PrefixService.convertFkgResource(triple.subject!!),
-                           predicate = "pkg:classTree",
-                           objekt = treeCache[mapping.ontologyClass]
+                           predicate = CLASS_TREE_URL,
+                           objekt = treeCache[mapping.ontologyClass!!]
                      ), null)
 
-                     treeCache[mapping.ontologyClass]!!.split("/").forEach {
+                     treeCache[mapping.ontologyClass!!]!!.split("/").forEach {
                         knowledgeStoreDao.save(FkgTriple(
                               subject = PrefixService.convertFkgResource(triple.subject!!),
-                              predicate = "rdf:type",
-                              objekt = PrefixService.prefixToUri("fkg:" + it)
+                              predicate = RDF_TYPE_URL,
+                              objekt = PrefixService.getFkgOntologyClassUrl(it)
                         ), null)
                      }
                   } else {
                      val typeUrl = "http://fa.wikipedia.org/wiki/template/" + triple.templateNameFull!!.replace(' ', '_')
                      knowledgeStoreDao.save(FkgTriple(
                            subject = PrefixService.convertFkgResource(triple.subject!!),
-                           predicate = "rdf:instanceOf",
+                           predicate = RDF_INSTANCE_OF_URL,
                            objekt = typeUrl
                      ), null)
                      knowledgeStoreDao.save(FkgTriple(
                            subject = PrefixService.convertFkgResource(triple.subject!!),
-                           predicate = "rdf:type",
+                           predicate = RDF_TYPE_URL,
                            objekt = typeUrl
                      ), null)
                   }
