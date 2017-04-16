@@ -77,13 +77,13 @@ object PrefixService {
    // this is different from dbpedia. they converts xx_yy to xxYy. but we don't change that.
    // because persian letters has not upper case
    fun generateOntologyProperty(rawProperty: String, prefix: String = "dbo")
-         = prefix + ":" + PropertyNormaller.removeDigits(rawProperty.replace(' ', '_'))
+         = prefix + ":" + PropertyNormaller.removeDigits(rawProperty).replace(' ', '_')
 
    fun convertFkgProperty(property: String): String? {
       if (property.contains("://")) return property
       val p =
             if (!property.contains(":")) generateOntologyProperty(property, KG_AUTO_PROPERTY_PREFIX)
-            else property
+            else property.replace(' ', '_')
       return prefixToUri(p)
    }
 }
