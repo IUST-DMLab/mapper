@@ -187,9 +187,9 @@ class PropertyMappingLogic {
       val addedRelations = mutableSetOf<String>()
       val addedLabels = mutableSetOf<String>()
       var relationNumber = 0
-      val PROPERTY_URI = PrefixService.prefixToUri("owl:DatatypeProperty")
       var page = 0
 
+      val PROPERTY_URI = PrefixService.prefixToUri("owl:DatatypeProperty")
       val RDFS_LABEL_URL = PrefixService.prefixToUri("rdfs:label")
       val RDFS_DOMAIN_URL = PrefixService.prefixToUri("rdfs:domain")
       val RDF_TYPE_URL = PrefixService.prefixToUri("rdf:type")
@@ -207,7 +207,9 @@ class PropertyMappingLogic {
             if (relation.status == MappingStatus.Multiple || relation.status == null) continue
             if (relation.ontologyProperty == null) continue
             try {
-               val property = relation.ontologyProperty!!
+               var property = relation.ontologyProperty!!
+               //TODO: why?!
+               if (!property.contains(':')) property = PrefixService.KG_ONTOLOGY_PREFIX + property
                val uri = PrefixService.prefixToUri(property)
                if (uri!!.isBlank()) continue
                val label = relation.templateProperty!!.replace('_', ' ')

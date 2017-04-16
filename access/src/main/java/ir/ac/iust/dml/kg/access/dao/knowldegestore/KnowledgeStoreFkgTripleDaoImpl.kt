@@ -45,7 +45,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
       data.module = "wiki"
       data.urls = Collections.singletonList(t.source)
       data.subject = t.subject
-      data.predicate = if (t.predicate!!.contains("://")) PrefixService.prefixToUri(t.predicate) else t.predicate
+      data.predicate = if (!t.predicate!!.contains("://")) PrefixService.prefixToUri(t.predicate) else t.predicate
       if (!data.predicate.contains("://")) {
          println("error:: " + data.predicate + ": " + t.predicate)
          System.exit(1)
