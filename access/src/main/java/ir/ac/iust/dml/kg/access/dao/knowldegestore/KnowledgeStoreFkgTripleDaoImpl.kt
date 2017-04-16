@@ -50,14 +50,14 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
       data.urls = Collections.singletonList(t.source)
       data.subject = t.subject
       data.predicate = if (!t.predicate!!.contains("://")) PrefixService.prefixToUri(t.predicate) else t.predicate
-      if (!data.predicate.startsWith("http://") && !data.predicate.startsWith("https://")) {
+      if (!PrefixService.isUrlFast(t.predicate)) {
          logger.error(data.predicate + ": " + t.predicate)
          return
       }
 
       val objectData = TypedValueData()
       objectData.type =
-            if ((t.objekt!!.startsWith("http://") || t.objekt!!.startsWith("https://")) && !t.objekt!!.contains(' '))
+            if (PrefixService.isUrlFast(t.objekt))
                TypedValueData.TypeEnum.RESOURCE
             else TypedValueData.TypeEnum.STRING
 

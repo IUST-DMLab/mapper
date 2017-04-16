@@ -86,4 +86,10 @@ object PrefixService {
             else property.replace(' ', '_')
       return prefixToUri(p)
    }
+
+   fun isUrlFast(str: String?): Boolean {
+      if (str == null) return false
+      if ((str.startsWith("http://") || str.startsWith("https://")) && !str.contains(' ')) return true
+      return false
+   }
 }
