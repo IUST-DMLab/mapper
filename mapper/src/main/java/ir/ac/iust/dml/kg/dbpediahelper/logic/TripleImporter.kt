@@ -107,7 +107,9 @@ class TripleImporter {
                      store.save(FkgTriple(
                            source = triple.source,
                            subject = PrefixService.convertFkgResource(triple.source!!),
-                           predicate = PrefixService.prefixToUri(mapping.ontologyProperty!!),
+                           predicate = PrefixService.prefixToUri(
+                                 mapping.ontologyProperty!!.replace("dbo:", "fkgo:")
+                           ),
                            objekt = PrefixService.convertFkgResource(triple.objekt!!),
                            status = mapping.status,
                            language = mapping.language!!,
