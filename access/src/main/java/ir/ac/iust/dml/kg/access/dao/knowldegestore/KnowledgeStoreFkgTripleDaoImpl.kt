@@ -41,7 +41,11 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
 
    override fun save(t: FkgTriple, mapping: FkgPropertyMapping?) {
       if (t.objekt == null || t.objekt!!.trim().isEmpty()) {
-         println("short triple here: ${t.source} ${t.predicate} ${t.objekt}")
+         logger.error("short triple here: ${t.source} ${t.predicate} ${t.objekt}")
+         return
+      }
+      if (t.objekt!!.length > 200) {
+         logger.error("too long triple here: ${t.source} ${t.predicate} ${t.objekt}")
          return
       }
       val data = TripleData()
