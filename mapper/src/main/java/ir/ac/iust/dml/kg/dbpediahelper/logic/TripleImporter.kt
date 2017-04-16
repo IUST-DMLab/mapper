@@ -94,6 +94,7 @@ class TripleImporter {
                      logger.warn("triple number is $tripleNumber. $index file is $p. " +
                            "time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
 
+                  logger.info("triple: $triple")
                   val predicate = PropertyNormaller.removeDigits(triple.predicate!!)
                   val mapping = mappingDao.read(
                         templateName = PropertyNormaller.removeDigits(triple.templateNameFull!!),
