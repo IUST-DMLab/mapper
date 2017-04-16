@@ -12,10 +12,12 @@ import ir.ac.iust.dml.kg.services.client.swagger.V1triplesApi
 import ir.ac.iust.dml.kg.services.client.swagger.model.TripleData
 import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValueData
 import ir.ac.iust.dml.kg.utils.PrefixService
+import org.apache.log4j.Logger
 import java.util.*
 
 class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
 
+   private val logger = Logger.getLogger(this.javaClass)!!
    val tripleApi: V1triplesApi
    val buffer = mutableListOf<TripleData>()
 
@@ -28,9 +30,11 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
    fun flush() {
       while (buffer.isNotEmpty()) {
          try {
+            logger.info("flushing ...")
             tripleApi.batchInsert1(buffer)
             buffer.clear()
          } catch (e: Throwable) {
+            logger.error(e)
          }
       }
    }
@@ -47,8 +51,8 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
       data.subject = t.subject
       data.predicate = if (!t.predicate!!.contains("://")) PrefixService.prefixToUri(t.predicate) else t.predicate
       if (!data.predicate.contains("://")) {
-         println("error:: " + data.predicate + ": " + t.predicate)
-         System.exit(1)
+         logger.error(data.predicate + ": " + t.predicate)
+         return
       }
 
       val objectData = TypedValueData()
@@ -81,10 +85,11 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
       buffer.add(data)
       if (buffer.size > 10000) {
          try {
+            logger.info("batch insert ...")
             tripleApi.batchInsert1(buffer)
             buffer.clear()
          } catch (th: Throwable) {
-            th.printStackTrace()
+            logger.error(th)
          }
       }
    }
