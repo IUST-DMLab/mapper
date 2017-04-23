@@ -31,7 +31,7 @@
         <prop key="hibernate.default_schema">knowledge_graph</prop>
         <prop key="hibernate.hbm2ddl.auto">update</prop>
         <prop key="hibernate.connection.username">root</prop>
-        <prop key="hibernate.connection.password">Dmlab2017</prop>
+        <prop key="hibernate.connection.password">fkgMYSQL2017</prop>
         <prop key="show_sql">false</prop>
       </props>
     </property>
