@@ -9,33 +9,34 @@ import java.util.*
 
 @Service
 class Commander {
-   @Autowired
-   lateinit var services: MappingHelperRestServices
-   private val logger = Logger.getLogger(this.javaClass)!!
+  @Autowired
+  lateinit var services: MappingHelperRestServices
+  private val logger = Logger.getLogger(this.javaClass)!!
 
-   fun processArgs(command: String, arg: String? = null) {
-      logger.info("====================================")
-      logger.info("====================================")
-      logger.info("running command $command at ${Date()}")
-      logger.info("====================================")
-      logger.info("====================================")
-      try {
-         when (command) {
-            "load" -> services.load()
-            "loadTypes" -> services.loadTypes()
-            "createStatsFile" -> services.createStatsFile()
-            "writeStats" -> services.writeStats()
-            "generateMapping" -> services.generateMapping()
-            "triples" -> services.triples(TripleImporter.StoreType.valueOf(arg!!))
-            "redirects" -> services.redirects()
-            "entities" -> services.entities()
-            "relations" -> services.relations()
-           "migrate" -> services.migrate()
-         }
-      } catch (th: Throwable) {
-         logger.error(th)
+  fun processArgs(command: String, arg: String? = null) {
+    logger.info("====================================")
+    logger.info("====================================")
+    logger.info("running command $command at ${Date()}")
+    logger.info("====================================")
+    logger.info("====================================")
+    try {
+      when (command) {
+        "load" -> services.load()
+        "loadTypes" -> services.loadTypes()
+        "createStatsFile" -> services.createStatsFile()
+        "writeStats" -> services.writeStats()
+        "generateMapping" -> services.generateMapping()
+        "triples" -> services.triples(TripleImporter.StoreType.valueOf(arg!!))
+        "redirects" -> services.redirects()
+        "entities" -> services.entities()
+        "relations" -> services.relations()
+        "migrate" -> services.migrate()
+        "ksMapLoad" -> services.ksMapLoad()
       }
-      logger.info("running command $command ended at ${Date()}. Bye bye!")
-      System.exit(0)
-   }
+    } catch (th: Throwable) {
+      logger.error(th)
+    }
+    logger.info("running command $command ended at ${Date()}. Bye bye!")
+    System.exit(0)
+  }
 }

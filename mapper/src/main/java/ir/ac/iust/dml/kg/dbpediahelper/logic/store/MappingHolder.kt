@@ -11,10 +11,12 @@ class MappingHolder {
   fun isValidTemplate(template: String) = maps.containsKey(template)
 
   fun getTemplateMapping(template: String)
-      = maps.getOrPut(template, { TemplateMapping(template, creationEpoch = System.currentTimeMillis()) })
+      = maps.getOrPut(template, { TemplateMapping(template) })
 
   fun getPropertyMapping(template: String, property: String)
       = getTemplateMapping(template).properties!!.getOrPut(property, { PropertyMapping() })
+
+  fun getAll() = maps.values
 
   override fun toString() = buildString { maps.values.forEach { this.append(it).append('\n') } }
 }
