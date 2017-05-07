@@ -30,6 +30,7 @@ class Commander {
             "redirects" -> services.redirects()
             "entities" -> services.entities()
             "relations" -> services.relations()
+           "migrate" -> services.migrate()
          }
       } catch (th: Throwable) {
          logger.error(th)

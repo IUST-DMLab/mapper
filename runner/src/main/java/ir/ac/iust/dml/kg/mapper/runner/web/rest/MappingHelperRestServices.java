@@ -3,6 +3,7 @@ package ir.ac.iust.dml.kg.mapper.runner.web.rest;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.*;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.ExportData;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.TemplateToOntologyExporter;
+import ir.ac.iust.dml.kg.dbpediahelper.logic.store.MigrationManager;
 import ir.ac.iust.dml.kg.utils.PrefixService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +28,14 @@ public class MappingHelperRestServices {
   private PropertyMappingLogic propertyMappingLogic;
   @Autowired
   private RedirectAmbigutyLogic redirectAmbigutyLogic;
+  @Autowired
+  private MigrationManager migrationManager;
+
+  @RequestMapping("/migrate")
+  public String migrate() throws Exception {
+    migrationManager.migrate();
+    return "Migrated!";
+  }
 
   @RequestMapping("/prefixes")
   public String prefixes() throws Exception {

@@ -31,7 +31,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
       while (buffer.isNotEmpty()) {
          try {
             logger.info("flushing ...")
-            tripleApi.batchInsert1(buffer)
+           tripleApi.batchInsert2(buffer)
             buffer.clear()
          } catch (e: Throwable) {
             logger.error(e)
@@ -90,7 +90,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
       if (buffer.size > 10000) {
          try {
             logger.info("batch insert ...")
-            tripleApi.batchInsert1(buffer)
+           tripleApi.batchInsert2(buffer)
             buffer.clear()
          } catch (th: Throwable) {
             logger.error(th)
