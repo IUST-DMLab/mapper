@@ -27,13 +27,14 @@ class KSMappingLoader {
     val all = mappingApi.readAll1(0, null).data
     all.forEach {
       val tm = holder.getTemplateMapping(it.template)
-      tm.weight = null //TODO add template weight to knowledge store
+      tm.weight = it.weight
       tm.template = it.template
       tm.rules = it.rules.map { convert(it) }.toMutableSet()
       it.properties.forEach { pm ->
         tm.properties!![pm.property] = PropertyMapping(
             property = pm.property, weight = pm.weight,
-            rules = pm.rules.map { convert(it) }.toMutableSet()
+            rules = pm.rules.map { convert(it) }.toMutableSet(),
+            recommendations = pm.recommendations.map { convert(it) }.toMutableSet()
         )
       }
     }
