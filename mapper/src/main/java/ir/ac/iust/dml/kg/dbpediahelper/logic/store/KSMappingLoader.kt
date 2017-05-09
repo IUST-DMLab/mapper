@@ -30,10 +30,10 @@ class KSMappingLoader {
       tm.weight = null //TODO add template weight to knowledge store
       tm.template = it.template
       tm.rules = it.rules.map { convert(it) }.toMutableSet()
-      it.properties.forEach {
-        val v = it.value!!
-        tm.properties!![it.key] = PropertyMapping(
-            property = v.property, weight = v.weight, rules = v.rules.map { convert(it) }.toMutableSet()
+      it.properties.forEach { pm ->
+        tm.properties!![pm.property] = PropertyMapping(
+            property = pm.property, weight = pm.weight,
+            rules = pm.rules.map { convert(it) }.toMutableSet()
         )
       }
     }
@@ -41,7 +41,7 @@ class KSMappingLoader {
   }
 
   private fun convert(it: ir.ac.iust.dml.kg.services.client.swagger.model.MapRule)
-      = MapRule(predicate = it.predicate, state = null, //TODO add status to knowledge store
+      = MapRule(predicate = it.predicate,
       transform = it.transform, constant = it.constant, unit = it.unit,
       type = ValueType.valueOf(it.type.name.toLowerCase().capitalize()))
 }

@@ -11,6 +11,7 @@ internal object KSMappingConverter {
   internal fun convert(tm: TemplateMapping): TemplateData {
     val td = TemplateData()
     td.template = tm.template
+    td.weight = tm.weight
     td.properties = mutableListOf()
     tm.properties?.forEach { t, u -> td.properties.add(convert(u)) }
     tm.rules?.forEach { td.rules.add(convert(it)) }
@@ -23,6 +24,8 @@ internal object KSMappingConverter {
     pd.weight = pm.weight
     pd.rules = mutableListOf()
     pm.rules.forEach { pd.rules.add(convert(it)) }
+    pd.recommendations = mutableListOf()
+    pm.recommendations.forEach { pd.recommendations.add(convert(it)) }
     return pd
   }
 
