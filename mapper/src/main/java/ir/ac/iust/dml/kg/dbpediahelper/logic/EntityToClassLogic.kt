@@ -75,7 +75,9 @@ class EntityToClassLogic {
       }
    }
 
-   private fun reloadTreeCache() {
+   public fun getTree(ontologyClass: String) = treeCache.get(ontologyClass)
+
+   public fun reloadTreeCache() {
       treeCache.clear()
       val allClasses = classDao.search(page = 0, pageSize = 0)
       for (ontologyClass in allClasses.data) {

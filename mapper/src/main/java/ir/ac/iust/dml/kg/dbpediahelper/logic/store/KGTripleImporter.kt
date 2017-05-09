@@ -5,6 +5,7 @@ import ir.ac.iust.dml.kg.access.dao.file.FileFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
+import ir.ac.iust.dml.kg.dbpediahelper.logic.EntityToClassLogic
 import ir.ac.iust.dml.kg.dbpediahelper.logic.TripleImporter
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.entities.MapRule
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
@@ -22,6 +23,7 @@ class KGTripleImporter {
   private val logger = Logger.getLogger(this.javaClass)!!
   @Autowired private lateinit var holder: KSMappingHolder
   @Autowired private lateinit var tripleDao: FkgTripleDao
+  @Autowired private lateinit var entityToClassLogic: EntityToClassLogic
   private val transformers = MappingTransformers()
 
   fun writeTriples(storeType: TripleImporter.StoreType = TripleImporter.StoreType.none) {
@@ -44,7 +46,7 @@ class KGTripleImporter {
 
     store.deleteAll()
 
-    val uniqueEntities = mutableSetOf<String>()
+    val entityTree = mutableMapOf<String, MutableSet<String>>()
     val notSeenTemplates = mutableMapOf<String, Int>()
     val notSeenProperties = mutableMapOf<String, Int>()
     var numberOfMapped = 0
@@ -52,6 +54,7 @@ class KGTripleImporter {
 
     val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
     val startTime = System.currentTimeMillis()
+    entityToClassLogic.reloadTreeCache()
     var tripleNumber = 0
     result.forEachIndexed { index, p ->
       TripleJsonFileReader(p).use { reader ->
@@ -74,7 +77,12 @@ class KGTripleImporter {
 
             //generate template-specific rules in first time of object
             val templateMapping = holder.getTemplateMapping(normalizedTemplate)
-            if (!uniqueEntities.contains(triple.subject!!)) {
+
+            val newClassTree = entityToClassLogic.getTree(templateMapping.ontologyClass)!!
+            entityTree.getOrPut(triple.subject!!, { mutableSetOf() }).add(newClassTree)
+
+
+            if (!entityTree.contains(triple.subject!!)) {
               if (templateMapping.rules!!.isEmpty()) {
                 val old = notSeenTemplates.getOrDefault(normalizedTemplate, 0)
                 notSeenTemplates[normalizedTemplate] = old + 1
@@ -84,7 +92,6 @@ class KGTripleImporter {
                 store.saveTriple(source = triple.source!!, subject = triple.subject!!,
                     objeck = triple.objekt!!, rule = it)
               }
-              uniqueEntities.add(triple.subject!!)
             }
 
             val propertyMapping = templateMapping.properties!![property]
@@ -113,6 +120,25 @@ class KGTripleImporter {
         }
       }
     }
+
+    entityTree.forEach { entity, ontologyClass ->
+      var longestTree = listOf<String>("Thing")
+      val allClasses = mutableSetOf<String>()
+
+      ontologyClass.forEach {
+        val t = it.split('/')
+        if (t.size > longestTree.size) longestTree = t
+        allClasses.addAll(t)
+      }
+
+      store.saveRawTriple(entity, entity, PrefixService.getFkgOntologyClass(longestTree.last()),
+          "fkgo:instanceOf")
+
+      allClasses.forEach {
+        store.saveRawTriple(entity, entity, PrefixService.getFkgOntologyClass(it), "rdf:type")
+      }
+    }
+
     if (store is KnowledgeStoreFkgTripleDaoImpl) store.flush()
     if (store is VirtuosoFkgTripleDaoImpl) store.close()
 

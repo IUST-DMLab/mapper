@@ -45,6 +45,8 @@ class KSMappingHolder {
       tm.weight = it.weight
       tm.template = it.template
       tm.rules = it.rules.map { KSMappingConverter.convert(it) }.toMutableSet()
+      tm.ontologyClass = (it.rules.filter { it.predicate == "rdf:type" }
+          .firstOrNull()?.constant ?: "fkgo:Thing").substringAfterLast(":")
       it.properties.forEach { pm ->
         tm.properties!![pm.property] = PropertyMapping(
             property = pm.property, weight = pm.weight,
