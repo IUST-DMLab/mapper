@@ -17,97 +17,96 @@ import java.util.*
 
 class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
 
-   private val logger = Logger.getLogger(this.javaClass)!!
-   val tripleApi: V1triplesApi
-   val buffer = mutableListOf<TripleData>()
+  private val logger = Logger.getLogger(this.javaClass)!!
+  val tripleApi: V1triplesApi
+  val buffer = mutableListOf<TripleData>()
 
-   init {
-      val client = ApiClient()
-      client.basePath = ConfigReader.getString("knowledge.store.url", "http://localhost:8091/rs")
-      tripleApi = V1triplesApi(client)
-   }
+  init {
+    val client = ApiClient()
+    client.basePath = ConfigReader.getString("knowledge.store.url", "http://localhost:8091/rs")
+    client.connectTimeout = 10000
+    tripleApi = V1triplesApi(client)
+  }
 
-   fun flush() {
-      while (buffer.isNotEmpty()) {
-         try {
-            logger.info("flushing ...")
-           tripleApi.batchInsert2(buffer)
-            buffer.clear()
-         } catch (e: Throwable) {
-            logger.error(e)
-         }
+  fun flush() {
+    while (buffer.isNotEmpty()) {
+      try {
+        logger.info("flushing ...")
+        if (tripleApi.batchInsert2(buffer)) buffer.clear()
+      } catch (e: Throwable) {
+        logger.error(e)
       }
-   }
+    }
+  }
 
-   override fun save(t: FkgTriple, mapping: FkgPropertyMapping?) {
-      if (t.objekt == null || t.objekt!!.trim().isEmpty()) {
-         logger.error("short triple here: ${t.source} ${t.predicate} ${t.objekt}")
-         return
+  override fun save(t: FkgTriple, mapping: FkgPropertyMapping?) {
+    if (t.objekt == null || t.objekt!!.trim().isEmpty()) {
+      logger.error("short triple here: ${t.source} ${t.predicate} ${t.objekt}")
+      return
+    }
+    if (t.objekt!!.length > 200) {
+      logger.error("too long triple here: ${t.source} ${t.predicate} ${t.objekt}")
+      return
+    }
+    val data = TripleData()
+    data.context = "http://fkg.iust.ac.ir/"
+    data.module = "wiki"
+    data.urls = Collections.singletonList(t.source)
+    data.subject = t.subject
+    data.predicate = if (!t.predicate!!.contains("://")) PrefixService.prefixToUri(t.predicate) else t.predicate
+    if (!PrefixService.isUrlFast(t.predicate)) {
+      logger.error(data.predicate + ": " + t.predicate)
+      return
+    }
+
+    val objectData = TypedValueData()
+    objectData.type =
+        if (PrefixService.isUrlFast(t.objekt))
+          TypedValueData.TypeEnum.RESOURCE
+        else TypedValueData.TypeEnum.STRING
+
+    objectData.value = t.objekt
+    objectData.lang =
+        if (t.language == null) LanguageChecker.detectLanguage(objectData.value)
+        else t.language!!
+    data.`object` = objectData
+
+    if (mapping != null) {
+      data.precession = if (mapping.language == "en") 1.0 else mapping.status?.getPrecession()
+      data.parameters = mapOf(
+          "templateName" to mapping.templateName.toString(),
+          "templateProperty" to mapping.templateProperty.toString(),
+          "templatePropertyLanguage" to mapping.templatePropertyLanguage.toString(),
+          "ontologyClass" to mapping.ontologyClass.toString(),
+          "ontologyProperty" to mapping.ontologyProperty.toString(),
+          "language" to mapping.language.toString(),
+          "status" to mapping.status.toString(),
+          "tupleCount" to mapping.tupleCount.toString(),
+          "approved" to mapping.approved.toString()
+      )
+    }
+
+    buffer.add(data)
+    if (buffer.size > 10000) {
+      try {
+        logger.info("batch insert ...")
+        if (tripleApi.batchInsert2(buffer)) buffer.clear()
+      } catch (th: Throwable) {
+        logger.error(th)
       }
-      if (t.objekt!!.length > 200) {
-         logger.error("too long triple here: ${t.source} ${t.predicate} ${t.objekt}")
-         return
-      }
-      val data = TripleData()
-      data.context = "http://fkg.iust.ac.ir/"
-      data.module = "wiki"
-      data.urls = Collections.singletonList(t.source)
-      data.subject = t.subject
-      data.predicate = if (!t.predicate!!.contains("://")) PrefixService.prefixToUri(t.predicate) else t.predicate
-      if (!PrefixService.isUrlFast(t.predicate)) {
-         logger.error(data.predicate + ": " + t.predicate)
-         return
-      }
+    }
+  }
 
-      val objectData = TypedValueData()
-      objectData.type =
-            if (PrefixService.isUrlFast(t.objekt))
-               TypedValueData.TypeEnum.RESOURCE
-            else TypedValueData.TypeEnum.STRING
+  override fun deleteAll() {
+  }
 
-      objectData.value = t.objekt
-      objectData.lang =
-            if (t.language == null) LanguageChecker.detectLanguage(objectData.value)
-            else t.language!!
-      data.`object` = objectData
+  override fun list(pageSize: Int, page: Int): PagedData<FkgTriple> {
+    // TODO not implemented
+    return PagedData(mutableListOf(), 0, 0, 0, 0)
+  }
 
-      if (mapping != null) {
-         data.precession = if (mapping.language == "en") 1.0 else mapping.status?.getPrecession()
-         data.parameters = mapOf(
-               "templateName" to mapping.templateName.toString(),
-               "templateProperty" to mapping.templateProperty.toString(),
-               "templatePropertyLanguage" to mapping.templatePropertyLanguage.toString(),
-               "ontologyClass" to mapping.ontologyClass.toString(),
-               "ontologyProperty" to mapping.ontologyProperty.toString(),
-               "language" to mapping.language.toString(),
-               "status" to mapping.status.toString(),
-               "tupleCount" to mapping.tupleCount.toString(),
-               "approved" to mapping.approved.toString()
-         )
-      }
-
-      buffer.add(data)
-      if (buffer.size > 10000) {
-         try {
-            logger.info("batch insert ...")
-           tripleApi.batchInsert2(buffer)
-            buffer.clear()
-         } catch (th: Throwable) {
-            logger.error(th)
-         }
-      }
-   }
-
-   override fun deleteAll() {
-   }
-
-   override fun list(pageSize: Int, page: Int): PagedData<FkgTriple> {
-      // TODO not implemented
-      return PagedData(mutableListOf(), 0, 0, 0, 0)
-   }
-
-   override fun read(subject: String?, predicate: String?, objekt: String?, status: MappingStatus?): MutableList<FkgTriple> {
-      // TODO not implemented
-      return mutableListOf()
-   }
+  override fun read(subject: String?, predicate: String?, objekt: String?, status: MappingStatus?): MutableList<FkgTriple> {
+    // TODO not implemented
+    return mutableListOf()
+  }
 }

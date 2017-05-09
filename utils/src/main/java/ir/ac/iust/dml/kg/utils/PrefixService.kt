@@ -14,6 +14,12 @@ object PrefixService {
    val KG_ONTOLOGY_PREFIX = "fkgo"
    val KG_AUTO_PROPERTY_PREFIX = "fkgp"
 
+  val PROPERTY_URI = "rdf:Property"
+  val PROPERTY_LABEL_URL = "rdfs:label"
+  val PROPERTY_DOMAIN_URL = "rdfs:domain"
+  val TYPE_URL = "rdf:type"
+  val PROPERTY_VARIANT_LABEL_URL = "fkgo:variantLabel"
+
    init {
       reload()
    }

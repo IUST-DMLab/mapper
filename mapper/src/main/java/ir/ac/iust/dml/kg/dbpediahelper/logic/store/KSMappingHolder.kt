@@ -32,6 +32,8 @@ class KSMappingHolder {
     mappingApi = V1mappingsApi(client)
   }
 
+  fun all() = maps.values
+
   fun writeToKS() {
     mappingApi.batchInsert1(maps.values.map { KSMappingConverter.convert(it) })
   }

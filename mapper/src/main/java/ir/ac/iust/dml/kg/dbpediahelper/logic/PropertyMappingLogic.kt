@@ -189,11 +189,11 @@ class PropertyMappingLogic {
       var relationNumber = 0
       var page = 0
 
-      val PROPERTY_URI = PrefixService.prefixToUri("rdf:Property")
-      val RDFS_LABEL_URL = PrefixService.prefixToUri("rdfs:label")
-      val RDFS_DOMAIN_URL = PrefixService.prefixToUri("rdfs:domain")
-      val RDF_TYPE_URL = PrefixService.prefixToUri("rdf:type")
-      val VARIANT_LABEL_URL = PrefixService.getFkgOntologyPropertyUrl("variant_label")
+      val PROPERTY_URI = PrefixService.prefixToUri(PrefixService.PROPERTY_URI)
+      val PROPERTY_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_LABEL_URL)
+      val PROPERTY_DOMAIN_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_DOMAIN_URL)
+      val TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)
+      val PROPERTY_VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_VARIANT_LABEL_URL)
 
       do {
          val data = dao.search(pageSize = 100, page = page++, language = null,
@@ -215,10 +215,10 @@ class PropertyMappingLogic {
                val label = relation.templateProperty!!.replace('_', ' ')
                if (!addedRelations.contains(property)) {
                   knowledgeStoreDao.save(FkgTriple(
-                        subject = uri, predicate = RDF_TYPE_URL, objekt = PROPERTY_URI
+                      subject = uri, predicate = TYPE_URL, objekt = PROPERTY_URI
                   ), null)
                   knowledgeStoreDao.save(FkgTriple(
-                        subject = uri, predicate = RDFS_LABEL_URL, objekt = label,
+                      subject = uri, predicate = PROPERTY_LABEL_URL, objekt = label,
                         language = relation.templatePropertyLanguage
                   ), null)
                   addedRelations.add(property)
@@ -227,13 +227,13 @@ class PropertyMappingLogic {
                val propertyAndLabel = property + "~" + label
                if (!addedLabels.contains(propertyAndLabel)) {
                   knowledgeStoreDao.save(FkgTriple(
-                        subject = uri, predicate = VARIANT_LABEL_URL,
+                      subject = uri, predicate = PROPERTY_VARIANT_LABEL_URL,
                         objekt = label, language = relation.templatePropertyLanguage
                   ), null)
                   addedRelations.add(property)
                }
                knowledgeStoreDao.save(FkgTriple(
-                     subject = uri, predicate = RDFS_DOMAIN_URL,
+                   subject = uri, predicate = PROPERTY_DOMAIN_URL,
                      objekt = PrefixService.convertFkgOntology(relation.ontologyClass!!)
                ), null)
             } catch (e: Throwable) {

@@ -139,13 +139,54 @@ class KGTripleImporter {
       }
     }
 
+    data class PredicateData(var labels: MutableMap<String, Double> = mutableMapOf(),
+                             var domains: MutableSet<String> = mutableSetOf())
+
+    val predicateData = mutableMapOf<String, PredicateData>()
+
+    holder.all().forEach { templateMapping ->
+      templateMapping.properties!!.values.forEach { propertyMapping ->
+        val label = propertyMapping.property!!.toLowerCase().replace('_', ' ')
+        propertyMapping.rules.forEach {
+          val data = predicateData.getOrPut(it.predicate!!, { PredicateData() })
+          data.labels[label] = (data.labels[label] ?: 0.0) + (propertyMapping.weight ?: 0.0)
+          data.domains.add(templateMapping.ontologyClass)
+        }
+      }
+    }
+
+    val PROPERTY_TYPE_URI = PrefixService.prefixToUri(PrefixService.PROPERTY_URI)!!
+    val PROPERTY_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_LABEL_URL)!!
+    val PROPERTY_DOMAIN_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_DOMAIN_URL)!!
+    val TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)!!
+    val PROPERTY_VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_VARIANT_LABEL_URL)!!
+
+    predicateData.forEach { predicate, data ->
+      val labels = data.labels.map { Pair(it.key, it.value) }.sortedByDescending { it.second }
+      val pu = PrefixService.prefixToUri(predicate)!!
+      if (!pu.contains("://")) {
+        logger.error("wrong predicate: $pu")
+        return@forEach
+      }
+      store.saveRawTriple(source = pu, subject = pu, property = TYPE_URL, objeck = PROPERTY_TYPE_URI)
+      if (labels.isNotEmpty())
+        store.saveRawTriple(source = pu, subject = pu, property = PROPERTY_LABEL_URL, objeck = labels[0].first)
+      labels.forEach {
+        store.saveRawTriple(source = pu, subject = pu, property = PROPERTY_VARIANT_LABEL_URL, objeck = it.first)
+      }
+      data.domains.forEach {
+        store.saveRawTriple(source = pu, subject = pu, property = PROPERTY_DOMAIN_URL,
+            objeck = PrefixService.getFkgOntologyClassUrl(it))
+      }
+    }
+
     if (store is KnowledgeStoreFkgTripleDaoImpl) store.flush()
     if (store is VirtuosoFkgTripleDaoImpl) store.close()
 
-    logger.warn("number of not seen templates ${notSeenTemplates.size}")
-    logger.warn("number of not seen properties ${notSeenProperties.size}")
-    logger.warn("number of not mapped properties $numberOfMapped")
-    logger.warn("number of mapped is $numberOfMapped")
+    logger.info("number of not seen templates ${notSeenTemplates.size}")
+    logger.info("number of not seen properties ${notSeenProperties.size}")
+    logger.info("number of not mapped properties $numberOfMapped")
+    logger.info("number of mapped is $numberOfMapped")
   }
 
   private fun FkgTripleDao.saveTriple(source: String, subject: String, objeck: String, rule: MapRule) {
@@ -160,5 +201,9 @@ class KGTripleImporter {
   private fun FkgTripleDao.saveRawTriple(source: String, subject: String, objeck: String, property: String) {
     this.save(FkgTriple(source = source, subject = PrefixService.convertFkgResource(subject),
         predicate = PrefixService.convertFkgProperty(property), objekt = objeck), null)
+  }
+
+  private fun FkgTripleDao.saveTriple(source: String, subject: String, objeck: String, property: String) {
+    this.save(FkgTriple(source = source, subject = subject, predicate = property, objekt = objeck), null)
   }
 }
