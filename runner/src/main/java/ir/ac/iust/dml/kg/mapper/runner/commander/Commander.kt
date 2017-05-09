@@ -27,6 +27,7 @@ class Commander {
         "writeStats" -> services.writeStats()
         "generateMapping" -> services.generateMapping()
         "triples" -> services.triples(TripleImporter.StoreType.valueOf(arg!!))
+        "kgTriples" -> services.kgTriples(TripleImporter.StoreType.valueOf(arg!!))
         "redirects" -> services.redirects()
         "entities" -> services.entities()
         "relations" -> services.relations()

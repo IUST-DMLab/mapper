@@ -3,6 +3,7 @@ package ir.ac.iust.dml.kg.mapper.runner.web.rest;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.*;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.ExportData;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.TemplateToOntologyExporter;
+import ir.ac.iust.dml.kg.dbpediahelper.logic.store.KGTripleImporter;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.KSMappingHolder;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.MigrationManager;
 import ir.ac.iust.dml.kg.utils.PrefixService;
@@ -33,6 +34,8 @@ public class MappingHelperRestServices {
   private MigrationManager migrationManager;
   @Autowired
   private KSMappingHolder ksMappingHolder;
+  @Autowired
+  private KGTripleImporter kgTripleImporter;
 
   @RequestMapping("/migrate")
   public String migrate() throws Exception {
@@ -86,6 +89,12 @@ public class MappingHelperRestServices {
   @RequestMapping("/triples")
   public String triples(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
     tripleImporter.processTripleInputFiles(type);
+    return "Imported!";
+  }
+
+  @RequestMapping("/kgTriples")
+  public String kgTriples(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
+    kgTripleImporter.writeTriples(type);
     return "Imported!";
   }
 
