@@ -4,10 +4,7 @@ import ir.ac.iust.dml.kg.access.dao.FkgPropertyMappingDao
 import ir.ac.iust.dml.kg.access.dao.FkgTemplateMappingDao
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.entities.MapRule
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.entities.ValueType
-import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
-import ir.ac.iust.dml.kg.services.client.ApiClient
-import ir.ac.iust.dml.kg.services.client.swagger.V1mappingsApi
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -18,23 +15,14 @@ class MigrationManager {
   private val logger = Logger.getLogger(this.javaClass)!!
   @Autowired private lateinit var templateDao: FkgTemplateMappingDao
   @Autowired private lateinit var propertyDao: FkgPropertyMappingDao
-  @Autowired private lateinit var holder: MappingHolder
-  private val mappingApi: V1mappingsApi
-
-  init {
-    val client = ApiClient()
-    client.basePath = ConfigReader.getString("knowledge.store.url", "http://localhost:8091/rs")
-    mappingApi = V1mappingsApi(client)
-  }
+  @Autowired private lateinit var holder: KSMappingHolder
 
   fun migrate() {
     migrateTemplateMapping()
     migratePropertyMapping()
   }
 
-  fun save() {
-    mappingApi.batchInsert1(holder.getAll().map { KSMappingConverter.convert(it) })
-  }
+  fun save() = holder.writeToKS()
 
   val validTemplatePrefixes = mapOf(
       "en" to listOf("infobox ", "taxobox ", "chembox ", "reactionbox ", "ionbox ", "drugbox ", "geobox ",

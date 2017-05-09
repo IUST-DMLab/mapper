@@ -3,6 +3,7 @@ package ir.ac.iust.dml.kg.dbpediahelper.logic.store
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.entities.MapRule
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.entities.PropertyMapping
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.entities.TemplateMapping
+import ir.ac.iust.dml.kg.dbpediahelper.logic.store.entities.ValueType
 import ir.ac.iust.dml.kg.services.client.swagger.model.MapRuleData
 import ir.ac.iust.dml.kg.services.client.swagger.model.PropertyData
 import ir.ac.iust.dml.kg.services.client.swagger.model.TemplateData
@@ -39,4 +40,8 @@ internal object KSMappingConverter {
     return mrd
   }
 
+  internal fun convert(it: ir.ac.iust.dml.kg.services.client.swagger.model.MapRule)
+      = MapRule(predicate = it.predicate,
+      transform = it.transform, constant = it.constant, unit = it.unit,
+      type = ValueType.valueOf(it.type.name.toLowerCase().capitalize()))
 }
