@@ -50,11 +50,25 @@ class KGTripleImporter {
     val notSeenTemplates = mutableMapOf<String, Int>()
     val notSeenProperties = mutableMapOf<String, Int>()
     var numberOfMapped = 0
+    var numberOfMappedInTree = 0
     var numberOfNotMapped = 0
 
     val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
     val startTime = System.currentTimeMillis()
     entityToClassLogic.reloadTreeCache()
+
+    val classMaps = mutableMapOf<String, MapRule>()
+    holder.all().forEach { templateMapping ->
+      templateMapping.properties!!.forEach { property, mapping ->
+        val tree = entityToClassLogic.getChildren(templateMapping.ontologyClass) ?: mutableListOf()
+        tree.forEach {
+          ontologyClass ->
+          if (mapping.rules.size == 1)
+            classMaps[ontologyClass + "~" + property] = mapping.rules.first()
+        }
+      }
+    }
+
     var tripleNumber = 0
     result.forEachIndexed { index, p ->
       TripleJsonFileReader(p).use { reader ->
@@ -81,7 +95,6 @@ class KGTripleImporter {
             val newClassTree = entityToClassLogic.getTree(templateMapping.ontologyClass)!!
             entityTree.getOrPut(triple.subject!!, { mutableSetOf() }).add(newClassTree)
 
-
             if (!entityTree.contains(triple.subject!!)) {
               if (templateMapping.rules!!.isEmpty()) {
                 val old = notSeenTemplates.getOrDefault(normalizedTemplate, 0)
@@ -103,9 +116,16 @@ class KGTripleImporter {
                 val old = notSeenProperties.getOrDefault(key, 0)
                 notSeenProperties[key] = old + 1
               }
-              numberOfNotMapped++
-              store.saveRawTriple(source = triple.source!!, subject = triple.subject!!,
-                  objeck = triple.objekt!!, property = property)
+              val key = templateMapping.ontologyClass + "~" + property
+              if (classMaps.containsKey(key)) {
+                numberOfMappedInTree++
+                store.saveTriple(source = triple.source!!, subject = triple.subject!!,
+                    objeck = triple.objekt!!, rule = classMaps[key]!!)
+              } else {
+                numberOfNotMapped++
+                store.saveRawTriple(source = triple.source!!, subject = triple.subject!!,
+                    objeck = triple.objekt!!, property = property)
+              }
             } else {
               numberOfMapped++
               propertyMapping.rules.forEach {
@@ -186,6 +206,7 @@ class KGTripleImporter {
     logger.info("number of not seen templates ${notSeenTemplates.size}")
     logger.info("number of not seen properties ${notSeenProperties.size}")
     logger.info("number of not mapped properties $numberOfMapped")
+    logger.info("number of mapped in tree $numberOfMappedInTree")
     logger.info("number of mapped is $numberOfMapped")
   }
 

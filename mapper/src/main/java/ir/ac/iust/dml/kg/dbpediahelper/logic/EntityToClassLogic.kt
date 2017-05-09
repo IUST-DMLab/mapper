@@ -29,6 +29,7 @@ class EntityToClassLogic {
    @Autowired lateinit var classDao: FkgClassDao
    private val logger = Logger.getLogger(this.javaClass)!!
    private val treeCache = mutableMapOf<String, String>()
+   private val childrenCache = mutableMapOf<String, List<String>>()
    val knowledgeStoreDao = KnowledgeStoreFkgTripleDaoImpl()
 
    fun load() {
@@ -77,11 +78,24 @@ class EntityToClassLogic {
 
    public fun getTree(ontologyClass: String) = treeCache.get(ontologyClass)
 
+   fun getChildren(ontologyClass: String) = childrenCache[ontologyClass]
+
    public fun reloadTreeCache() {
       treeCache.clear()
       val allClasses = classDao.search(page = 0, pageSize = 0)
       for (ontologyClass in allClasses.data) {
          treeCache[ontologyClass.name!!] = getTree(ontologyClass)!!
+         val children = mutableListOf<String>()
+         fillChildren(ontologyClass, children)
+         childrenCache[ontologyClass.name!!] = children
+      }
+   }
+
+   private fun fillChildren(ontologyClass: FkgClass, list: MutableList<String> = mutableListOf()) {
+      val children = classDao.getChildren(ontologyClass.id!!)
+      children.forEach {
+         list.add(it.name!!)
+         fillChildren(it, list)
       }
    }
 
