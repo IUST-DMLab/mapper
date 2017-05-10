@@ -161,7 +161,7 @@ class KGTripleImporter {
         allClasses.addAll(t)
       }
 
-      store.saveRawTripleD(entity, entity, entity.substringAfterLast('/').replace('_', ' ').trim(),
+      store.saveRawTriple(entity, entity, entity.substringAfterLast('/').replace('_', ' ').trim(),
           RESOURCE_LABEL_URL)
 
       store.saveRawTriple(entity, entity, PrefixService.getFkgOntologyClass(longestTree.first()),
@@ -218,20 +218,15 @@ class KGTripleImporter {
   }
 
   private fun FkgTripleDao.saveTriple(source: String, subject: String, objeck: String, rule: MapRule) {
-//    val value = if (rule.transform != null) {
-//      MappingTransformers::class.java.getMethod(rule.transform, String::class.java).invoke(transformers, objeck)
-//    } else if (rule.constant != null) rule.constant
-//    else objeck
-//    this.save(FkgTriple(source = source, subject = subject,
-//        predicate = PrefixService.prefixToUri(rule.predicate), objekt = value.toString()), null)
+    val value = if (rule.transform != null) {
+      MappingTransformers::class.java.getMethod(rule.transform, String::class.java).invoke(transformers, objeck)
+    } else if (rule.constant != null) rule.constant
+    else objeck
+    this.save(FkgTriple(source = source, subject = subject,
+        predicate = PrefixService.prefixToUri(rule.predicate), objekt = value.toString()), null)
   }
 
   private fun FkgTripleDao.saveRawTriple(source: String, subject: String, objeck: String, property: String) {
-//    this.save(FkgTriple(source = source, subject = subject,
-//        predicate = PrefixService.convertFkgProperty(property), objekt = objeck), null)
-  }
-
-  private fun FkgTripleDao.saveRawTripleD(source: String, subject: String, objeck: String, property: String) {
     this.save(FkgTriple(source = source, subject = subject,
         predicate = PrefixService.convertFkgProperty(property), objekt = objeck), null)
   }
