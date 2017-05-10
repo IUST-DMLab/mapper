@@ -50,7 +50,7 @@ class RedirectAmbigutyLogic {
       val WIKI_PAGE_REDIRECT_URL = PrefixService.getFkgOntologyPropertyUrl("wikiPageRedirects")
      val DBO_WIKI_DISAMBIGUATED_FROM = PrefixService.prefixToUri("fkgo:wikiDisambiguatedFrom")
 
-      var files = PathWalker.getPath(redirectsFolder)
+     var files = PathWalker.getPath(redirectsFolder, Regex("[01]-redirects.json"))
       var i = 0
       files.forEach {
          try {
