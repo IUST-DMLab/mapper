@@ -24,7 +24,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
   init {
     val client = ApiClient()
     client.basePath = ConfigReader.getString("knowledge.store.url", "http://localhost:8091/rs")
-    client.connectTimeout = 10000
+    client.connectTimeout = 120000
     tripleApi = V1triplesApi(client)
   }
 
@@ -87,7 +87,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
     }
 
     buffer.add(data)
-    if (buffer.size > 10000) {
+    if (buffer.size > 1000) {
       try {
         logger.info("batch insert ...")
         if (tripleApi.batchInsert2(buffer)) buffer.clear()

@@ -88,22 +88,24 @@ class KGTripleImporter {
 
             val normalizedTemplate = triple.templateNameFull!!.toLowerCase().replace('_', ' ')
             val property = triple.predicate!!
+            val subject = PrefixService.convertFkgResource(triple.subject!!)
+            val objekt = PrefixService.convertFkgResource(triple.objekt!!)
 
             //generate template-specific rules in first time of object
             val templateMapping = holder.getTemplateMapping(normalizedTemplate)
 
             val newClassTree = entityToClassLogic.getTree(templateMapping.ontologyClass)!!
-            entityTree.getOrPut(triple.subject!!, { mutableSetOf() }).add(newClassTree)
+            entityTree.getOrPut(subject, { mutableSetOf() }).add(newClassTree)
 
-            if (!entityTree.contains(triple.subject!!)) {
+            if (!entityTree.contains(subject)) {
               if (templateMapping.rules!!.isEmpty()) {
                 val old = notSeenTemplates.getOrDefault(normalizedTemplate, 0)
                 notSeenTemplates[normalizedTemplate] = old + 1
               }
               templateMapping.rules!!.forEach {
                 numberOfMapped++
-                store.saveTriple(source = triple.source!!, subject = triple.subject!!,
-                    objeck = triple.objekt!!, rule = it)
+                store.saveTriple(source = triple.source!!, subject = subject,
+                    objeck = objekt, rule = it)
               }
             }
 
@@ -119,18 +121,18 @@ class KGTripleImporter {
               val key = templateMapping.ontologyClass + "~" + property
               if (classMaps.containsKey(key)) {
                 numberOfMappedInTree++
-                store.saveTriple(source = triple.source!!, subject = triple.subject!!,
-                    objeck = triple.objekt!!, rule = classMaps[key]!!)
+                store.saveTriple(source = triple.source!!, subject = subject,
+                    objeck = objekt, rule = classMaps[key]!!)
               } else {
                 numberOfNotMapped++
-                store.saveRawTriple(source = triple.source!!, subject = triple.subject!!,
-                    objeck = triple.objekt!!, property = property)
+                store.saveRawTriple(source = triple.source!!, subject = subject,
+                    objeck = objekt, property = property)
               }
             } else {
               numberOfMapped++
               propertyMapping.rules.forEach {
-                store.saveTriple(source = triple.source!!, subject = triple.subject!!,
-                    objeck = triple.objekt!!, rule = it)
+                store.saveTriple(source = triple.source!!, subject = subject,
+                    objeck = objekt, rule = it)
               }
             }
           } catch (th: Throwable) {
@@ -215,16 +217,12 @@ class KGTripleImporter {
       MappingTransformers::class.java.getMethod(rule.transform, String::class.java).invoke(transformers, objeck)
     } else if (rule.constant != null) rule.constant
     else objeck
-    this.save(FkgTriple(source = source, subject = PrefixService.convertFkgResource(subject),
+    this.save(FkgTriple(source = source, subject = subject,
         predicate = PrefixService.prefixToUri(rule.predicate), objekt = value.toString()), null)
   }
 
   private fun FkgTripleDao.saveRawTriple(source: String, subject: String, objeck: String, property: String) {
-    this.save(FkgTriple(source = source, subject = PrefixService.convertFkgResource(subject),
+    this.save(FkgTriple(source = source, subject = subject,
         predicate = PrefixService.convertFkgProperty(property), objekt = objeck), null)
-  }
-
-  private fun FkgTripleDao.saveTriple(source: String, subject: String, objeck: String, property: String) {
-    this.save(FkgTriple(source = source, subject = subject, predicate = property, objekt = objeck), null)
   }
 }
