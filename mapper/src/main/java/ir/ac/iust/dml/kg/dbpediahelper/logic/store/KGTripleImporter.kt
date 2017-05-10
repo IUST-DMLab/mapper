@@ -143,6 +143,14 @@ class KGTripleImporter {
       }
     }
 
+    val PROPERTY_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_LABEL_URL)!!
+    val RESOURCE_LABEL_URL = PrefixService.prefixToUri(PrefixService.RESOURCE_LABEL_URL)!!
+    val PROPERTY_INSTANCE_OF_URL_URL = PrefixService.prefixToUri(PrefixService.INSTANCE_OF_URL)!!
+    val PROPERTY_TYPE_URI = PrefixService.prefixToUri(PrefixService.PROPERTY_URI)!!
+    val PROPERTY_DOMAIN_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_DOMAIN_URL)!!
+    val TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)!!
+    val PROPERTY_VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_VARIANT_LABEL_URL)!!
+
     entityTree.forEach { entity, ontologyClass ->
       var longestTree = listOf<String>("Thing")
       val allClasses = mutableSetOf<String>()
@@ -153,8 +161,11 @@ class KGTripleImporter {
         allClasses.addAll(t)
       }
 
+      store.saveRawTripleD(entity, entity, entity.substringAfterLast('/').replace('_', ' ').trim(),
+          RESOURCE_LABEL_URL)
+
       store.saveRawTriple(entity, entity, PrefixService.getFkgOntologyClass(longestTree.first()),
-          "fkgo:instanceOf")
+          PROPERTY_INSTANCE_OF_URL_URL)
 
       allClasses.forEach {
         store.saveRawTriple(entity, entity, PrefixService.getFkgOntologyClass(it), "rdf:type")
@@ -176,12 +187,6 @@ class KGTripleImporter {
         }
       }
     }
-
-    val PROPERTY_TYPE_URI = PrefixService.prefixToUri(PrefixService.PROPERTY_URI)!!
-    val PROPERTY_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_LABEL_URL)!!
-    val PROPERTY_DOMAIN_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_DOMAIN_URL)!!
-    val TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)!!
-    val PROPERTY_VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_VARIANT_LABEL_URL)!!
 
     predicateData.forEach { predicate, data ->
       val labels = data.labels.map { Pair(it.key, it.value) }.sortedByDescending { it.second }
@@ -213,15 +218,20 @@ class KGTripleImporter {
   }
 
   private fun FkgTripleDao.saveTriple(source: String, subject: String, objeck: String, rule: MapRule) {
-    val value = if (rule.transform != null) {
-      MappingTransformers::class.java.getMethod(rule.transform, String::class.java).invoke(transformers, objeck)
-    } else if (rule.constant != null) rule.constant
-    else objeck
-    this.save(FkgTriple(source = source, subject = subject,
-        predicate = PrefixService.prefixToUri(rule.predicate), objekt = value.toString()), null)
+//    val value = if (rule.transform != null) {
+//      MappingTransformers::class.java.getMethod(rule.transform, String::class.java).invoke(transformers, objeck)
+//    } else if (rule.constant != null) rule.constant
+//    else objeck
+//    this.save(FkgTriple(source = source, subject = subject,
+//        predicate = PrefixService.prefixToUri(rule.predicate), objekt = value.toString()), null)
   }
 
   private fun FkgTripleDao.saveRawTriple(source: String, subject: String, objeck: String, property: String) {
+//    this.save(FkgTriple(source = source, subject = subject,
+//        predicate = PrefixService.convertFkgProperty(property), objekt = objeck), null)
+  }
+
+  private fun FkgTripleDao.saveRawTripleD(source: String, subject: String, objeck: String, property: String) {
     this.save(FkgTriple(source = source, subject = subject,
         predicate = PrefixService.convertFkgProperty(property), objekt = objeck), null)
   }

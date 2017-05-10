@@ -16,9 +16,11 @@ object PrefixService {
 
   val PROPERTY_URI = "rdf:Property"
   val PROPERTY_LABEL_URL = "rdfs:label"
+  val RESOURCE_LABEL_URL = "rdfs:label"
   val PROPERTY_DOMAIN_URL = "rdfs:domain"
   val TYPE_URL = "rdf:type"
   val PROPERTY_VARIANT_LABEL_URL = "fkgo:variantLabel"
+  val INSTANCE_OF_URL = "fkgo:instanceOf"
 
    init {
       reload()
