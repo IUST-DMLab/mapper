@@ -151,7 +151,7 @@ class KGTripleImporter {
         allClasses.addAll(t)
       }
 
-      store.saveRawTriple(entity, entity, PrefixService.getFkgOntologyClass(longestTree.last()),
+      store.saveRawTriple(entity, entity, PrefixService.getFkgOntologyClass(longestTree.first()),
           "fkgo:instanceOf")
 
       allClasses.forEach {
@@ -211,20 +211,21 @@ class KGTripleImporter {
   }
 
   private fun FkgTripleDao.saveTriple(source: String, subject: String, objeck: String, rule: MapRule) {
-    val value = if (rule.transform != null) {
-      MappingTransformers::class.java.getMethod(rule.transform, String::class.java).invoke(transformers, objeck)
-    } else if (rule.constant != null) rule.constant
-    else objeck
-    this.save(FkgTriple(source = source, subject = PrefixService.convertFkgResource(subject),
-        predicate = PrefixService.prefixToUri(rule.predicate), objekt = value.toString()), null)
+//    val value = if (rule.transform != null) {
+//      MappingTransformers::class.java.getMethod(rule.transform, String::class.java).invoke(transformers, objeck)
+//    } else if (rule.constant != null) rule.constant
+//    else objeck
+//    this.save(FkgTriple(source = source, subject = PrefixService.convertFkgResource(subject),
+//        predicate = PrefixService.prefixToUri(rule.predicate), objekt = value.toString()), null)
   }
 
   private fun FkgTripleDao.saveRawTriple(source: String, subject: String, objeck: String, property: String) {
+    if (!property.contains("instanceOf")) return
     this.save(FkgTriple(source = source, subject = PrefixService.convertFkgResource(subject),
         predicate = PrefixService.convertFkgProperty(property), objekt = objeck), null)
   }
 
   private fun FkgTripleDao.saveTriple(source: String, subject: String, objeck: String, property: String) {
-    this.save(FkgTriple(source = source, subject = subject, predicate = property, objekt = objeck), null)
+//    this.save(FkgTriple(source = source, subject = subject, predicate = property, objekt = objeck), null)
   }
 }
