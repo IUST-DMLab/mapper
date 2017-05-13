@@ -262,13 +262,13 @@ class EntityToClassLogic {
                   addedEntities.add(entity)
 
                   knowledgeStoreDao.save(FkgTriple(
-                        subject = PrefixService.convertFkgResource(triple.subject!!),
+                      subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
                         predicate = RDFS_LABEL_URL,
                         objekt = entity
                   ), null)
 
                   knowledgeStoreDao.save(FkgTriple(
-                        subject = PrefixService.convertFkgResource(triple.subject!!),
+                      subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
                         predicate = RDF_TYPE_URL,
                         objekt = RDFS_RESOURCE_CLASS_URL
                   ), null)
@@ -276,20 +276,20 @@ class EntityToClassLogic {
                   val mapping = templateDao.read(triple.templateNameFull!!, null)
                   if (mapping != null) {
                      knowledgeStoreDao.save(FkgTriple(
-                           subject = PrefixService.convertFkgResource(triple.subject!!),
+                         subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
                            predicate = RDF_INSTANCE_OF_URL,
                            objekt = PrefixService.getFkgOntologyClassUrl(mapping.ontologyClass!!)
                      ), null)
 
                      knowledgeStoreDao.save(FkgTriple(
-                           subject = PrefixService.convertFkgResource(triple.subject!!),
+                         subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
                            predicate = CLASS_TREE_URL,
                            objekt = treeCache[mapping.ontologyClass!!]
                      ), null)
 
                      treeCache[mapping.ontologyClass!!]!!.split("/").forEach {
                         knowledgeStoreDao.save(FkgTriple(
-                              subject = PrefixService.convertFkgResource(triple.subject!!),
+                            subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
                               predicate = RDF_TYPE_URL,
                               objekt = PrefixService.getFkgOntologyClassUrl(it)
                         ), null)
@@ -297,12 +297,12 @@ class EntityToClassLogic {
                   } else {
                      val typeUrl = "http://fa.wikipedia.org/wiki/template/" + triple.templateNameFull!!.replace(' ', '_')
                      knowledgeStoreDao.save(FkgTriple(
-                           subject = PrefixService.convertFkgResource(triple.subject!!),
+                         subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
                            predicate = RDF_INSTANCE_OF_URL,
                            objekt = typeUrl
                      ), null)
                      knowledgeStoreDao.save(FkgTriple(
-                           subject = PrefixService.convertFkgResource(triple.subject!!),
+                         subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
                            predicate = RDF_TYPE_URL,
                            objekt = typeUrl
                      ), null)

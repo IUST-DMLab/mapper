@@ -234,7 +234,7 @@ class PropertyMappingLogic {
                }
                knowledgeStoreDao.save(FkgTriple(
                    subject = uri, predicate = PROPERTY_DOMAIN_URL,
-                     objekt = PrefixService.convertFkgOntology(relation.ontologyClass!!)
+                   objekt = PrefixService.convertFkgOntologyUrl(relation.ontologyClass!!)
                ), null)
             } catch (e: Throwable) {
                e.printStackTrace()

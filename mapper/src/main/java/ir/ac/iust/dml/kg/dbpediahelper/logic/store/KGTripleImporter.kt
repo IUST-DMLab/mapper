@@ -88,8 +88,8 @@ class KGTripleImporter {
 
             val normalizedTemplate = triple.templateNameFull!!.toLowerCase().replace('_', ' ')
             val property = triple.predicate!!
-            val subject = PrefixService.convertFkgResource(triple.subject!!)
-            val objekt = PrefixService.convertFkgResource(triple.objekt!!)
+            val subject = PrefixService.convertFkgResourceUrl(triple.subject!!)
+            val objekt = PrefixService.convertFkgResourceUrl(triple.objekt!!)
 
             //generate template-specific rules in first time of object
             val templateMapping = holder.getTemplateMapping(normalizedTemplate)

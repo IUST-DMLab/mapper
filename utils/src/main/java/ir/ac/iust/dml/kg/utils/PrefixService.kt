@@ -45,7 +45,7 @@ object PrefixService {
    }
 
    fun prefixToUri(source: String?): String? {
-      if (source == null || !source.contains(':')) return source
+     if (source == null || !source.contains(':') || source.startsWith("http")) return source
       val splits = source.split(":")
       var address = prefixNames[splits[0]]
       if (address != null && !address.startsWith("http://") && !address.startsWith("https://"))
@@ -71,14 +71,14 @@ object PrefixService {
    fun getFkgOntologyClass(name: String) =
          KG_ONTOLOGY_PREFIX + ":" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, name.replace(' ', '_'))
 
-   fun convertFkgResource(url: String): String {
+  fun convertFkgResourceUrl(url: String): String {
       if (url.startsWith("http://fa.wikipedia.org/wiki/")
             || url.startsWith("fa.wikipedia.org/wiki/"))
          return prefixNames[KG_RESOURCE_PREFIX] + url.substringAfterLast("/")
       return url
    }
 
-   fun convertFkgOntology(url: String): String {
+  fun convertFkgOntologyUrl(url: String): String {
       return prefixNames[KG_ONTOLOGY_PREFIX] + url.substringAfterLast("/")
    }
 
