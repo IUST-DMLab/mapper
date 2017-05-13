@@ -18,7 +18,7 @@ import java.util.*
 class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
 
   private val logger = Logger.getLogger(this.javaClass)!!
-  val FLUSH_SIZE = 5000
+  val FLUSH_SIZE = 1000
   val tripleApi: V1triplesApi
   val buffer = mutableListOf<TripleData>()
 
