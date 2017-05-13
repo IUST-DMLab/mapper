@@ -223,11 +223,13 @@ class KGTripleImporter {
     } else if (rule.constant != null) rule.constant
     else objeck
     this.save(FkgTriple(source = source, subject = subject,
-        predicate = PrefixService.prefixToUri(rule.predicate), objekt = value.toString()), null)
+        predicate = PrefixService.prefixToUri(rule.predicate),
+        objekt = PrefixService.prefixToUri(value.toString())), null)
   }
 
   private fun FkgTripleDao.saveRawTriple(source: String, subject: String, objeck: String, property: String) {
     this.save(FkgTriple(source = source, subject = subject,
-        predicate = PrefixService.convertFkgProperty(property), objekt = objeck), null)
+        predicate = PrefixService.convertFkgProperty(property),
+        objekt = PrefixService.prefixToUri(objeck)), null)
   }
 }
