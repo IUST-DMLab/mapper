@@ -18,14 +18,14 @@ import java.util.*
 class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
 
   private val logger = Logger.getLogger(this.javaClass)!!
-  val FLUSH_SIZE = 20000
+  val FLUSH_SIZE = 5000
   val tripleApi: V1triplesApi
   val buffer = mutableListOf<TripleData>()
 
   init {
     val client = ApiClient()
     client.basePath = ConfigReader.getString("knowledge.store.url", "http://localhost:8091/rs")
-    client.connectTimeout = 120000
+    client.connectTimeout = 1200000
     tripleApi = V1triplesApi(client)
   }
 
