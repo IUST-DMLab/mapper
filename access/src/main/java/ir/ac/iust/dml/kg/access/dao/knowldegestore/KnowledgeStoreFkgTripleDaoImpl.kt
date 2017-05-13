@@ -18,6 +18,7 @@ import java.util.*
 class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
 
   private val logger = Logger.getLogger(this.javaClass)!!
+  val FLUSH_SIZE = 20000
   val tripleApi: V1triplesApi
   val buffer = mutableListOf<TripleData>()
 
@@ -87,7 +88,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
     }
 
     buffer.add(data)
-    if (buffer.size > 1000) {
+    if (buffer.size > FLUSH_SIZE) {
       try {
         logger.info("batch insert ...")
         if (tripleApi.batchInsert2(buffer)) buffer.clear()
