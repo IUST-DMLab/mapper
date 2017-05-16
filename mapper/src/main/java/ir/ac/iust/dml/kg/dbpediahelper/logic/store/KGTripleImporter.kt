@@ -144,6 +144,7 @@ class KGTripleImporter {
       }
     }
 
+    val TYPE_OF_ALL_RESOURCES = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_RESOURCES)!!
     val PROPERTY_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_LABEL_URL)!!
     val RESOURCE_LABEL_URL = PrefixService.prefixToUri(PrefixService.RESOURCE_LABEL_URL)!!
     val PROPERTY_INSTANCE_OF_URL_URL = PrefixService.prefixToUri(PrefixService.INSTANCE_OF_URL)!!
@@ -168,8 +169,10 @@ class KGTripleImporter {
       store.saveRawTriple(entity, entity, PrefixService.getFkgOntologyClass(longestTree.first()),
           PROPERTY_INSTANCE_OF_URL_URL)
 
+      store.saveRawTriple(entity, entity, TYPE_OF_ALL_RESOURCES, TYPE_URL)
+
       allClasses.forEach {
-        store.saveRawTriple(entity, entity, PrefixService.getFkgOntologyClass(it), "rdf:type")
+        store.saveRawTriple(entity, entity, PrefixService.getFkgOntologyClass(it), TYPE_URL)
       }
     }
 

@@ -190,10 +190,10 @@ class PropertyMappingLogic {
       var page = 0
 
       val PROPERTY_URI = PrefixService.prefixToUri(PrefixService.PROPERTY_URI)
-      val PROPERTY_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_LABEL_URL)
+      val LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_LABEL_URL)
       val PROPERTY_DOMAIN_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_DOMAIN_URL)
       val TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)
-      val PROPERTY_VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_VARIANT_LABEL_URL)
+      val VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_VARIANT_LABEL_URL)
 
       do {
          val data = dao.search(pageSize = 100, page = page++, language = null,
@@ -218,7 +218,7 @@ class PropertyMappingLogic {
                       subject = uri, predicate = TYPE_URL, objekt = PROPERTY_URI
                   ), null)
                   knowledgeStoreDao.save(FkgTriple(
-                      subject = uri, predicate = PROPERTY_LABEL_URL, objekt = label,
+                      subject = uri, predicate = LABEL_URL, objekt = label,
                         language = relation.templatePropertyLanguage
                   ), null)
                   addedRelations.add(property)
@@ -227,7 +227,7 @@ class PropertyMappingLogic {
                val propertyAndLabel = property + "~" + label
                if (!addedLabels.contains(propertyAndLabel)) {
                   knowledgeStoreDao.save(FkgTriple(
-                      subject = uri, predicate = PROPERTY_VARIANT_LABEL_URL,
+                      subject = uri, predicate = VARIANT_LABEL_URL,
                         objekt = label, language = relation.templatePropertyLanguage
                   ), null)
                   addedRelations.add(property)
