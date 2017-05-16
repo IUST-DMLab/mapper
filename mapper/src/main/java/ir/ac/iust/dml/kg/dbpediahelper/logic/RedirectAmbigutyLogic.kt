@@ -46,7 +46,7 @@ class RedirectAmbigutyLogic {
     val maxNumberOfRedirects = ConfigReader.getInt("test.mode.max.redirects", "10000000")
     val maxNumberOfDisambiguation = ConfigReader.getInt("test.mode.max.disambiguation", "10000000")
 
-    val VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_VARIANT_LABEL_URL)
+    val VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)
     val REDIRECT_URL = PrefixService.prefixToUri(PrefixService.REDIRECTS_URI)
     val DISAMBIGUATED_FROM = PrefixService.prefixToUri(PrefixService.DISAMBIGUATED_FROM_URI)
 

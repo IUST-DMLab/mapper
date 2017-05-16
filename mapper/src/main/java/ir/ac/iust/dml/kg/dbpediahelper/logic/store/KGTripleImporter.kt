@@ -148,10 +148,12 @@ class KGTripleImporter {
     val PROPERTY_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_LABEL_URL)!!
     val RESOURCE_LABEL_URL = PrefixService.prefixToUri(PrefixService.RESOURCE_LABEL_URL)!!
     val PROPERTY_INSTANCE_OF_URL_URL = PrefixService.prefixToUri(PrefixService.INSTANCE_OF_URL)!!
-    val PROPERTY_TYPE_URI = PrefixService.prefixToUri(PrefixService.PROPERTY_URI)!!
+    val PROPERTY_TYPE_URI = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_PROPERTIES)!!
     val PROPERTY_DOMAIN_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_DOMAIN_URL)!!
     val TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)!!
-    val PROPERTY_VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_VARIANT_LABEL_URL)!!
+    val VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)!!
+
+    entityToClassLogic.writeTree(store)
 
     entityTree.forEach { entity, ontologyClass ->
       var longestTree = listOf<String>("Thing")
@@ -203,7 +205,7 @@ class KGTripleImporter {
       if (labels.isNotEmpty())
         store.saveRawTriple(source = pu, subject = pu, property = PROPERTY_LABEL_URL, objeck = labels[0].first)
       labels.forEach {
-        store.saveRawTriple(source = pu, subject = pu, property = PROPERTY_VARIANT_LABEL_URL, objeck = it.first)
+        store.saveRawTriple(source = pu, subject = pu, property = VARIANT_LABEL_URL, objeck = it.first)
       }
       data.domains.forEach {
         store.saveRawTriple(source = pu, subject = pu, property = PROPERTY_DOMAIN_URL,

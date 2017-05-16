@@ -189,11 +189,11 @@ class PropertyMappingLogic {
       var relationNumber = 0
       var page = 0
 
-      val PROPERTY_URI = PrefixService.prefixToUri(PrefixService.PROPERTY_URI)
+      val PROPERTY_URI = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_PROPERTIES)
       val LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_LABEL_URL)
       val PROPERTY_DOMAIN_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_DOMAIN_URL)
       val TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)
-      val VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_VARIANT_LABEL_URL)
+      val VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)
 
       do {
          val data = dao.search(pageSize = 100, page = page++, language = null,

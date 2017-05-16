@@ -3,6 +3,7 @@ package ir.ac.iust.dml.kg.dbpediahelper.logic
 import ir.ac.iust.dml.kg.access.dao.FkgClassDao
 import ir.ac.iust.dml.kg.access.dao.FkgEntityClassesDao
 import ir.ac.iust.dml.kg.access.dao.FkgTemplateMappingDao
+import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgClass
 import ir.ac.iust.dml.kg.access.entities.FkgEntityClasses
@@ -204,39 +205,13 @@ class EntityToClassLogic {
       }
       reloadTreeCache()
 
-      val RDFS_LABEL_URL = PrefixService.prefixToUri("rdfs:label")
-      val RDFS_RESOURCE_CLASS_URL = PrefixService.prefixToUri("rdfs:Resource")
-      val RDFS_SUBCLASS_OF_URL = PrefixService.prefixToUri("rdfs:subClassOf")
-      val RDF_TYPE_URL = PrefixService.prefixToUri("rdf:type")
-      val OWL_CLASS_URL = PrefixService.prefixToUri("owl:Class")
-      val RDF_INSTANCE_OF_URL = PrefixService.prefixToUri("rdf:instanceOf")
-      val CLASS_TREE_URL = PrefixService.getFkgOntologyPropertyUrl("classTree")
+      val RESOURCE_LABEL_URI = PrefixService.prefixToUri(PrefixService.RESOURCE_LABEL_URL)
+      val RDFS_RESOURCE_CLASS_URL = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_RESOURCES)
+      val RDF_TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)
+      val RDF_INSTANCE_OF_URL = PrefixService.prefixToUri(PrefixService.INSTANCE_OF_URL)
+      val CLASS_TREE_URL = PrefixService.prefixToUri(PrefixService.CLASS_TREE)
 
-      logger.info("writing tree started.")
-      treeCache.forEach { key, value ->
-         val splits = value.split("/")
-         val subjectUrl = PrefixService.getFkgOntologyClassUrl(key)
-         if (splits.size > 1) {
-            knowledgeStoreDao.save(FkgTriple(
-                  subject = subjectUrl,
-                  predicate = RDFS_SUBCLASS_OF_URL,
-                  objekt = PrefixService.getFkgOntologyClassUrl(splits[1])
-            ), null)
-         }
-      }
-
-      val classes = classDao.search(page = 0, pageSize = 0).data
-      classes.forEach {
-         val subjectUrl = PrefixService.getFkgOntologyClassUrl(it.name!!)
-         knowledgeStoreDao.save(FkgTriple(subject = subjectUrl,
-               predicate = RDF_TYPE_URL, objekt = OWL_CLASS_URL), null)
-         knowledgeStoreDao.save(FkgTriple(subject = subjectUrl,
-               predicate = RDFS_LABEL_URL, objekt = it.faLabel, language = "fa"), null)
-         knowledgeStoreDao.save(FkgTriple(subject = subjectUrl,
-               predicate = RDFS_LABEL_URL, objekt = it.faLabel, language = "fa"), null)
-      }
-
-      logger.info("writing tree ended.")
+      writeTree(knowledgeStoreDao)
 
       val addedEntities = mutableSetOf<String>()
       val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
@@ -263,7 +238,7 @@ class EntityToClassLogic {
 
                   knowledgeStoreDao.save(FkgTriple(
                       subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
-                        predicate = RDFS_LABEL_URL,
+                      predicate = RESOURCE_LABEL_URI,
                         objekt = entity
                   ), null)
 
@@ -316,5 +291,39 @@ class EntityToClassLogic {
          }
       }
       knowledgeStoreDao.flush()
+   }
+
+   fun writeTree(dao: FkgTripleDao) {
+
+      val RDFS_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_LABEL_URL)
+      val RDFS_SUBCLASS_OF_URL = PrefixService.prefixToUri(PrefixService.SUB_CLASS_OF)
+      val RDF_TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)
+      val OWL_CLASS_URL = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_CLASSES)
+
+      logger.info("writing tree started.")
+      treeCache.forEach { key, value ->
+         val splits = value.split("/")
+         val subjectUrl = PrefixService.getFkgOntologyClassUrl(key)
+         if (splits.size > 1) {
+            dao.save(FkgTriple(
+                subject = subjectUrl,
+                predicate = RDFS_SUBCLASS_OF_URL,
+                objekt = PrefixService.getFkgOntologyClassUrl(splits[1])
+            ), null)
+         }
+      }
+
+      val classes = classDao.search(page = 0, pageSize = 0).data
+      classes.forEach {
+         val subjectUrl = PrefixService.getFkgOntologyClassUrl(it.name!!)
+         dao.save(FkgTriple(subject = subjectUrl,
+             predicate = RDF_TYPE_URL, objekt = OWL_CLASS_URL), null)
+         dao.save(FkgTriple(subject = subjectUrl,
+             predicate = RDFS_LABEL_URL, objekt = it.faLabel, language = "fa"), null)
+         dao.save(FkgTriple(subject = subjectUrl,
+             predicate = RDFS_LABEL_URL, objekt = it.faLabel, language = "fa"), null)
+      }
+
+      logger.info("writing tree ended.")
    }
 }
