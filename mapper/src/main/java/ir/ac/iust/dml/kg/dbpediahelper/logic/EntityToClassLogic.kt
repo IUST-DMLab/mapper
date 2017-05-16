@@ -12,8 +12,8 @@ import ir.ac.iust.dml.kg.dbpediahelper.logic.data.FkgEntityClassesData
 import ir.ac.iust.dml.kg.dbpediahelper.logic.dump.EntityDataDumpReader
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
+import ir.ac.iust.dml.kg.raw.utils.PrefixService
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
-import ir.ac.iust.dml.kg.utils.PrefixService
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service

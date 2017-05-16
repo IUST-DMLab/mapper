@@ -6,7 +6,7 @@ import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImp
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
-import ir.ac.iust.dml.kg.utils.PrefixService
+import ir.ac.iust.dml.kg.raw.utils.PrefixService
 import org.apache.log4j.Logger
 import org.springframework.stereotype.Service
 import java.io.BufferedReader

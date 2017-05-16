@@ -6,8 +6,8 @@ import ir.ac.iust.dml.kg.access.entities.enumerations.TripleStatisticsType
 import ir.ac.iust.dml.kg.dbpediahelper.logic.dump.StatisticsLogReader
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
+import ir.ac.iust.dml.kg.raw.utils.PropertyNormaller
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
-import ir.ac.iust.dml.kg.utils.PropertyNormaller
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor

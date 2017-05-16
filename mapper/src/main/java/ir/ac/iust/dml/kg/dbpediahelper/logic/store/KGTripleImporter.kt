@@ -10,8 +10,9 @@ import ir.ac.iust.dml.kg.dbpediahelper.logic.TripleImporter
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.entities.MapRule
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
+import ir.ac.iust.dml.kg.raw.utils.PrefixService
+import ir.ac.iust.dml.kg.raw.utils.Transformers
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
-import ir.ac.iust.dml.kg.utils.PrefixService
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -24,7 +25,7 @@ class KGTripleImporter {
   @Autowired private lateinit var holder: KSMappingHolder
   @Autowired private lateinit var tripleDao: FkgTripleDao
   @Autowired private lateinit var entityToClassLogic: EntityToClassLogic
-  private val transformers = MappingTransformers()
+  private val transformers = Transformers()
 
   fun writeTriples(storeType: TripleImporter.StoreType = TripleImporter.StoreType.none) {
     holder.writeToKS()
@@ -219,7 +220,7 @@ class KGTripleImporter {
 
   private fun FkgTripleDao.saveTriple(source: String, subject: String, objeck: String, rule: MapRule) {
     val value = if (rule.transform != null) {
-      MappingTransformers::class.java.getMethod(rule.transform, String::class.java).invoke(transformers, objeck)
+      Transformers::class.java.getMethod(rule.transform, String::class.java).invoke(transformers, objeck)
     } else if (rule.constant != null) rule.constant
     else objeck
     this.save(FkgTriple(source = source, subject = subject,

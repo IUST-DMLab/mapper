@@ -4,7 +4,7 @@ import io.swagger.annotations.Api
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.dbpediahelper.logic.PropertyMappingLogic
 import ir.ac.iust.dml.kg.dbpediahelper.logic.data.FkgPropertyMappingData
-import ir.ac.iust.dml.kg.utils.PrefixService
+import ir.ac.iust.dml.kg.raw.utils.PrefixService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 

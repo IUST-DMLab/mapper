@@ -6,7 +6,7 @@ import ir.ac.iust.dml.kg.dbpediahelper.logic.export.TemplateToOntologyExporter;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.KGTripleImporter;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.KSMappingHolder;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.MigrationManager;
-import ir.ac.iust.dml.kg.utils.PrefixService;
+import ir.ac.iust.dml.kg.raw.utils.PrefixService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;

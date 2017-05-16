@@ -5,8 +5,8 @@ import ir.ac.iust.dml.kg.access.dao.WikipediaPropertyTranslationDao
 import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
+import ir.ac.iust.dml.kg.raw.utils.PrefixService
 import ir.ac.iust.dml.kg.raw.utils.dump.owl.OwlDumpReader
-import ir.ac.iust.dml.kg.utils.PrefixService
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service

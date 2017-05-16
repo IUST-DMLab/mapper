@@ -10,10 +10,10 @@ import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
+import ir.ac.iust.dml.kg.raw.utils.PrefixService
+import ir.ac.iust.dml.kg.raw.utils.PropertyNormaller
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
-import ir.ac.iust.dml.kg.utils.PrefixService
 //import ir.ac.iust.dml.kg.services.client.ApiException
-import ir.ac.iust.dml.kg.utils.PropertyNormaller
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor

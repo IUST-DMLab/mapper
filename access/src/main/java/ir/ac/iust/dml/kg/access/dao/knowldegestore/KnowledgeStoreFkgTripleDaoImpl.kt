@@ -7,11 +7,11 @@ import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
 import ir.ac.iust.dml.kg.raw.utils.PagedData
+import ir.ac.iust.dml.kg.raw.utils.PrefixService
 import ir.ac.iust.dml.kg.services.client.ApiClient
 import ir.ac.iust.dml.kg.services.client.swagger.V1triplesApi
 import ir.ac.iust.dml.kg.services.client.swagger.model.TripleData
 import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValueData
-import ir.ac.iust.dml.kg.utils.PrefixService
 import org.apache.log4j.Logger
 import java.util.*
 
