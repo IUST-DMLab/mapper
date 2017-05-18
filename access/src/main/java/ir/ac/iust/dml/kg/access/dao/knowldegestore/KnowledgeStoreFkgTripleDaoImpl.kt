@@ -40,7 +40,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
     }
   }
 
-  override fun save(t: FkgTriple, mapping: FkgPropertyMapping?) {
+  override fun save(t: FkgTriple, mapping: FkgPropertyMapping?, approved: Boolean) {
     if (t.objekt == null || t.objekt!!.trim().isEmpty()) {
       logger.error("short triple here: ${t.source} ${t.predicate} ${t.objekt}")
       return
@@ -85,6 +85,10 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
           "tupleCount" to mapping.tupleCount.toString(),
           "approved" to mapping.approved.toString()
       )
+    }
+
+    if (approved) {
+      // TODO: approve and write to knowledge store
     }
 
     buffer.add(data)

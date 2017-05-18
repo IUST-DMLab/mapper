@@ -11,7 +11,7 @@ class VirtuosoFkgTripleDaoImpl : FkgTripleDao {
 
    val connector = VirtuosoConnector("http://fkg.iust.ac.ir/")
 
-   override fun save(t: FkgTriple, mapping: FkgPropertyMapping?) {
+   override fun save(t: FkgTriple, mapping: FkgPropertyMapping?, approved: Boolean) {
       if (t.objekt == null || t.objekt!!.trim().isEmpty()) {
          println("short triple here: ${t.source} ${t.predicate} ${t.objekt}")
          return

@@ -205,11 +205,11 @@ class EntityToClassLogic {
       }
       reloadTreeCache()
 
-      val RESOURCE_LABEL_URI = PrefixService.prefixToUri(PrefixService.RESOURCE_LABEL_URL)
-      val RDFS_RESOURCE_CLASS_URL = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_RESOURCES)
-      val RDF_TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)
-      val RDF_INSTANCE_OF_URL = PrefixService.prefixToUri(PrefixService.INSTANCE_OF_URL)
-      val CLASS_TREE_URL = PrefixService.prefixToUri(PrefixService.CLASS_TREE)
+      val LABEL = PrefixService.prefixToUri(PrefixService.LABEL_URL)
+      val TYPE_OF_ALL_RESOURCES = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_RESOURCES)
+      val TYPE = PrefixService.prefixToUri(PrefixService.TYPE_URL)
+      val INSTANCE_OF = PrefixService.prefixToUri(PrefixService.INSTANCE_OF_URL)
+      val CLASS_TREE = PrefixService.prefixToUri(PrefixService.CLASS_TREE)
 
       writeTree(knowledgeStoreDao)
 
@@ -238,34 +238,34 @@ class EntityToClassLogic {
 
                   knowledgeStoreDao.save(FkgTriple(
                       subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
-                      predicate = RESOURCE_LABEL_URI,
+                      predicate = LABEL,
                         objekt = entity
                   ), null)
 
                   knowledgeStoreDao.save(FkgTriple(
                       subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
-                        predicate = RDF_TYPE_URL,
-                        objekt = RDFS_RESOURCE_CLASS_URL
+                      predicate = TYPE,
+                      objekt = TYPE_OF_ALL_RESOURCES
                   ), null)
 
                   val mapping = templateDao.read(triple.templateNameFull!!, null)
                   if (mapping != null) {
                      knowledgeStoreDao.save(FkgTriple(
                          subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
-                           predicate = RDF_INSTANCE_OF_URL,
+                         predicate = INSTANCE_OF,
                            objekt = PrefixService.getFkgOntologyClassUrl(mapping.ontologyClass!!)
                      ), null)
 
                      knowledgeStoreDao.save(FkgTriple(
                          subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
-                           predicate = CLASS_TREE_URL,
+                         predicate = CLASS_TREE,
                            objekt = treeCache[mapping.ontologyClass!!]
                      ), null)
 
                      treeCache[mapping.ontologyClass!!]!!.split("/").forEach {
                         knowledgeStoreDao.save(FkgTriple(
                             subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
-                              predicate = RDF_TYPE_URL,
+                            predicate = TYPE,
                               objekt = PrefixService.getFkgOntologyClassUrl(it)
                         ), null)
                      }
@@ -273,12 +273,12 @@ class EntityToClassLogic {
                      val typeUrl = "http://fa.wikipedia.org/wiki/template/" + triple.templateNameFull!!.replace(' ', '_')
                      knowledgeStoreDao.save(FkgTriple(
                          subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
-                           predicate = RDF_INSTANCE_OF_URL,
+                         predicate = INSTANCE_OF,
                            objekt = typeUrl
                      ), null)
                      knowledgeStoreDao.save(FkgTriple(
                          subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
-                           predicate = RDF_TYPE_URL,
+                         predicate = TYPE,
                            objekt = typeUrl
                      ), null)
                   }
@@ -295,7 +295,7 @@ class EntityToClassLogic {
 
    fun writeTree(dao: FkgTripleDao) {
 
-      val RDFS_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_LABEL_URL)
+      val RDFS_LABEL_URL = PrefixService.prefixToUri(PrefixService.LABEL_URL)
       val RDFS_SUBCLASS_OF_URL = PrefixService.prefixToUri(PrefixService.SUB_CLASS_OF)
       val RDF_TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)
       val OWL_CLASS_URL = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_CLASSES)

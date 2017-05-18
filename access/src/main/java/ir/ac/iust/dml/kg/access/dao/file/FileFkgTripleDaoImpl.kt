@@ -23,7 +23,7 @@ class FileFkgTripleDaoImpl(val path: Path, val flushSize: Int = 1000) : FkgTripl
   var notFlushedTriples = mutableListOf<FkgTriple>()
   var gson = GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create()
 
-   override fun save(t: FkgTriple, mapping: FkgPropertyMapping?) {
+  override fun save(t: FkgTriple, mapping: FkgPropertyMapping?, approved: Boolean) {
     synchronized(notFlushedTriples) {
       notFlushedTriples.add(t)
       if (notFlushedTriples.size > flushSize) {

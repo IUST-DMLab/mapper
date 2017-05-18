@@ -145,10 +145,9 @@ class KGTripleImporter {
     }
 
     val TYPE_OF_ALL_RESOURCES = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_RESOURCES)!!
-    val PROPERTY_LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_LABEL_URL)!!
-    val RESOURCE_LABEL_URL = PrefixService.prefixToUri(PrefixService.RESOURCE_LABEL_URL)!!
-    val PROPERTY_INSTANCE_OF_URL_URL = PrefixService.prefixToUri(PrefixService.INSTANCE_OF_URL)!!
-    val PROPERTY_TYPE_URI = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_PROPERTIES)!!
+    val LABEL = PrefixService.prefixToUri(PrefixService.LABEL_URL)!!
+    val INSTANCE_OF = PrefixService.prefixToUri(PrefixService.INSTANCE_OF_URL)!!
+    val TYPE_OF_ALL_PROPERTIES = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_PROPERTIES)!!
     val PROPERTY_DOMAIN_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_DOMAIN_URL)!!
     val TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)!!
     val VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)!!
@@ -165,11 +164,10 @@ class KGTripleImporter {
         allClasses.addAll(t)
       }
 
-      store.saveRawTriple(entity, entity, entity.substringAfterLast('/').replace('_', ' ').trim(),
-          RESOURCE_LABEL_URL)
+      store.saveRawTriple(entity, entity, entity.substringAfterLast('/').replace('_', ' ').trim(), LABEL)
 
       store.saveRawTriple(entity, entity, PrefixService.getFkgOntologyClass(longestTree.first()),
-          PROPERTY_INSTANCE_OF_URL_URL)
+          INSTANCE_OF)
 
       store.saveRawTriple(entity, entity, TYPE_OF_ALL_RESOURCES, TYPE_URL)
 
@@ -201,9 +199,10 @@ class KGTripleImporter {
         logger.error("wrong predicate: $pu")
         return@forEach
       }
-      store.saveRawTriple(source = pu, subject = pu, property = TYPE_URL, objeck = PROPERTY_TYPE_URI)
+      store.saveRawTriple(source = pu, subject = pu, property = TYPE_URL, objeck = TYPE_OF_ALL_PROPERTIES)
+
       if (labels.isNotEmpty())
-        store.saveRawTriple(source = pu, subject = pu, property = PROPERTY_LABEL_URL, objeck = labels[0].first)
+        store.saveRawTriple(source = pu, subject = pu, property = LABEL, objeck = labels[0].first)
       labels.forEach {
         store.saveRawTriple(source = pu, subject = pu, property = VARIANT_LABEL_URL, objeck = it.first)
       }

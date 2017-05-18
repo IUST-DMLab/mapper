@@ -190,7 +190,7 @@ class PropertyMappingLogic {
       var page = 0
 
       val PROPERTY_URI = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_PROPERTIES)
-      val LABEL_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_LABEL_URL)
+      val LABEL_URL = PrefixService.prefixToUri(PrefixService.LABEL_URL)
       val PROPERTY_DOMAIN_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_DOMAIN_URL)
       val TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)
       val VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)
@@ -214,9 +214,11 @@ class PropertyMappingLogic {
                if (!uri.contains(':')) uri = PrefixService.getFkgOntologyPropertyUrl(uri)
                val label = relation.templateProperty!!.replace('_', ' ')
                if (!addedRelations.contains(property)) {
+
                   knowledgeStoreDao.save(FkgTriple(
                       subject = uri, predicate = TYPE_URL, objekt = PROPERTY_URI
                   ), null)
+
                   knowledgeStoreDao.save(FkgTriple(
                       subject = uri, predicate = LABEL_URL, objekt = label,
                         language = relation.templatePropertyLanguage

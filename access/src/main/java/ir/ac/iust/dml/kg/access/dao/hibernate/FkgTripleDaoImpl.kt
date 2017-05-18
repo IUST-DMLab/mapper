@@ -17,7 +17,7 @@ open class FkgTripleDaoImpl : FkgTripleDao {
    @Autowired
    lateinit var sessionFactory: SessionFactory
 
-   override fun save(t: FkgTriple, mapping: FkgPropertyMapping?) {
+   override fun save(t: FkgTriple, mapping: FkgPropertyMapping?, approved: Boolean) {
       val session = this.sessionFactory.openSession()
       val tx = session.beginTransaction()
       session.saveOrUpdate(t)
