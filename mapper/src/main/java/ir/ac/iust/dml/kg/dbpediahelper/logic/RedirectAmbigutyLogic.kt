@@ -46,8 +46,8 @@ class RedirectAmbigutyLogic {
     val maxNumberOfRedirects = ConfigReader.getInt("test.mode.max.redirects", "10000000")
     val maxNumberOfDisambiguation = ConfigReader.getInt("test.mode.max.disambiguation", "10000000")
 
-    val VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)
-    val REDIRECT_URL = PrefixService.prefixToUri(PrefixService.REDIRECTS_URI)
+    val VARIANT_LABEL = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)
+    val REDIRECT = PrefixService.prefixToUri(PrefixService.REDIRECTS_URI)
     val DISAMBIGUATED_FROM = PrefixService.prefixToUri(PrefixService.DISAMBIGUATED_FROM_URI)
 
     var files = PathWalker.getPath(redirectsFolder, Regex("[01]-redirects.json"))
@@ -62,14 +62,14 @@ class RedirectAmbigutyLogic {
               if (i % 1000 == 0) logger.info("writing redirect $i: $t to $u")
               knowledgeStoreDao.save(FkgTriple(
                   subject = PrefixService.getFkgResourceUrl(u),
-                  predicate = REDIRECT_URL,
+                  predicate = REDIRECT,
                   objekt = "http://fa.wikipedia.org/wiki/" + t.replace(' ', '_')
-              ), null)
+              ), null, true)
               knowledgeStoreDao.save(FkgTriple(
                   subject = PrefixService.getFkgResourceUrl(u),
-                  predicate = VARIANT_LABEL_URL,
+                  predicate = VARIANT_LABEL,
                   objekt = t.replace('_', ' ')
-              ), null)
+              ), null, true)
             }
           }
         }
@@ -96,7 +96,7 @@ class RedirectAmbigutyLogic {
                     predicate = DISAMBIGUATED_FROM,
                     objekt = if (a.title!!.contains("(ابهام زدایی)")) a.title!!.substringBefore("(ابهام زدایی)")
                     else a.title
-                ), null)
+                ), null, true)
               }
             }
           }
