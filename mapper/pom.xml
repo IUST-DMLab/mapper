@@ -22,7 +22,7 @@
   <dependencies>
     <dependency>
       <groupId>ir.ac.iust.dml.kg.mapping</groupId>
-      <artifactId>utils</artifactId>
+      <artifactId>mapping-utils</artifactId>
       <version>${parent.version}</version>
     </dependency>
     <dependency>
