@@ -220,7 +220,7 @@ class KGTripleImporter {
     val store = getStore(storeType, path)
     val maxNumberOfTriples = ConfigReader.getInt("test.mode.max.triples", "10000000")
 
-    val visitedSubjects = mutableSetOf<String>()
+    val visitedSources = mutableSetOf<String>()
 
     val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
 
@@ -234,8 +234,7 @@ class KGTripleImporter {
           try {
             if (triple.subject == null || !triple.subject!!.contains('/')) continue
             if (tripleNumber % 100000 == 0) logger.warn("triple number is $tripleNumber. $index file is $p. ")
-            val subject = PrefixService.convertFkgResourceUrl(triple.subject!!)
-            visitedSubjects.add(subject)
+            visitedSources.add(triple.subject!!)
           } catch (th: Throwable) {
             logger.info("triple: $triple")
             logger.error(th)
@@ -246,12 +245,13 @@ class KGTripleImporter {
 
     val VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)!!
 
-    visitedSubjects.forEach { subject ->
-      var label = subject.substringAfterLast("/").replace('_', ' ')
+    visitedSources.forEach { source ->
+      val subject = PrefixService.convertFkgResourceUrl(source)
+      var label = source.substringAfterLast("/").replace('_', ' ')
 //      store.saveRawTriple(source = subject, subject = subject, property = LABEL, objeck = label)
       if (label.contains('(')) {
         label = label.substringBeforeLast('(').trim()
-        store.saveRawTriple(source = subject, subject = subject, property = VARIANT_LABEL_URL, objeck = label)
+        store.saveRawTriple(source = source, subject = subject, property = VARIANT_LABEL_URL, objeck = label)
       }
     }
 
