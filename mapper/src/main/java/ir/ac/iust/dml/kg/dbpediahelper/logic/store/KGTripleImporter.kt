@@ -234,7 +234,8 @@ class KGTripleImporter {
           try {
             if (triple.subject == null || !triple.subject!!.contains('/')) continue
             if (tripleNumber % 100000 == 0) logger.warn("triple number is $tripleNumber. $index file is $p. ")
-            visitedSubjects.add(triple.subject!!)
+            val subject = PrefixService.convertFkgResourceUrl(triple.subject!!)
+            visitedSubjects.add(subject)
           } catch (th: Throwable) {
             logger.info("triple: $triple")
             logger.error(th)
