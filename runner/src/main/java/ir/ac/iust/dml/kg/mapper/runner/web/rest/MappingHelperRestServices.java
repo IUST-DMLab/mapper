@@ -98,9 +98,23 @@ public class MappingHelperRestServices {
     return "Imported!";
   }
 
+  @RequestMapping("/rewriteLabels")
+  public String rewriteLabels(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
+    kgTripleImporter.rewriteLabels(type);
+    return "Imported!";
+  }
+
+  @RequestMapping("/allTriples")
+  public String allTriples(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
+    kgTripleImporter.writeTriples(type);
+    kgTripleImporter.rewriteLabels(type);
+    redirectAmbigutyLogic.write(type);
+    return "Imported!";
+  }
+
   @RequestMapping("/redirects")
   public String redirects() throws Exception {
-    redirectAmbigutyLogic.write();
+    redirectAmbigutyLogic.write(TripleImporter.StoreType.knowledgeStore);
     return "Imported!";
   }
 

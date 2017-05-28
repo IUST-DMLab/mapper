@@ -2,12 +2,15 @@ package ir.ac.iust.dml.kg.dbpediahelper.logic
 
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
+import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
+import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.PrefixService
 import org.apache.log4j.Logger
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.BufferedReader
 import java.io.FileInputStream
@@ -19,7 +22,7 @@ import java.nio.file.Files
 class RedirectAmbigutyLogic {
 
   val logger = Logger.getLogger(this.javaClass)!!
-  val knowledgeStoreDao = KnowledgeStoreFkgTripleDaoImpl()
+  @Autowired private lateinit var tripleDao: FkgTripleDao
 
   class Ambiguity {
     var title: String? = null
@@ -27,7 +30,7 @@ class RedirectAmbigutyLogic {
   }
 
   @Throws(Exception::class)
-  fun write() {
+  fun write(storeType: TripleImporter.StoreType = TripleImporter.StoreType.knowledgeStore) {
     val redirectsFolder = ConfigReader.getPath("extractor.redirect.folder", "~/.pkg/data/redirects")
     Files.createDirectories(redirectsFolder.parent)
     if (!Files.exists(redirectsFolder)) {
@@ -38,6 +41,12 @@ class RedirectAmbigutyLogic {
     Files.createDirectories(disambiguationFolder.parent)
     if (!Files.exists(disambiguationFolder)) {
       throw Exception("There is no file ${disambiguationFolder.toAbsolutePath()} existed.")
+    }
+
+    val store = when (storeType) {
+      TripleImporter.StoreType.mysql -> tripleDao
+      TripleImporter.StoreType.virtuoso -> VirtuosoFkgTripleDaoImpl()
+      else -> KnowledgeStoreFkgTripleDaoImpl()
     }
 
     val gson = Gson()
@@ -60,12 +69,12 @@ class RedirectAmbigutyLogic {
             i++
             if (i < maxNumberOfRedirects) {
               if (i % 1000 == 0) logger.info("writing redirect $i: $t to $u")
-              knowledgeStoreDao.save(FkgTriple(
+              store.save(FkgTriple(
                   subject = PrefixService.getFkgResourceUrl(u),
                   predicate = REDIRECT,
                   objekt = "http://fa.wikipedia.org/wiki/" + t.replace(' ', '_')
               ), null, true)
-              knowledgeStoreDao.save(FkgTriple(
+              store.save(FkgTriple(
                   subject = PrefixService.getFkgResourceUrl(u),
                   predicate = VARIANT_LABEL,
                   objekt = t.replace('_', ' ')
@@ -91,7 +100,7 @@ class RedirectAmbigutyLogic {
               i++
               if (i < maxNumberOfDisambiguation) {
                 if (i % 1000 == 0) logger.info("writing disambiguation $i: $a to $f")
-                knowledgeStoreDao.save(FkgTriple(
+                store.save(FkgTriple(
                     subject = PrefixService.getFkgResourceUrl(f),
                     predicate = DISAMBIGUATED_FROM,
                     objekt = if (a.title!!.contains("(ابهام زدایی)")) a.title!!.substringBefore("(ابهام زدایی)")
@@ -105,6 +114,8 @@ class RedirectAmbigutyLogic {
         logger.error(th)
       }
     }
-    knowledgeStoreDao.flush()
+
+    if (store is KnowledgeStoreFkgTripleDaoImpl) store.flush()
+    if (store is VirtuosoFkgTripleDaoImpl) store.close()
   }
 }

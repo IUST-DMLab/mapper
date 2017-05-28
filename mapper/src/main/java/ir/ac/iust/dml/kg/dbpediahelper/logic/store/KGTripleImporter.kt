@@ -17,6 +17,7 @@ import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.nio.file.Files
+import java.nio.file.Path
 
 @Service
 class KGTripleImporter {
@@ -31,18 +32,9 @@ class KGTripleImporter {
     holder.writeToKS()
     holder.loadFromKS()
 
-    val path = ConfigReader.getPath("wiki.triple.input.folder", "~/.pkg/data/triples")
-    if (!Files.exists(path.parent)) Files.createDirectories(path.parent)
-    if (!Files.exists(path)) {
-      throw Exception("There is no file ${path.toAbsolutePath()} existed.")
-    }
+    val path = getTriplesPath()
 
-    val store = when (storeType) {
-      TripleImporter.StoreType.file -> FileFkgTripleDaoImpl(path.resolve("mapped"))
-      TripleImporter.StoreType.mysql -> tripleDao
-      TripleImporter.StoreType.virtuoso -> VirtuosoFkgTripleDaoImpl()
-      else -> KnowledgeStoreFkgTripleDaoImpl()
-    }
+    val store = getStore(storeType, path)
     val maxNumberOfTriples = ConfigReader.getInt("test.mode.max.triples", "10000000")
 
     store.deleteAll()
@@ -220,6 +212,69 @@ class KGTripleImporter {
     logger.info("number of not mapped properties $numberOfMapped")
     logger.info("number of mapped in tree $numberOfMappedInTree")
     logger.info("number of mapped is $numberOfMapped")
+  }
+
+  fun rewriteLabels(storeType: TripleImporter.StoreType = TripleImporter.StoreType.none) {
+
+    val path = getTriplesPath()
+    val store = getStore(storeType, path)
+    val maxNumberOfTriples = ConfigReader.getInt("test.mode.max.triples", "10000000")
+
+    val visitedSubjects = mutableSetOf<String>()
+
+    val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
+
+    var tripleNumber = 0
+    result.forEachIndexed { index, p ->
+      TripleJsonFileReader(p).use { reader ->
+        while (reader.hasNext()) {
+          val triple = reader.next()
+          tripleNumber++
+          if (tripleNumber > maxNumberOfTriples) break
+          try {
+            if (triple.subject == null || !triple.subject!!.contains('/')) continue
+            if (tripleNumber % 100000 == 0) logger.warn("triple number is $tripleNumber. $index file is $p. ")
+            visitedSubjects.add(triple.subject!!)
+          } catch (th: Throwable) {
+            logger.info("triple: $triple")
+            logger.error(th)
+          }
+        }
+      }
+    }
+
+    val VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)!!
+
+    visitedSubjects.forEach { subject ->
+      var label = subject.substringAfterLast("/").replace('_', ' ')
+//      store.saveRawTriple(source = subject, subject = subject, property = LABEL, objeck = label)
+      if (label.contains('(')) {
+        label = label.substringBeforeLast('(').trim()
+        store.saveRawTriple(source = subject, subject = subject, property = VARIANT_LABEL_URL, objeck = label)
+      }
+    }
+
+    if (store is KnowledgeStoreFkgTripleDaoImpl) store.flush()
+    if (store is VirtuosoFkgTripleDaoImpl) store.close()
+  }
+
+  private fun getTriplesPath(): Path {
+    val path = ConfigReader.getPath("wiki.triple.input.folder", "~/.pkg/data/triples")
+    if (!Files.exists(path.parent)) Files.createDirectories(path.parent)
+    if (!Files.exists(path)) {
+      throw Exception("There is no file ${path.toAbsolutePath()} existed.")
+    }
+    return path
+  }
+
+  private fun getStore(storeType: TripleImporter.StoreType, path: Path): FkgTripleDao {
+    val store = when (storeType) {
+      TripleImporter.StoreType.file -> FileFkgTripleDaoImpl(path.resolve("mapped"))
+      TripleImporter.StoreType.mysql -> tripleDao
+      TripleImporter.StoreType.virtuoso -> VirtuosoFkgTripleDaoImpl()
+      else -> KnowledgeStoreFkgTripleDaoImpl()
+    }
+    return store
   }
 
   private fun FkgTripleDao.saveTriple(source: String, subject: String, objeck: String, rule: MapRule) {
