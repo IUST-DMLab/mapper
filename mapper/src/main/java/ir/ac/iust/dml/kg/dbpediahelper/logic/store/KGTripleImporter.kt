@@ -28,6 +28,8 @@ class KGTripleImporter {
   @Autowired private lateinit var entityToClassLogic: EntityToClassLogic
   private val transformers = Transformers()
 
+  private val invalidPropertyRegex = Regex("\\d+")
+
   fun writeTriples(storeType: TripleImporter.StoreType = TripleImporter.StoreType.none) {
     holder.writeToKS()
     holder.loadFromKS()
@@ -79,6 +81,8 @@ class KGTripleImporter {
 
             val normalizedTemplate = triple.templateNameFull!!.toLowerCase().replace('_', ' ')
             val property = triple.predicate!!
+            // some properties are invalid based on rdf standards
+            if (property.matches(invalidPropertyRegex)) continue
             val subject = PrefixService.convertFkgResourceUrl(triple.subject!!)
             val objekt = PrefixService.convertFkgResourceUrl(triple.objekt!!)
 
