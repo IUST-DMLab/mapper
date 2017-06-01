@@ -77,7 +77,10 @@ class MigrationManager {
       pm.property = templateProperty
       pm.weight = it.tupleCount?.toDouble()
       val rule = MapRule(
-          predicate = it.ontologyProperty!!.replace("dbo:", "fkgo:").replace("dbp:", "fkgp:"),
+          predicate = it.ontologyProperty!!
+              .replace("fkg:", "fkgo:")
+              .replace("dbo:", "fkgo:")
+              .replace("dbp:", "fkgp:"),
           type = ValueType.String,
           unit = null,
           constant = null,

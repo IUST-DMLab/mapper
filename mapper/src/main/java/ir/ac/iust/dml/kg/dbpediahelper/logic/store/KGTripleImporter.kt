@@ -53,12 +53,10 @@ class KGTripleImporter {
     val classMaps = mutableMapOf<String, MapRule>()
     holder.all().forEach { templateMapping ->
       templateMapping.properties!!.forEach { property, mapping ->
-        val tree = entityToClassLogic.getChildren(templateMapping.ontologyClass) ?: mutableListOf()
-        tree.forEach {
-          ontologyClass ->
-          if (mapping.rules.size == 1)
-            classMaps[ontologyClass + "~" + property] = mapping.rules.first()
-        }
+        if (mapping.rules.size == 1)
+          entityToClassLogic.getChildren(templateMapping.ontologyClass)?.forEach {
+            classMaps[it + "~" + property] = mapping.rules.first()
+          }
       }
     }
 
