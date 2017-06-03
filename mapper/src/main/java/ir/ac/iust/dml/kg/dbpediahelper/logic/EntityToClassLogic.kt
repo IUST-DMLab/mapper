@@ -298,6 +298,7 @@ class EntityToClassLogic {
       val RDFS_LABEL_URL = PrefixService.prefixToUri(PrefixService.LABEL_URL)
       val RDFS_SUBCLASS_OF_URL = PrefixService.prefixToUri(PrefixService.SUB_CLASS_OF)
       val RDF_TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)
+     val RDFS_COMMENT = PrefixService.prefixToUri(PrefixService.COMMENT_URL)
       val OWL_CLASS_URL = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_CLASSES)
 
       logger.info("writing tree started.")
@@ -318,6 +319,8 @@ class EntityToClassLogic {
          val subjectUrl = PrefixService.getFkgOntologyClassUrl(it.name!!)
          dao.save(FkgTriple(subject = subjectUrl,
              predicate = RDF_TYPE_URL, objekt = OWL_CLASS_URL), null)
+        dao.save(FkgTriple(subject = subjectUrl,
+            predicate = RDFS_COMMENT, objekt = it.comment), null)
          dao.save(FkgTriple(subject = subjectUrl,
              predicate = RDFS_LABEL_URL, objekt = it.faLabel, language = "fa"), null)
          dao.save(FkgTriple(subject = subjectUrl,
