@@ -30,7 +30,6 @@ import java.util.Properties;
 public class Application {
 
   public static void main(String[] args) {
-    System.setProperty("spring.devtools.restart.enabled", "false");
     SpringApplication app = new SpringApplication(Application.class);
     Properties properties = new Properties();
     if (args.length > 0) properties.put("server.port", 9999);
@@ -41,7 +40,6 @@ public class Application {
       Commander commander = context.getBeansOfType(Commander.class).values().iterator().next();
       commander.processArgs(args[0], args.length > 1 ? args[1] : null);
     }
-
   }
 
 }
