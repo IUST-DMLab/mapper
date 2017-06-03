@@ -33,27 +33,34 @@ class OntologyLogic {
     tripleApi = V1triplesApi(client)
   }
 
-  fun classes(page: Int, pageSize: Int, keyword: String?) = getType(keyword, owlClass, page, pageSize)
-
-  fun properties(page: Int, pageSize: Int, keyword: String?) = getType(keyword, owlObjectProperty, page, pageSize)
-
   private fun getType(keyword: String?, type: String, page: Int, pageSize: Int): PagedData<String> {
     val result = tripleApi.search1(null, keyword, rdfType, type, page, pageSize)
     val data = result.data.map { it.subject }.toMutableList()
     return PagedData<String>(data, page, pageSize, result.pageCount, result.totalSize)
   }
 
-  private fun predicateValues(subject: String, predicate: String): MutableList<String> {
+  private fun subjectsOfPredicate(predicate: String, `object`: String): MutableList<String> {
+    val result = mutableListOf<String>()
+    val values = tripleApi.search1(null, null, predicate, `object`, 0, 1000)
+    values.data.forEach { result.add(it.subject) }
+    return result
+  }
+
+  private fun objectsOfPredicate(subject: String, predicate: String): MutableList<String> {
     val result = mutableListOf<String>()
     val values = tripleApi.search1(null, subject, predicate, null, 0, 1000)
     values.data.forEach { result.add(it.`object`.value) }
     return result
   }
 
-  private fun predicateValue(subject: String, predicate: String): String? {
+  private fun objectOfPredicate(subject: String, predicate: String): String? {
     val values = tripleApi.search1(null, subject, predicate, null, 0, 1000)
     return values.data.firstOrNull()?.`object`?.value
   }
+
+  fun classes(page: Int, pageSize: Int, keyword: String?) = getType(keyword, owlClass, page, pageSize)
+
+  fun properties(page: Int, pageSize: Int, keyword: String?) = getType(keyword, owlObjectProperty, page, pageSize)
 
   fun classData(classUrl: String): OntologyClassData {
     val classData = OntologyClassData()
@@ -69,11 +76,16 @@ class OntologyLogic {
       if (it.`object`.lang == "en") classData.enComment = it.`object`.value
     }
 
-    classData.subClassOf = predicateValue(classUrl, rdfsSubClassOf)
-    classData.equivalentClasses = predicateValues(classUrl, owlEqClass)
-    classData.disjointWith = predicateValues(classUrl, owlDisjointWith)
+    classData.subClassOf = objectOfPredicate(classUrl, rdfsSubClassOf)
+    classData.equivalentClasses = objectsOfPredicate(classUrl, owlEqClass)
+    classData.disjointWith = objectsOfPredicate(classUrl, owlDisjointWith)
+    classData.properties = subjectsOfPredicate(rdfsDomain, classUrl)
 
     return classData
+  }
+
+  fun saveClass(data: OntologyClassData) {
+
   }
 
   fun propertyData(propertyUrl: String): OntologyPropertyData {
@@ -91,10 +103,10 @@ class OntologyLogic {
       if (it.`object`.lang == "en") propertyData.enVariantLabels.add(it.`object`.value)
     }
 
-    propertyData.types.addAll(predicateValues(propertyUrl, rdfType))
-    propertyData.domains.addAll(predicateValues(propertyUrl, rdfsDomain))
-    propertyData.ranges.addAll(predicateValues(propertyUrl, rdfsRange))
-    propertyData.equivalentProperties.addAll(predicateValues(propertyUrl, owlEqProperty))
+    propertyData.types.addAll(objectsOfPredicate(propertyUrl, rdfType))
+    propertyData.domains.addAll(objectsOfPredicate(propertyUrl, rdfsDomain))
+    propertyData.ranges.addAll(objectsOfPredicate(propertyUrl, rdfsRange))
+    propertyData.equivalentProperties.addAll(objectsOfPredicate(propertyUrl, owlEqProperty))
 
     return propertyData
   }
