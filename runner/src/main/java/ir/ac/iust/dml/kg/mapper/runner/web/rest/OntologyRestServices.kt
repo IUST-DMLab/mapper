@@ -2,6 +2,8 @@ package ir.ac.iust.dml.kg.mapper.runner.web.rest
 
 import io.swagger.annotations.Api
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.OntologyLogic
+import ir.ac.iust.dml.kg.dbpediahelper.logic.store.data.OntologyClassData
+import ir.ac.iust.dml.kg.dbpediahelper.logic.store.data.OntologyPropertyData
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 
@@ -32,5 +34,15 @@ class OntologyRestServices {
   @ResponseBody
   fun propertyData(@RequestParam(required = false) propertyData: String?)
       = logic.propertyData(propertyData!!)
+
+  @RequestMapping("saveClass", method = arrayOf(RequestMethod.POST))
+  @ResponseBody
+  fun saveClass(@RequestBody classData: OntologyClassData)
+      = logic.saveClass(classData)
+
+  @RequestMapping("saveProperty", method = arrayOf(RequestMethod.POST))
+  @ResponseBody
+  fun saveProperty(@RequestBody propertyData: OntologyPropertyData)
+      = logic.saveProperty(propertyData)
 
 }

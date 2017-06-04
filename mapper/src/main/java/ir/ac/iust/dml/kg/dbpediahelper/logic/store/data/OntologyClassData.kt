@@ -9,6 +9,7 @@ package ir.ac.iust.dml.kg.dbpediahelper.logic.store.data
  * rdfs:comment
  */
 data class OntologyClassData(
+    var url: String? = null,
     var faLabel: String? = null,
     var enLabel: String? = null,
     var faComment: String? = null,

@@ -3,16 +3,21 @@ package ir.ac.iust.dml.kg.dbpediahelper.logic.store
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.data.OntologyClassData
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.data.OntologyPropertyData
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
+import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
 import ir.ac.iust.dml.kg.raw.utils.PagedData
 import ir.ac.iust.dml.kg.raw.utils.PrefixService
 import ir.ac.iust.dml.kg.services.client.ApiClient
+import ir.ac.iust.dml.kg.services.client.swagger.V1expertsApi
 import ir.ac.iust.dml.kg.services.client.swagger.V1triplesApi
+import ir.ac.iust.dml.kg.services.client.swagger.model.TripleData
+import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValueData
 import org.springframework.stereotype.Service
 
 @Service
 class OntologyLogic {
 
   val tripleApi: V1triplesApi
+  val expertApi: V1expertsApi
   val rdfType = PrefixService.prefixToUri(PrefixService.TYPE_URL)!!
   val rdfsLabel = PrefixService.prefixToUri(PrefixService.LABEL_URL)!!
   val fkgVariantLabel = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)!!
@@ -31,6 +36,7 @@ class OntologyLogic {
     client.basePath = ConfigReader.getString("knowledge.store.url", "http://localhost:8091/rs")
     client.connectTimeout = 1200000
     tripleApi = V1triplesApi(client)
+    expertApi = V1expertsApi(client)
   }
 
   private fun getType(keyword: String?, type: String, page: Int, pageSize: Int): PagedData<String> {
@@ -58,12 +64,37 @@ class OntologyLogic {
     return values.data.firstOrNull()?.`object`?.value
   }
 
+  private fun insertAndVote(subject: String?, predicate: String?,
+                            objectValue: String,
+                            objectType: TypedValueData.TypeEnum = TypedValueData.TypeEnum.RESOURCE): Boolean {
+    val tripleData = TripleData()
+    tripleData.context = subject
+    tripleData.subject = subject
+    tripleData.predicate = predicate
+    tripleData.`object` = TypedValueData()
+    tripleData.`object`.lang = LanguageChecker.detectLanguage(objectValue)
+    tripleData.`object`.type = objectType
+    tripleData.`object`.value = objectValue
+    tripleData.module = "ontology"
+    tripleData.precession = 1.0
+    tripleData.urls = mutableListOf(subject)
+    return insertAndVote(tripleData)
+  }
+
+  private fun insertAndVote(data: TripleData): Boolean {
+    val success = tripleApi.insert3(data)
+    if (!success) return false
+//    val triple = tripleApi.triple1(data.subject, data.predicate, data.`object`.value, data.context)
+//    expertApi.vote1(triple.identifier, data.module, "expert", "accept")
+    return true
+  }
+
   fun classes(page: Int, pageSize: Int, keyword: String?) = getType(keyword, owlClass, page, pageSize)
 
   fun properties(page: Int, pageSize: Int, keyword: String?) = getType(keyword, owlObjectProperty, page, pageSize)
 
   fun classData(classUrl: String): OntologyClassData {
-    val classData = OntologyClassData()
+    val classData = OntologyClassData(url = classUrl)
     val labels = tripleApi.search1(null, classUrl, rdfsLabel, null, 0, 10)
     labels.data.forEach {
       if (it.`object`.lang == "fa") classData.faLabel = it.`object`.value
@@ -84,12 +115,36 @@ class OntologyLogic {
     return classData
   }
 
-  fun saveClass(data: OntologyClassData) {
+  fun saveClass(data: OntologyClassData): Boolean {
+    if (data.url == null) return false
+    insertAndVote(data.url, rdfType, owlClass)
+    if (data.faLabel != null) insertAndVote(data.url, rdfsLabel, data.faLabel!!)
+    if (data.enLabel != null) insertAndVote(data.url, rdfsLabel, data.enLabel!!)
+    if (data.faComment != null) insertAndVote(data.url, rdfsComment, data.faComment!!)
+    if (data.enComment != null) insertAndVote(data.url, rdfsComment, data.enComment!!)
+    if (data.subClassOf != null) insertAndVote(data.url, rdfsSubClassOf, data.subClassOf!!)
+    data.equivalentClasses.forEach { insertAndVote(data.url, owlEqClass, it) }
+    data.disjointWith.forEach { insertAndVote(data.url, owlDisjointWith, it) }
+    data.properties.forEach { insertAndVote(it, rdfsDomain, data.url!!) }
+    return true
+  }
 
+  fun saveProperty(data: OntologyPropertyData): Boolean {
+    if (data.url == null) return false
+    insertAndVote(data.url, rdfType, owlObjectProperty)
+    if (data.faLabel != null) insertAndVote(data.url, rdfsLabel, data.faLabel!!)
+    if (data.enLabel != null) insertAndVote(data.url, rdfsLabel, data.enLabel!!)
+    data.faVariantLabels.forEach { insertAndVote(data.url, fkgVariantLabel, it) }
+    data.enVariantLabels.forEach { insertAndVote(data.url, fkgVariantLabel, it) }
+    data.types.forEach { insertAndVote(data.url, rdfType, it) }
+    data.domains.forEach { insertAndVote(data.url, rdfsDomain, it) }
+    data.ranges.forEach { insertAndVote(data.url, rdfsRange, it) }
+    data.equivalentProperties.forEach { insertAndVote(it, owlEqProperty, data.url!!) }
+    return true
   }
 
   fun propertyData(propertyUrl: String): OntologyPropertyData {
-    val propertyData = OntologyPropertyData()
+    val propertyData = OntologyPropertyData(url = propertyUrl)
 
     val labels = tripleApi.search1(null, propertyUrl, rdfsLabel, null, 0, 10)
     labels.data.forEach {
