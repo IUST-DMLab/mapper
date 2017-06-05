@@ -48,7 +48,6 @@ class KGTableImporter {
     val result = PathWalker.getPath(path, Regex(".*\\.json"))
 
     // TODO: mastmal
-
     val propertyMap = mapOf(
         "دانشکده" to "fkgo:faculty",
         "رتبه دانشگاهی" to "fkgo:grade",
@@ -65,21 +64,28 @@ class KGTableImporter {
 
     entityToClassLogic.reloadTreeCache()
 
+    val adjacentSpaceRegex = Regex("\\s+")
     var tripleNumber = 0
     result.forEachIndexed { index, p ->
       TableJsonFileReader(p).use { reader ->
         while (reader.hasNext() && tripleNumber++ < maxNumberOfTriples) {
           val triple = reader.next()
-          val subject = PrefixService.getFkgResourceUrl(triple.subject!!)
-          val ontologyClass = triple.ontologyClass!!
+          try {
+            if (triple.subject == null || triple.objekt == null) continue
+            triple.objekt = triple.objekt!!.replace(adjacentSpaceRegex, " ")
+            val subject = PrefixService.getFkgResourceUrl(triple.subject!!)
+            val ontologyClass = triple.ontologyClass!!
 
-          val newClassTree = entityToClassLogic.getTree(ontologyClass)!!
-          entityTree.getOrPut(subject, { mutableSetOf() }).add(newClassTree)
-          val predicate =
-              if (propertyMap.containsKey(triple.predicate)) PrefixService.prefixToUri(propertyMap[triple.predicate!!])!!
-              else PrefixService.convertFkgProperty(triple.predicate!!)!!
+            val newClassTree = entityToClassLogic.getTree(ontologyClass)!!
+            entityTree.getOrPut(subject, { mutableSetOf() }).add(newClassTree)
+            val predicate =
+                if (propertyMap.containsKey(triple.predicate)) PrefixService.prefixToUri(propertyMap[triple.predicate!!])!!
+                else PrefixService.convertFkgProperty(triple.predicate!!)!!
 
-          store.save(triple.source!!, subject, triple.objekt!!, predicate)
+            store.save(triple.source!!, subject, triple.objekt!!, predicate)
+          } catch (e: Throwable) {
+            logger.error(triple.toString(), e)
+          }
         }
       }
     }
