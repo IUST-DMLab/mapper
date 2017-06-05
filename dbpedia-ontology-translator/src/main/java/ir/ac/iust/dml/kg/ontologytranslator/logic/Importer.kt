@@ -3,7 +3,7 @@ package ir.ac.iust.dml.kg.ontologytranslator.logic
 import ir.ac.iust.dml.kg.access.dao.DBpediaClassDao
 import ir.ac.iust.dml.kg.access.dao.FkgClassDao
 import ir.ac.iust.dml.kg.access.entities.DBpediaClass
-import ir.ac.iust.dml.kg.access.entities.FkgClass
+import ir.ac.iust.dml.kg.access.entities.FkgOntologyClass
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -25,8 +25,8 @@ class Importer {
    //TODO can we remove this?
    fun fixName(name: String) = if (name.startsWith("owl#")) name.substring(4) else name
 
-   fun createNode(clazz: DBpediaClass): FkgClass {
-      val parentFkgClass: FkgClass?
+  fun createNode(clazz: DBpediaClass): FkgOntologyClass {
+    val parentFkgClass: FkgOntologyClass?
       if (clazz.parentId != null && clazz.parentId != clazz.id) {
          val dbpediaParentClass = dbpediaDao.read(clazz.parentId!!)!!
          val parent = fkgDao.read(fixName(dbpediaParentClass.name!!), null)
@@ -37,7 +37,7 @@ class Importer {
       if (clazz.comment != "") println(clazz.comment)
       var fkgClass = fkgDao.read(fixName(clazz.name!!), parentFkgClass?.id)
       if (fkgClass == null) {
-         fkgClass = FkgClass(
+        fkgClass = FkgOntologyClass(
                name = fixName(clazz.name!!),
                enLabel = clazz.enLabel,
                parentId = parentFkgClass?.id,

@@ -5,7 +5,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "ontology_classes_translation")
-data class FkgClass(
+data class FkgOntologyClass(
       @Id
       @Column(name = "id")
       @GeneratedValue(strategy = GenerationType.IDENTITY)

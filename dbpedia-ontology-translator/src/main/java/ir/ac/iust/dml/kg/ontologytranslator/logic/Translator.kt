@@ -1,7 +1,7 @@
 package ir.ac.iust.dml.kg.ontologytranslator.logic
 
 import ir.ac.iust.dml.kg.access.dao.FkgClassDao
-import ir.ac.iust.dml.kg.access.entities.FkgClass
+import ir.ac.iust.dml.kg.access.entities.FkgOntologyClass
 import ir.ac.iust.dml.kg.ontologytranslator.logic.export.FkgClassData
 import ir.ac.iust.dml.kg.raw.utils.PagedData
 import org.apache.log4j.Logger
@@ -13,7 +13,7 @@ class Translator {
    @Autowired lateinit var dao: FkgClassDao
    val logger = Logger.getLogger(this.javaClass)
 
-   fun sync(fkgClass: FkgClass?): FkgClassData? {
+  fun sync(fkgClass: FkgOntologyClass?): FkgClassData? {
       if (fkgClass == null) return null
       return FkgClassData(
             ontologyClass = fkgClass.name,

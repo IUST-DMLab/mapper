@@ -1,7 +1,7 @@
 package ir.ac.iust.dml.kg.access.dao.hibernate
 
 import ir.ac.iust.dml.kg.access.dao.FkgClassDao
-import ir.ac.iust.dml.kg.access.entities.FkgClass
+import ir.ac.iust.dml.kg.access.entities.FkgOntologyClass
 import ir.ac.iust.dml.kg.access.utils.SqlJpaTools
 import ir.ac.iust.dml.kg.raw.utils.PagedData
 import org.hibernate.SessionFactory
@@ -15,7 +15,7 @@ open class FkgClassDaoImpl : FkgClassDao {
    @Autowired
    lateinit var sessionFactory: SessionFactory
 
-   override fun save(p: FkgClass) {
+   override fun save(p: FkgOntologyClass) {
       val session = this.sessionFactory.openSession()
       val tx = session.beginTransaction()
       session.saveOrUpdate(p)
@@ -23,44 +23,44 @@ open class FkgClassDaoImpl : FkgClassDao {
       session.close()
    }
 
-   override fun read(id: Long?): FkgClass? {
+   override fun read(id: Long?): FkgOntologyClass? {
       val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(FkgClass::class.java)
+      val criteria = session.createCriteria(FkgOntologyClass::class.java)
       criteria.add(Restrictions.eq("id", id))
-      val mapping = criteria.uniqueResult() as? FkgClass
+      val mapping = criteria.uniqueResult() as? FkgOntologyClass
       session.close()
       return mapping
    }
 
-   override fun read(name: String, parentId: Long?): FkgClass? {
+   override fun read(name: String, parentId: Long?): FkgOntologyClass? {
       val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(FkgClass::class.java)
+      val criteria = session.createCriteria(FkgOntologyClass::class.java)
       criteria.add(Restrictions.eq("name", name))
       if (parentId != null) criteria.add(Restrictions.eq("parentId", parentId))
       val list = criteria.list()
-      val mapping: FkgClass?
+      val mapping: FkgOntologyClass?
       if (list.isEmpty()) {
          println("No instance for $name")
          mapping = null
       } else {
          if (list.size > 1) println("multiple instances for $name")
-         mapping = list[0] as? FkgClass
+         mapping = list[0] as? FkgOntologyClass
       }
       session.close()
       return mapping
    }
 
-   override fun readRoot(): FkgClass? {
+   override fun readRoot(): FkgOntologyClass? {
       val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(FkgClass::class.java)
+      val criteria = session.createCriteria(FkgOntologyClass::class.java)
       criteria.add(Restrictions.isNull("parentId"))
-      val mapping = criteria.uniqueResult() as? FkgClass
+      val mapping = criteria.uniqueResult() as? FkgOntologyClass
       session.close()
       return mapping
    }
 
    override fun search(name: String?, parentId: Long?, like: Boolean, approved: Boolean?, hasFarsi: Boolean?,
-                       pageSize: Int, page: Int): PagedData<FkgClass> {
+                       pageSize: Int, page: Int): PagedData<FkgOntologyClass> {
       val session = this.sessionFactory.openSession()
       val criteria = SqlJpaTools.conditionalCriteria(
             name != null && !like, Restrictions.eq("name", name),
@@ -73,17 +73,17 @@ open class FkgClassDaoImpl : FkgClassDao {
             hasFarsi != null && hasFarsi, Restrictions.isNotNull("faLabel"),
             hasFarsi != null && !hasFarsi, Restrictions.isNull("faLabel")
       )
-      val list = SqlJpaTools.page(FkgClass::class.java, page, pageSize, session, null, *criteria)
+      val list = SqlJpaTools.page(FkgOntologyClass::class.java, page, pageSize, session, null, *criteria)
       session.close()
       return list
    }
 
    @Suppress("UNCHECKED_CAST")
-   override fun getChildren(id: Long): List<FkgClass> {
+   override fun getChildren(id: Long): List<FkgOntologyClass> {
       val session = this.sessionFactory.openSession()
-      val criteria = session.createCriteria(FkgClass::class.java)
+      val criteria = session.createCriteria(FkgOntologyClass::class.java)
       criteria.add(Restrictions.eq("parentId", id))
-      val mapping = criteria.list() as MutableList<FkgClass>
+      val mapping = criteria.list() as MutableList<FkgOntologyClass>
       session.close()
       return mapping
    }

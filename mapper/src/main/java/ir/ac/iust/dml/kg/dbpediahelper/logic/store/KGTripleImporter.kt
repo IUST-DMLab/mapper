@@ -122,7 +122,7 @@ class KGTripleImporter {
                     objeck = objekt, rule = classMaps[key]!!)
               } else {
                 numberOfNotMapped++
-                store.saveRawTriple(source = triple.source!!, subject = subject,
+                store.convertAndSave(source = triple.source!!, subject = subject,
                     objeck = objekt, property = property)
               }
             } else {
@@ -188,10 +188,10 @@ class KGTripleImporter {
     visitedSources.forEach { source ->
       val subject = PrefixService.convertFkgResourceUrl(source)
       var label = source.substringAfterLast("/").replace('_', ' ')
-//      store.saveRawTriple(source = subject, subject = subject, property = LABEL, objeck = label)
+//      store.convertAndSave(source = subject, subject = subject, property = LABEL, objeck = label)
       if (label.contains('(')) {
         label = label.substringBeforeLast('(').trim()
-        store.saveRawTriple(source = source, subject = subject, property = VARIANT_LABEL_URL, objeck = label)
+        store.convertAndSave(source = source, subject = subject, property = VARIANT_LABEL_URL, objeck = label)
       }
     }
 

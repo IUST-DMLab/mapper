@@ -7,6 +7,7 @@ import ir.ac.iust.dml.kg.dbpediahelper.logic.StoreProvider
 import ir.ac.iust.dml.kg.dbpediahelper.logic.TripleImporter
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
+import ir.ac.iust.dml.kg.raw.utils.PrefixService
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TableJsonFileReader
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -46,12 +47,39 @@ class KGTableImporter {
 
     val result = PathWalker.getPath(path, Regex(".*\\.json"))
 
+    // TODO: mastmal
+
+    val propertyMap = mapOf(
+        "دانشکده" to "fkgo:faculty",
+        "رتبه دانشگاهی" to "fkgo:grade",
+        "website" to "fkgo:website",
+        "تصویر" to "fkgo:image",
+        "پست الکترونیکی" to "fkgo:email",
+        "آدرس" to "fkgo:address",
+        "تلفن" to "fkgo:phone",
+        "فکس" to "fkgo:fax",
+        "گروه" to "fkgo:educationGroup",
+        "نام" to "foaf:firstName",
+        "نام خانوادگی" to "foaf:familyName"
+    )
+
+    entityToClassLogic.reloadTreeCache()
+
     var tripleNumber = 0
     result.forEachIndexed { index, p ->
       TableJsonFileReader(p).use { reader ->
-        while (reader.hasNext()) {
+        while (reader.hasNext() && tripleNumber++ < maxNumberOfTriples) {
           val triple = reader.next()
-          println(triple)
+          val subject = PrefixService.getFkgResourceUrl(triple.subject!!)
+          val ontologyClass = triple.ontologyClass!!
+
+          val newClassTree = entityToClassLogic.getTree(ontologyClass)!!
+          entityTree.getOrPut(subject, { mutableSetOf() }).add(newClassTree)
+          val predicate =
+              if (propertyMap.containsKey(triple.predicate)) PrefixService.prefixToUri(propertyMap[triple.predicate!!])!!
+              else PrefixService.convertFkgProperty(triple.predicate!!)!!
+
+          store.save(triple.source!!, subject, triple.objekt!!, predicate)
         }
       }
     }

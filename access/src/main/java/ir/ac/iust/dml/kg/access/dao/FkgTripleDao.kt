@@ -20,9 +20,13 @@ abstract class FkgTripleDao {
   abstract fun read(subject: String? = null, predicate: String? = null, objekt: String? = null,
                     status: MappingStatus? = null): MutableList<FkgTriple>
 
-  fun saveRawTriple(source: String, subject: String, objeck: String, property: String) {
+  fun convertAndSave(source: String, subject: String, objeck: String, property: String) {
     this.save(FkgTriple(source = source, subject = subject,
         predicate = PrefixService.convertFkgProperty(property),
         objekt = PrefixService.prefixToUri(objeck)), null)
+  }
+
+  fun save(source: String, subject: String, objeck: String, property: String) {
+    this.save(FkgTriple(source = source, subject = subject, predicate = property, objekt = objeck), null)
   }
 }

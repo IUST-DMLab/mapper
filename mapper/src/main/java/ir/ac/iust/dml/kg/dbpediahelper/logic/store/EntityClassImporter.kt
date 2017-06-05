@@ -23,15 +23,15 @@ class EntityClassImporter {
         allClasses.addAll(t)
       }
 
-      store.saveRawTriple(entity, entity, entity.substringAfterLast('/').replace('_', ' ').trim(), LABEL)
+      store.convertAndSave(entity, entity, entity.substringAfterLast('/').replace('_', ' ').trim(), LABEL)
 
-      store.saveRawTriple(entity, entity, PrefixService.getFkgOntologyClass(longestTree.first()),
+      store.convertAndSave(entity, entity, PrefixService.getFkgOntologyClass(longestTree.first()),
           INSTANCE_OF)
 
-      store.saveRawTriple(entity, entity, TYPE_OF_ALL_RESOURCES, TYPE_URL)
+      store.convertAndSave(entity, entity, TYPE_OF_ALL_RESOURCES, TYPE_URL)
 
       allClasses.forEach {
-        store.saveRawTriple(entity, entity, PrefixService.getFkgOntologyClass(it), TYPE_URL)
+        store.convertAndSave(entity, entity, PrefixService.getFkgOntologyClass(it), TYPE_URL)
       }
     }
   }

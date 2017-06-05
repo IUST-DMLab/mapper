@@ -42,15 +42,15 @@ class PredicateImporter {
         logger.error("wrong predicate: $pu")
         return@forEach
       }
-      store.saveRawTriple(source = pu, subject = pu, property = TYPE_URL, objeck = TYPE_OF_ALL_PROPERTIES)
+      store.convertAndSave(source = pu, subject = pu, property = TYPE_URL, objeck = TYPE_OF_ALL_PROPERTIES)
 
       if (labels.isNotEmpty())
-        store.saveRawTriple(source = pu, subject = pu, property = LABEL, objeck = labels[0].first)
+        store.convertAndSave(source = pu, subject = pu, property = LABEL, objeck = labels[0].first)
       labels.forEach {
-        store.saveRawTriple(source = pu, subject = pu, property = VARIANT_LABEL_URL, objeck = it.first)
+        store.convertAndSave(source = pu, subject = pu, property = VARIANT_LABEL_URL, objeck = it.first)
       }
       data.domains.forEach {
-        store.saveRawTriple(source = pu, subject = pu, property = PROPERTY_DOMAIN_URL,
+        store.convertAndSave(source = pu, subject = pu, property = PROPERTY_DOMAIN_URL,
             objeck = PrefixService.getFkgOntologyClassUrl(it))
       }
     }
