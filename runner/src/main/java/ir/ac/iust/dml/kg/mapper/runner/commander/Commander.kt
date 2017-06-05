@@ -28,6 +28,7 @@ class Commander {
         "generateMapping" -> services.generateMapping()
         "triples" -> services.triples(TripleImporter.StoreType.valueOf(arg!!))
         "kgTriples" -> services.kgTriples(TripleImporter.StoreType.valueOf(arg!!))
+        "kgTables" -> services.kgTables(TripleImporter.StoreType.valueOf(arg!!))
         "allTriples" -> services.allTriples(TripleImporter.StoreType.valueOf(arg!!))
         "rewriteLabels" -> services.rewriteLabels(TripleImporter.StoreType.valueOf(arg!!))
         "redirects" -> services.redirects()

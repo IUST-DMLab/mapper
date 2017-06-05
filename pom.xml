@@ -75,7 +75,7 @@
     <dependency>
       <groupId>ir.ac.iust.dml.kg</groupId>
       <artifactId>utils</artifactId>
-      <version>0.2.0</version>
+      <version>0.2.1</version>
     </dependency>
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>

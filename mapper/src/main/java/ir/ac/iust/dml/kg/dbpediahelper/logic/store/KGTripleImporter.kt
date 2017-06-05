@@ -1,11 +1,11 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic.store
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
-import ir.ac.iust.dml.kg.access.dao.file.FileFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.dbpediahelper.logic.EntityToClassLogic
+import ir.ac.iust.dml.kg.dbpediahelper.logic.StoreProvider
 import ir.ac.iust.dml.kg.dbpediahelper.logic.TripleImporter
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.entities.MapRule
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
@@ -24,8 +24,10 @@ class KGTripleImporter {
 
   private val logger = Logger.getLogger(this.javaClass)!!
   @Autowired private lateinit var holder: KSMappingHolder
-  @Autowired private lateinit var tripleDao: FkgTripleDao
   @Autowired private lateinit var entityToClassLogic: EntityToClassLogic
+  @Autowired private lateinit var storeProvider: StoreProvider
+  @Autowired private lateinit var predicateImporter: PredicateImporter
+  @Autowired private lateinit var entityClassImporter: EntityClassImporter
   private val transformers = Transformers()
 
   private val invalidPropertyRegex = Regex("\\d+")
@@ -36,7 +38,7 @@ class KGTripleImporter {
 
     val path = getTriplesPath()
 
-    val store = getStore(storeType, path)
+    val store = storeProvider.getStore(storeType, path)
     val maxNumberOfTriples = ConfigReader.getInt("test.mode.max.triples", "10000000")
 
     store.deleteAll()
@@ -138,73 +140,9 @@ class KGTripleImporter {
       }
     }
 
-    val TYPE_OF_ALL_RESOURCES = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_RESOURCES)!!
-    val LABEL = PrefixService.prefixToUri(PrefixService.LABEL_URL)!!
-    val INSTANCE_OF = PrefixService.prefixToUri(PrefixService.INSTANCE_OF_URL)!!
-    val TYPE_OF_ALL_PROPERTIES = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_PROPERTIES)!!
-    val PROPERTY_DOMAIN_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_DOMAIN_URL)!!
-    val TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)!!
-    val VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)!!
-
     entityToClassLogic.writeTree(store)
-
-    entityTree.forEach { entity, ontologyClass ->
-      var longestTree = listOf<String>("Thing")
-      val allClasses = mutableSetOf<String>()
-
-      ontologyClass.forEach {
-        val t = it.split('/')
-        if (t.size > longestTree.size) longestTree = t
-        allClasses.addAll(t)
-      }
-
-      store.saveRawTriple(entity, entity, entity.substringAfterLast('/').replace('_', ' ').trim(), LABEL)
-
-      store.saveRawTriple(entity, entity, PrefixService.getFkgOntologyClass(longestTree.first()),
-          INSTANCE_OF)
-
-      store.saveRawTriple(entity, entity, TYPE_OF_ALL_RESOURCES, TYPE_URL)
-
-      allClasses.forEach {
-        store.saveRawTriple(entity, entity, PrefixService.getFkgOntologyClass(it), TYPE_URL)
-      }
-    }
-
-    data class PredicateData(var labels: MutableMap<String, Double> = mutableMapOf(),
-                             var domains: MutableSet<String> = mutableSetOf())
-
-    val predicateData = mutableMapOf<String, PredicateData>()
-
-    holder.all().forEach { templateMapping ->
-      templateMapping.properties!!.values.forEach { propertyMapping ->
-        val label = propertyMapping.property!!.toLowerCase().replace('_', ' ')
-        propertyMapping.rules.forEach {
-          val data = predicateData.getOrPut(it.predicate!!, { PredicateData() })
-          data.labels[label] = (data.labels[label] ?: 0.0) + (propertyMapping.weight ?: 0.0)
-          data.domains.add(templateMapping.ontologyClass)
-        }
-      }
-    }
-
-    predicateData.forEach { predicate, data ->
-      val labels = data.labels.map { Pair(it.key, it.value) }.sortedByDescending { it.second }
-      val pu = PrefixService.prefixToUri(predicate)!!
-      if (!pu.contains("://")) {
-        logger.error("wrong predicate: $pu")
-        return@forEach
-      }
-      store.saveRawTriple(source = pu, subject = pu, property = TYPE_URL, objeck = TYPE_OF_ALL_PROPERTIES)
-
-      if (labels.isNotEmpty())
-        store.saveRawTriple(source = pu, subject = pu, property = LABEL, objeck = labels[0].first)
-      labels.forEach {
-        store.saveRawTriple(source = pu, subject = pu, property = VARIANT_LABEL_URL, objeck = it.first)
-      }
-      data.domains.forEach {
-        store.saveRawTriple(source = pu, subject = pu, property = PROPERTY_DOMAIN_URL,
-            objeck = PrefixService.getFkgOntologyClassUrl(it))
-      }
-    }
+    entityClassImporter.writeEntityTrees(entityTree, store)
+    predicateImporter.writePredicates(store)
 
     if (store is KnowledgeStoreFkgTripleDaoImpl) store.flush()
     if (store is VirtuosoFkgTripleDaoImpl) store.close()
@@ -219,7 +157,7 @@ class KGTripleImporter {
   fun rewriteLabels(storeType: TripleImporter.StoreType = TripleImporter.StoreType.none) {
 
     val path = getTriplesPath()
-    val store = getStore(storeType, path)
+    val store = storeProvider.getStore(storeType, path)
     val maxNumberOfTriples = ConfigReader.getInt("test.mode.max.triples", "10000000")
 
     val visitedSources = mutableSetOf<String>()
@@ -270,16 +208,6 @@ class KGTripleImporter {
     return path
   }
 
-  private fun getStore(storeType: TripleImporter.StoreType, path: Path): FkgTripleDao {
-    val store = when (storeType) {
-      TripleImporter.StoreType.file -> FileFkgTripleDaoImpl(path.resolve("mapped"))
-      TripleImporter.StoreType.mysql -> tripleDao
-      TripleImporter.StoreType.virtuoso -> VirtuosoFkgTripleDaoImpl()
-      else -> KnowledgeStoreFkgTripleDaoImpl()
-    }
-    return store
-  }
-
   private fun FkgTripleDao.saveTriple(source: String, subject: String, objeck: String, rule: MapRule) {
     val value = if (rule.transform != null) {
       Transformers::class.java.getMethod(rule.transform, String::class.java).invoke(transformers, objeck)
@@ -288,11 +216,5 @@ class KGTripleImporter {
     this.save(FkgTriple(source = source, subject = subject,
         predicate = PrefixService.prefixToUri(rule.predicate),
         objekt = PrefixService.prefixToUri(value.toString())), null)
-  }
-
-  private fun FkgTripleDao.saveRawTriple(source: String, subject: String, objeck: String, property: String) {
-    this.save(FkgTriple(source = source, subject = subject,
-        predicate = PrefixService.convertFkgProperty(property),
-        objekt = PrefixService.prefixToUri(objeck)), null)
   }
 }
