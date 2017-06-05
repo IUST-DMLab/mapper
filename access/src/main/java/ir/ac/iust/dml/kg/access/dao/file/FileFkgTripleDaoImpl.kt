@@ -13,7 +13,7 @@ import java.io.OutputStreamWriter
 import java.nio.file.Files
 import java.nio.file.Path
 
-class FileFkgTripleDaoImpl(val path: Path, val flushSize: Int = 1000) : FkgTripleDao {
+class FileFkgTripleDaoImpl(val path: Path, val flushSize: Int = 1000) : FkgTripleDao() {
 
   init {
     if (!Files.exists(path)) Files.createDirectories(path)

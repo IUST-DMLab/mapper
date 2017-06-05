@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 
 @Repository
-open class FkgTripleDaoImpl : FkgTripleDao {
+open class FkgTripleDaoImpl : FkgTripleDao() {
 
    @Autowired
    lateinit var sessionFactory: SessionFactory

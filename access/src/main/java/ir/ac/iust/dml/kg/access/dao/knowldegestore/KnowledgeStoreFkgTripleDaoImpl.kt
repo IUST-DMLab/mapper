@@ -15,7 +15,7 @@ import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValueData
 import org.apache.log4j.Logger
 import java.util.*
 
-class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao {
+class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
 
   private val logger = Logger.getLogger(this.javaClass)!!
   val FLUSH_SIZE = 1000

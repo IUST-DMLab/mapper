@@ -7,7 +7,7 @@ import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.raw.utils.PagedData
 import ir.ac.iust.dml.kg.virtuoso.connector.VirtuosoConnector
 
-class VirtuosoFkgTripleDaoImpl : FkgTripleDao {
+class VirtuosoFkgTripleDaoImpl : FkgTripleDao() {
 
    val connector = VirtuosoConnector("http://fkg.iust.ac.ir/")
 
