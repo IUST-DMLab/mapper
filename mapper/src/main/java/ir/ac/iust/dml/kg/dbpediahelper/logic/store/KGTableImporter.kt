@@ -18,7 +18,6 @@ import java.nio.file.Path
 @Service
 class KGTableImporter {
   private val logger = Logger.getLogger(this.javaClass)!!
-  @Autowired private lateinit var holder: KSMappingHolder
   @Autowired private lateinit var entityToClassLogic: EntityToClassLogic
   @Autowired private lateinit var entityClassImporter: EntityClassImporter
   @Autowired private lateinit var storeProvider: StoreProvider
@@ -33,9 +32,6 @@ class KGTableImporter {
   }
 
   fun writeTriples(storeType: TripleImporter.StoreType = TripleImporter.StoreType.none) {
-    holder.writeToKS()
-    holder.loadFromKS()
-
     val path = getTriplesPath()
 
     val store = storeProvider.getStore(storeType, path)
@@ -64,7 +60,6 @@ class KGTableImporter {
 
     entityToClassLogic.reloadTreeCache()
 
-    val adjacentSpaceRegex = Regex("\\s+")
     var tripleNumber = 0
     result.forEachIndexed { index, p ->
       TableJsonFileReader(p).use { reader ->
@@ -72,7 +67,6 @@ class KGTableImporter {
           val triple = reader.next()
           try {
             if (triple.subject == null || triple.objekt == null) continue
-            triple.objekt = triple.objekt!!.replace(adjacentSpaceRegex, " ")
             val subject = PrefixService.getFkgResourceUrl(triple.subject!!)
             val ontologyClass = triple.ontologyClass!!
 
