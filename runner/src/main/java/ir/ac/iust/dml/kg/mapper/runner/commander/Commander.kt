@@ -32,6 +32,7 @@ class Commander {
         "allTriples" -> services.allTriples(TripleImporter.StoreType.valueOf(arg!!))
         "rewriteLabels" -> services.rewriteLabels(TripleImporter.StoreType.valueOf(arg!!))
         "redirects" -> services.redirects()
+        "ambiguities" -> services.ambiguities()
         "entities" -> services.entities()
         "relations" -> services.relations()
         "migrate" -> services.migrate()

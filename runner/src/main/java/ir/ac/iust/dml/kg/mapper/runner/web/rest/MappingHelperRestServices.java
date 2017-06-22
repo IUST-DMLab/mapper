@@ -3,10 +3,7 @@ package ir.ac.iust.dml.kg.mapper.runner.web.rest;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.*;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.ExportData;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.TemplateToOntologyExporter;
-import ir.ac.iust.dml.kg.dbpediahelper.logic.store.KGTableImporter;
-import ir.ac.iust.dml.kg.dbpediahelper.logic.store.KGTripleImporter;
-import ir.ac.iust.dml.kg.dbpediahelper.logic.store.KSMappingHolder;
-import ir.ac.iust.dml.kg.dbpediahelper.logic.store.MigrationManager;
+import ir.ac.iust.dml.kg.dbpediahelper.logic.store.*;
 import ir.ac.iust.dml.kg.raw.utils.PrefixService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +27,9 @@ public class MappingHelperRestServices {
   @Autowired
   private PropertyMappingLogic propertyMappingLogic;
   @Autowired
-  private RedirectAmbigutyLogic redirectAmbigutyLogic;
+  private RedirectLogic redirectLogic;
+  @Autowired
+  private AmbiguityLogic ambiguityLogic;
   @Autowired
   private MigrationManager migrationManager;
   @Autowired
@@ -117,13 +116,20 @@ public class MappingHelperRestServices {
   public String allTriples(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
     kgTripleImporter.writeTriples(type);
     kgTripleImporter.rewriteLabels(type);
-    redirectAmbigutyLogic.write(type);
+    redirectLogic.write(type);
+    ambiguityLogic.write(type);
     return "Imported!";
   }
 
   @RequestMapping("/redirects")
   public String redirects() throws Exception {
-    redirectAmbigutyLogic.write(TripleImporter.StoreType.knowledgeStore);
+    redirectLogic.write(TripleImporter.StoreType.knowledgeStore);
+    return "Imported!";
+  }
+
+  @RequestMapping("/ambiguities")
+  public String ambiguities() throws Exception {
+    ambiguityLogic.write(TripleImporter.StoreType.knowledgeStore);
     return "Imported!";
   }
 

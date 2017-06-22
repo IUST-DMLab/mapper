@@ -19,7 +19,7 @@ import java.nio.file.Files
 
 
 @Service
-class RedirectAmbigutyLogic {
+class RedirectLogic {
 
   val logger = Logger.getLogger(this.javaClass)!!
   @Autowired private lateinit var tripleDao: FkgTripleDao
@@ -37,12 +37,6 @@ class RedirectAmbigutyLogic {
       throw Exception("There is no file ${redirectsFolder.toAbsolutePath()} existed.")
     }
 
-    val disambiguationFolder = ConfigReader.getPath("extractor.disambiguations.folder", "~/.pkg/data/disambiguations")
-    Files.createDirectories(disambiguationFolder.parent)
-    if (!Files.exists(disambiguationFolder)) {
-      throw Exception("There is no file ${disambiguationFolder.toAbsolutePath()} existed.")
-    }
-
     val store = when (storeType) {
       TripleImporter.StoreType.mysql -> tripleDao
       TripleImporter.StoreType.virtuoso -> VirtuosoFkgTripleDaoImpl()
@@ -50,16 +44,14 @@ class RedirectAmbigutyLogic {
     }
 
     val gson = Gson()
-    var type = object : TypeToken<Map<String, String>>() {}.type
+    val type = object : TypeToken<Map<String, String>>() {}.type
 
     val maxNumberOfRedirects = ConfigReader.getInt("test.mode.max.redirects", "10000000")
-    val maxNumberOfDisambiguation = ConfigReader.getInt("test.mode.max.disambiguation", "10000000")
 
     val VARIANT_LABEL = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)
     val REDIRECT = PrefixService.prefixToUri(PrefixService.REDIRECTS_URI)
-    val DISAMBIGUATED_FROM = PrefixService.prefixToUri(PrefixService.DISAMBIGUATED_FROM_URI)
 
-    var files = PathWalker.getPath(redirectsFolder, Regex("[01]-redirects.json"))
+    val files = PathWalker.getPath(redirectsFolder, Regex("[01]-redirects.json"))
     var i = 0
     files.forEach {
       try {
@@ -85,33 +77,6 @@ class RedirectAmbigutyLogic {
       } catch (th: Throwable) {
         logger.error(th)
         th.printStackTrace()
-      }
-    }
-
-    type = object : TypeToken<List<Ambiguity>>() {}.type
-    files = PathWalker.getPath(disambiguationFolder)
-    i = 0
-    files.forEach {
-      try {
-        BufferedReader(InputStreamReader(FileInputStream(it.toFile()), "UTF8")).use { reader ->
-          val map: List<Ambiguity> = gson.fromJson(reader, type)
-          map.forEach { a ->
-            a.field.forEach { f ->
-              i++
-              if (i < maxNumberOfDisambiguation) {
-                if (i % 1000 == 0) logger.info("writing disambiguation $i: $a to $f")
-                store.save(FkgTriple(
-                    subject = PrefixService.getFkgResourceUrl(f),
-                    predicate = DISAMBIGUATED_FROM,
-                    objekt = if (a.title!!.contains("(ابهام زدایی)")) a.title!!.substringBefore("(ابهام زدایی)")
-                    else a.title
-                ), null, true)
-              }
-            }
-          }
-        }
-      } catch (th: Throwable) {
-        logger.error(th)
       }
     }
 
