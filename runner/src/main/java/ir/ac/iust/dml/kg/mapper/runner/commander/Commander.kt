@@ -34,6 +34,7 @@ class Commander {
         "redirects" -> services.redirects()
         "ambiguities" -> services.ambiguities()
         "entities" -> services.entities()
+        "predicates" -> services.predicates()
         "relations" -> services.relations()
         "migrate" -> services.migrate()
         "ksMapLoad" -> services.ksMapLoad()

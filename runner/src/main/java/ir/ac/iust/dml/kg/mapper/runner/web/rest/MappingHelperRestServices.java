@@ -38,6 +38,8 @@ public class MappingHelperRestServices {
   private KGTripleImporter kgTripleImporter;
   @Autowired
   private KGTableImporter KGTableImporter;
+  @Autowired
+  private PredicateImporter predicateImporter;
 
   @RequestMapping("/migrate")
   public String migrate() throws Exception {
@@ -167,5 +169,12 @@ public class MappingHelperRestServices {
   @ResponseBody
   public ExportData exportXml(@RequestParam(required = false) String language) throws Exception {
     return templateToOntologyExporter.export(language);
+  }
+
+  @RequestMapping("/predicates")
+  @ResponseBody
+  public Boolean predicates() {
+    predicateImporter.writePredicatesToKS();
+    return true;
   }
 }

@@ -111,7 +111,12 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
   }
 
   override fun read(subject: String?, predicate: String?, objekt: String?, status: MappingStatus?): MutableList<FkgTriple> {
-    // TODO not implemented
-    return mutableListOf()
+    val list = mutableListOf<FkgTriple>()
+    val result = tripleApi.search1(null, subject, predicate, objekt, null, null)
+    result.data.forEach {
+      list.add(FkgTriple(source = it.sources.firstOrNull()?.urls?.firstOrNull(),
+              subject = it.subject, predicate = it.predicate, objekt = it.`object`?.value))
+    }
+    return list
   }
 }
