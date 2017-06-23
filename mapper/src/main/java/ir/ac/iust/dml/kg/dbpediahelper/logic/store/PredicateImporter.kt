@@ -47,7 +47,7 @@ class PredicateImporter {
 
         val size = predicateData.size
         var number = 0
-        var startTime = System.currentTimeMillis()
+        val startTime = System.currentTimeMillis()
         predicateData.forEach { predicate, data ->
             number++
             logger.info("predicate $number form $size: $predicate " +
