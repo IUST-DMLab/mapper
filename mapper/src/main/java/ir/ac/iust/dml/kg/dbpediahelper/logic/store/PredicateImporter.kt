@@ -49,8 +49,9 @@ class PredicateImporter {
         var number = 0
         predicateData.forEach { predicate, data ->
             number++
-            if (number % 100 == 0)
+            if (number % 10 == 1)
                 logger.info("predicate $number from $size has been written.")
+            logger.info("predicate $number $predicate")
             val labels = data.labels.map { Pair(it.key, it.value) }.sortedByDescending { it.second }
             val pu = PrefixService.prefixToUri(predicate)!!
             if (!pu.contains("://")) {

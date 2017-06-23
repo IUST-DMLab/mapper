@@ -32,7 +32,7 @@ public class Application {
   public static void main(String[] args) {
     SpringApplication app = new SpringApplication(Application.class);
     Properties properties = new Properties();
-    if (args.length > 0) properties.put("server.port", 9999);
+    if (args.length > 0) properties.put("server.port", 9998);
     else properties.put("server.port", 8090);
     app.setDefaultProperties(properties);
     ConfigurableApplicationContext context = app.run(args);
