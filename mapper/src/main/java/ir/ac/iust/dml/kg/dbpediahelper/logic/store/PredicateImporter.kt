@@ -47,11 +47,11 @@ class PredicateImporter {
 
         val size = predicateData.size
         var number = 0
+        var startTime = System.currentTimeMillis()
         predicateData.forEach { predicate, data ->
             number++
-            if (number % 10 == 1)
-                logger.info("predicate $number from $size has been written.")
-            logger.info("predicate $number $predicate")
+            logger.info("predicate $number form $size: $predicate " +
+                    "in ${(System.currentTimeMillis() - startTime) / 1000} seconds.")
             val labels = data.labels.map { Pair(it.key, it.value) }.sortedByDescending { it.second }
             val pu = PrefixService.prefixToUri(predicate)!!
             if (!pu.contains("://")) {
