@@ -19,6 +19,10 @@ class OntologyRestServices {
               @RequestParam(required = false, defaultValue = "20") pageSize: Int?,
               @RequestParam(required = false) keyword: String?) = logic.classes(page!!, pageSize!!, keyword)
 
+  @RequestMapping("classTree", method = arrayOf(RequestMethod.GET))
+  @ResponseBody
+  fun classTree() = logic.classTree()
+
   @RequestMapping("classData", method = arrayOf(RequestMethod.GET))
   @ResponseBody
   fun classData(@RequestParam(required = false) classUrl: String?) = logic.classData(classUrl!!)

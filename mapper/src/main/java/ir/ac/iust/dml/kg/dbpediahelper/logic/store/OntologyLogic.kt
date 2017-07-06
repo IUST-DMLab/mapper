@@ -91,6 +91,33 @@ class OntologyLogic {
 
   fun classes(page: Int, pageSize: Int, keyword: String?) = getType(keyword, owlClass, page, pageSize)
 
+  data class OntologyNode(var url: String, var label: String? = null,
+                          var children: MutableList<OntologyNode> = mutableListOf<OntologyNode>())
+
+  fun classTree(): OntologyNode {
+    val root = OntologyNode(PrefixService.getFkgOntologyClassUrl("Thing"))
+    fillNode(root)
+    return root
+  }
+
+  fun fillNode(node: OntologyNode) {
+    node.label = getLabel(node.url)
+    val children = tripleApi.search1(null, null, rdfsSubClassOf, node.url, 0, null).data
+    children.forEach {
+      val child = OntologyNode(it.subject)
+      fillNode(child)
+      node.children.add(child)
+    }
+  }
+
+  fun getLabel(url: String): String? {
+    try {
+      return tripleApi.search1(null, url, rdfsLabel, null, 0, 1).data.firstOrNull()?.`object`?.value
+    } catch (th: Throwable) {
+      return null
+    }
+  }
+
   fun properties(page: Int, pageSize: Int, keyword: String?) = getType(keyword, owlObjectProperty, page, pageSize)
 
   fun classData(classUrl: String): OntologyClassData {

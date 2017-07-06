@@ -6,7 +6,7 @@
 
   <groupId>ir.ac.iust.dml.kg.mapping</groupId>
   <artifactId>parent</artifactId>
-    <version>0.5.3</version>
+  <version>0.5.3</version>
   <packaging>pom</packaging>
   <name>Mapping service Parent Project</name>
 
@@ -20,7 +20,7 @@
   </modules>
 
   <properties>
-      <kotlin.version>1.1.2-5</kotlin.version>
+    <kotlin.version>1.1.3-2</kotlin.version>
     <!--<hibernate.version>5.2.6.Final</hibernate.version>-->
     <spring-framework.version>4.3.2.RELEASE</spring-framework.version>
     <sweble.version>2.2.0</sweble.version>
