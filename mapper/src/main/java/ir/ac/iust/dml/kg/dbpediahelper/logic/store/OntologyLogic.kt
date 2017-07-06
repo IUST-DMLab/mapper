@@ -94,18 +94,19 @@ class OntologyLogic {
   data class OntologyNode(var url: String, var label: String? = null,
                           var children: MutableList<OntologyNode> = mutableListOf<OntologyNode>())
 
-  fun classTree(): OntologyNode {
-    val root = OntologyNode(PrefixService.getFkgOntologyClassUrl("Thing"))
-    fillNode(root)
+  fun classTree(rootUrl: String?, maxDepth: Int? = null, label: Boolean = false): OntologyNode {
+    val root = OntologyNode(rootUrl ?: PrefixService.getFkgOntologyClassUrl("Thing"))
+    fillNode(root, label, 0, maxDepth)
     return root
   }
 
-  fun fillNode(node: OntologyNode) {
-    node.label = getLabel(node.url)
+  fun fillNode(node: OntologyNode, label: Boolean, depth: Int, maxDepth: Int?) {
+    if (label) node.label = getLabel(node.url)
+    if (maxDepth != null && depth == maxDepth) return
     val children = tripleApi.search1(null, null, rdfsSubClassOf, node.url, 0, null).data
     children.forEach {
       val child = OntologyNode(it.subject)
-      fillNode(child)
+      fillNode(child, label, depth + 1, maxDepth)
       node.children.add(child)
     }
   }

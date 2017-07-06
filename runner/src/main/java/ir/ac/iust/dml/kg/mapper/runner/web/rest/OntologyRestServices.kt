@@ -21,7 +21,10 @@ class OntologyRestServices {
 
   @RequestMapping("classTree", method = arrayOf(RequestMethod.GET))
   @ResponseBody
-  fun classTree() = logic.classTree()
+  fun classTree(
+      @RequestParam(required = false) root: String?,
+      @RequestParam(required = false) depth: Int?,
+      @RequestParam(required = false, defaultValue = "false") label: Boolean) = logic.classTree(root, depth, label)
 
   @RequestMapping("classData", method = arrayOf(RequestMethod.GET))
   @ResponseBody
