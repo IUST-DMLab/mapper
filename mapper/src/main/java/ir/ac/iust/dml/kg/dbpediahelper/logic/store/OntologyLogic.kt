@@ -96,7 +96,7 @@ class OntologyLogic {
 
   fun classTree(rootUrl: String?, maxDepth: Int? = null, label: Boolean = false): OntologyNode {
     val root = OntologyNode(rootUrl ?: PrefixService.getFkgOntologyClassUrl("Thing"))
-    fillNode(root, label, 0, maxDepth)
+    fillNode(root, label, 0, maxDepth ?: 100)
     return root
   }
 
