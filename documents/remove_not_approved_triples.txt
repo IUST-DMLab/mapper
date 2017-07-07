@@ -15,4 +15,4 @@ java -jar runner/target/mapping-services-runner-0.5.3.jar allTriples knowledgeSt
     java -jar runner/target/mapping-services-runner-0.5.3.jar ambiguities knowledgeStore
 java -jar runner/target/mapping-services-runner-0.5.3.jar rewriteLabels knowledgeStore
 java -jar runner/target/mapping-services-runner-0.5.3.jar entities
-java -jar runner/target/mapping-services-runner-0.5.3.jar predicates
+java -jar runner/target/mapping-services-runner-0.5.3.jar predicates knowledgeStore

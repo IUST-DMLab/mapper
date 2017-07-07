@@ -173,8 +173,8 @@ public class MappingHelperRestServices {
 
   @RequestMapping("/predicates")
   @ResponseBody
-  public Boolean predicates() {
-    predicateImporter.writePredicatesToKS();
+  public Boolean predicates(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) {
+    predicateImporter.writePredicates(type);
     return true;
   }
 
@@ -186,6 +186,6 @@ public class MappingHelperRestServices {
     allTriples(type);
     kgTripleImporter.rewriteLabels(type);
     entityToClassLogic.writeEntityTypesToKnowledgeStore();
-    predicateImporter.writePredicatesToKS();
+    predicateImporter.writePredicates(type);
   }
 }

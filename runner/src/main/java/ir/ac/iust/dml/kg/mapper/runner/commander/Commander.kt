@@ -34,7 +34,7 @@ class Commander {
         "redirects" -> services.redirects()
         "ambiguities" -> services.ambiguities()
         "entities" -> services.entities()
-        "predicates" -> services.predicates()
+        "predicates" -> services.predicates(TripleImporter.StoreType.valueOf(arg!!))
         "relations" -> services.relations() // deprecated
         "migrate" -> services.migrate()
         "ksMapLoad" -> services.ksMapLoad() // just for tests. can be removed.
