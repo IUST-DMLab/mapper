@@ -84,11 +84,11 @@ class KGTripleImporter {
             val normalizedTemplate = triple.templateNameFull!!.toLowerCase().replace('_', ' ')
             val property = triple.predicate!!
             // some properties are invalid based on rdf standards
-            if (property.matches(invalidPropertyRegex)) continue
+            if (property.trim().isBlank() || property.matches(invalidPropertyRegex)) continue
             val subject = PrefixService.convertFkgResourceUrl(triple.subject!!)
             val objekt = PrefixService.convertFkgResourceUrl(triple.objekt!!)
 
-            //generate template-specific rules in first time of object
+            // generate template-specific rules in first time of object
             val templateMapping = holder.getTemplateMapping(normalizedTemplate)
 
             val newClassTree = entityToClassLogic.getTree(templateMapping.ontologyClass)!!
@@ -154,6 +154,9 @@ class KGTripleImporter {
     logger.info("number of mapped is $numberOfMapped")
   }
 
+  /**
+   * fix labels and removes (). for example: Majid Asgari (Artist) -> Majid Asgari
+   */
   fun rewriteLabels(storeType: TripleImporter.StoreType = TripleImporter.StoreType.none) {
 
     val path = getTriplesPath()

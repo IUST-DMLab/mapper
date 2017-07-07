@@ -88,7 +88,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
     }
 
     if (approved) {
-      // TODO: approve and write to knowledge store
+      // TODO: approve and write to knowledge store`
     }
 
     buffer.add(data)
@@ -112,7 +112,8 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
 
   override fun read(subject: String?, predicate: String?, objekt: String?, status: MappingStatus?): MutableList<FkgTriple> {
     val list = mutableListOf<FkgTriple>()
-    val result = tripleApi.search1(null, subject, predicate, objekt, null, null)
+    val result = tripleApi.search1(null, false, subject, false, predicate,
+        false, objekt, false, null, null)
     result.data.forEach {
       list.add(FkgTriple(source = it.sources.firstOrNull()?.urls?.firstOrNull(),
               subject = it.subject, predicate = it.predicate, objekt = it.`object`?.value))

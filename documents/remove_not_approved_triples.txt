@@ -1,0 +1,18 @@
+db.triples.remove({
+    state: "None"
+})
+
+db.triples.find({
+    state: {$ne: "None"}
+})
+
+cd /home/asgari/pkg/codes/knowledge-base-mapping
+java -jar runner/target/mapping-services-runner-0.5.3.jar migrate
+java -jar runner/target/mapping-services-runner-0.5.3.jar kgTables knowledgeStore
+java -jar runner/target/mapping-services-runner-0.5.3.jar allTriples knowledgeStore
+    java -jar runner/target/mapping-services-runner-0.5.3.jar kgTriples knowledgeStore
+    java -jar runner/target/mapping-services-runner-0.5.3.jar redirects knowledgeStore
+    java -jar runner/target/mapping-services-runner-0.5.3.jar ambiguities knowledgeStore
+java -jar runner/target/mapping-services-runner-0.5.3.jar rewriteLabels knowledgeStore
+java -jar runner/target/mapping-services-runner-0.5.3.jar entities
+java -jar runner/target/mapping-services-runner-0.5.3.jar predicates

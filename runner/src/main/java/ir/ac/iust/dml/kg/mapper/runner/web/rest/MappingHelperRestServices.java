@@ -177,4 +177,15 @@ public class MappingHelperRestServices {
     predicateImporter.writePredicatesToKS();
     return true;
   }
+
+  @RequestMapping("/completeDumpUpdate")
+  public void completeDumpUpdate(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
+    migrationManager.migrate();
+    migrationManager.save();
+    KGTableImporter.writeTriples(type);
+    allTriples(type);
+    kgTripleImporter.rewriteLabels(type);
+    entityToClassLogic.writeEntityTypesToKnowledgeStore();
+    predicateImporter.writePredicatesToKS();
+  }
 }
