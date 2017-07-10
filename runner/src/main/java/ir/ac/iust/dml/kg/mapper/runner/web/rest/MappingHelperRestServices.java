@@ -96,6 +96,12 @@ public class MappingHelperRestServices {
     return "Imported!";
   }
 
+  @RequestMapping("/withoutInfoBox")
+  public String withoutInfoBox(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
+    kgTripleImporter.writeEntitiesWithoutInfoBox(type);
+    return "Imported!";
+  }
+
   @RequestMapping("/kgAbstracts")
   public String kgAbstracts(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
     kgTripleImporter.writeAbstracts(type);
@@ -122,6 +128,7 @@ public class MappingHelperRestServices {
 
   @RequestMapping("/allTriples")
   public String allTriples(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
+    kgTripleImporter.writeEntitiesWithoutInfoBox(type);
     kgTripleImporter.writeTriples(type);
     kgTripleImporter.writeAbstracts(type);
     kgTripleImporter.rewriteLabels(type);

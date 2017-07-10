@@ -9,12 +9,31 @@ class EntityClassImporter {
 
   val TYPE_OF_ALL_RESOURCES = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_RESOURCES)!!
   val LABEL = PrefixService.prefixToUri(PrefixService.LABEL_URL)!!
+  val VARIANT_LABEL = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)!!
   val INSTANCE_OF = PrefixService.prefixToUri(PrefixService.INSTANCE_OF_URL)!!
   val TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)!!
+  val THING = PrefixService.getFkgOntologyClass("Thing")
+
+  fun writeNoInfoBoxEntity(entities: Set<String>, store: FkgTripleDao) {
+    val source = "http://dumps.wikimedia.org"
+    entities.forEach { entity ->
+      val subject = PrefixService.getFkgResourceUrl(entity)
+      val fullLabel = entity.substringAfterLast('/').replace('_', ' ').trim()
+      store.convertAndSave(source, subject, fullLabel, VARIANT_LABEL)
+      if (fullLabel.contains("(")) {
+        val label = fullLabel.substringBefore("(").trim()
+        store.convertAndSave(source, subject, label, LABEL)
+        store.convertAndSave(source, subject, label, VARIANT_LABEL)
+      } else store.convertAndSave(source, subject, fullLabel, LABEL)
+      store.convertAndSave(source, subject, THING, INSTANCE_OF)
+      store.convertAndSave(source, subject, TYPE_OF_ALL_RESOURCES, TYPE_URL)
+      store.convertAndSave(source, subject, THING, TYPE_URL)
+    }
+  }
 
   fun writeEntityTrees(entityTree: MutableMap<String, MutableSet<String>>, store: FkgTripleDao) {
     entityTree.forEach { entity, ontologyClass ->
-      var longestTree = listOf<String>("Thing")
+      var longestTree = listOf("Thing")
       val allClasses = mutableSetOf<String>()
 
       ontologyClass.forEach {

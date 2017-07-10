@@ -1,5 +1,7 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic.store
 
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
@@ -16,6 +18,9 @@ import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.io.BufferedReader
+import java.io.FileInputStream
+import java.io.InputStreamReader
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -33,11 +38,7 @@ class KGTripleImporter {
   private val invalidPropertyRegex = Regex("\\d+")
 
   fun writeAbstracts(storeType: TripleImporter.StoreType = TripleImporter.StoreType.none) {
-    val path = ConfigReader.getPath("wiki.abstracts.input.folder", "~/.pkg/data/abstract_tuples")
-    if (!Files.exists(path.parent)) Files.createDirectories(path.parent)
-    if (!Files.exists(path)) {
-      throw Exception("There is no file ${path.toAbsolutePath()} existed.")
-    }
+    val path = getPath("wiki.abstracts.input.folder", "~/.pkg/data/abstract_tuples")
     val maxNumberOfTriples = ConfigReader.getInt("test.mode.max.triples", "10000000")
     val store = storeProvider.getStore(storeType, path)
 
@@ -64,6 +65,32 @@ class KGTripleImporter {
         }
       }
     }
+    (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
+    (store as? VirtuosoFkgTripleDaoImpl)?.close()
+  }
+
+  fun writeEntitiesWithoutInfoBox(storeType: TripleImporter.StoreType = TripleImporter.StoreType.none) {
+    val path = getPath("wiki.without.info.box.input.folder", "~/.pkg/data/without_infobox")
+    val maxNumberOfFiles = ConfigReader.getInt("test.mode.max.files", "1")
+    val store = storeProvider.getStore(storeType, path)
+
+    val result = PathWalker.getPath(path, Regex("\\d+-revision_ids\\.json"))
+    val startTime = System.currentTimeMillis()
+
+    val type = object : TypeToken<Map<String, String>>() {}.type
+    val gson = Gson()
+
+    result.forEachIndexed { index, p ->
+      if (index > maxNumberOfFiles) return@forEachIndexed
+      InputStreamReader(FileInputStream(p.toFile()), "UTF8").use {
+        BufferedReader(it).use {
+          val revisionIdMap: Map<String, String> = gson.fromJson(it, type)
+          entityClassImporter.writeNoInfoBoxEntity(revisionIdMap.keys, store)
+          logger.warn("$index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
+        }
+      }
+    }
+
     (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
     (store as? VirtuosoFkgTripleDaoImpl)?.close()
   }
@@ -238,15 +265,6 @@ class KGTripleImporter {
     (store as? VirtuosoFkgTripleDaoImpl)?.close()
   }
 
-  private fun getTriplesPath(): Path {
-    val path = ConfigReader.getPath("wiki.triple.input.folder", "~/.pkg/data/triples")
-    if (!Files.exists(path.parent)) Files.createDirectories(path.parent)
-    if (!Files.exists(path)) {
-      throw Exception("There is no file ${path.toAbsolutePath()} existed.")
-    }
-    return path
-  }
-
   private fun FkgTripleDao.saveTriple(source: String, subject: String, objeck: String, rule: MapRule) {
     val value = if (rule.transform != null) {
       Transformers::class.java.getMethod(rule.transform, String::class.java).invoke(transformers, objeck)
@@ -255,5 +273,16 @@ class KGTripleImporter {
     this.save(FkgTriple(source = source, subject = subject,
         predicate = PrefixService.prefixToUri(rule.predicate),
         objekt = PrefixService.prefixToUri(value.toString())), null)
+  }
+
+  private fun getTriplesPath() = getPath("wiki.triple.input.folder", "~/.pkg/data/triples")
+
+  private fun getPath(key: String, defaultValue: String): Path {
+    val path = ConfigReader.getPath(key, defaultValue)
+    if (!Files.exists(path.parent)) Files.createDirectories(path.parent)
+    if (!Files.exists(path)) {
+      throw Exception("There is no file ${path.toAbsolutePath()} existed.")
+    }
+    return path
   }
 }
