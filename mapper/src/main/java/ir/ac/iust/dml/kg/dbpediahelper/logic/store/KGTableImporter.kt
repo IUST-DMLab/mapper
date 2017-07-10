@@ -4,7 +4,7 @@ import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImp
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.dbpediahelper.logic.EntityToClassLogic
 import ir.ac.iust.dml.kg.dbpediahelper.logic.StoreProvider
-import ir.ac.iust.dml.kg.dbpediahelper.logic.TripleImporter
+import ir.ac.iust.dml.kg.dbpediahelper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.PrefixService
@@ -31,7 +31,7 @@ class KGTableImporter {
     return path
   }
 
-  fun writeTriples(storeType: TripleImporter.StoreType = TripleImporter.StoreType.none) {
+  fun writeTriples(storeType: StoreType = StoreType.none) {
     val path = getTriplesPath()
 
     val store = storeProvider.getStore(storeType, path)
@@ -84,9 +84,9 @@ class KGTableImporter {
       }
     }
 
-    entityClassImporter.writeEntityTrees(entityTree, store)
+    entityTree.forEach { entity, tress -> entityClassImporter.writeEntityTrees(entity, tress, store) }
 
-    if (store is KnowledgeStoreFkgTripleDaoImpl) store.flush()
-    if (store is VirtuosoFkgTripleDaoImpl) store.close()
+    (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
+    (store as? VirtuosoFkgTripleDaoImpl)?.close()
   }
 }

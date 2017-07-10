@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.mapper.runner.commander
 
-import ir.ac.iust.dml.kg.dbpediahelper.logic.TripleImporter
+import ir.ac.iust.dml.kg.dbpediahelper.logic.type.StoreType
 import ir.ac.iust.dml.kg.mapper.runner.web.rest.MappingHelperRestServices
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,21 +26,21 @@ class Commander {
         "createStatsFile" -> services.createStatsFile() // deprecated
         "writeStats" -> services.writeStats() // deprecated
         "generateMapping" -> services.generateMapping() // deprecated
-        "triples" -> services.triples(TripleImporter.StoreType.valueOf(arg!!)) // deprecated
-        "kgTriples" -> services.kgTriples(TripleImporter.StoreType.valueOf(arg!!))
-        "abstracts" -> services.kgAbstracts(TripleImporter.StoreType.valueOf(arg!!))
-        "withoutInfoBox" -> services.withoutInfoBox(TripleImporter.StoreType.valueOf(arg!!))
-        "kgTables" -> services.kgTables(TripleImporter.StoreType.valueOf(arg!!))
-        "allTriples" -> services.allTriples(TripleImporter.StoreType.valueOf(arg!!))
-        "rewriteLabels" -> services.rewriteLabels(TripleImporter.StoreType.valueOf(arg!!)) // fixes labels
+        "triples" -> services.triples(StoreType.valueOf(arg!!)) // deprecated
+        "kgTriples" -> services.kgTriples(StoreType.valueOf(arg!!))
+        "abstracts" -> services.kgAbstracts(StoreType.valueOf(arg!!))
+        "withoutInfoBox" -> services.withoutInfoBox(StoreType.valueOf(arg!!))
+        "withInfoBox" -> services.withInfoBox(StoreType.valueOf(arg!!))
+        "kgTables" -> services.kgTables(StoreType.valueOf(arg!!))
+        "allTriples" -> services.allTriples(StoreType.valueOf(arg!!))
         "redirects" -> services.redirects()
         "ambiguities" -> services.ambiguities()
         "entities" -> services.entities()
-        "predicates" -> services.predicates(TripleImporter.StoreType.valueOf(arg!!))
+        "predicates" -> services.predicates(StoreType.valueOf(arg!!))
         "relations" -> services.relations() // deprecated
         "migrate" -> services.migrate()
         "ksMapLoad" -> services.ksMapLoad() // just for tests. can be removed.
-        "completeDumpUpdate" -> services.completeDumpUpdate(TripleImporter.StoreType.valueOf(arg!!)) // all needed tasks in one place
+        "completeDumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(arg!!)) // all needed tasks in one place
       }
     } catch (th: Throwable) {
       logger.error(th)

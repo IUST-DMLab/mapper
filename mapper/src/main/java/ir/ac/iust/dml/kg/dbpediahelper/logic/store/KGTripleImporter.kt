@@ -8,8 +8,8 @@ import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.dbpediahelper.logic.EntityToClassLogic
 import ir.ac.iust.dml.kg.dbpediahelper.logic.StoreProvider
-import ir.ac.iust.dml.kg.dbpediahelper.logic.TripleImporter
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.entities.MapRule
+import ir.ac.iust.dml.kg.dbpediahelper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.PrefixService
@@ -37,7 +37,7 @@ class KGTripleImporter {
 
   private val invalidPropertyRegex = Regex("\\d+")
 
-  fun writeAbstracts(storeType: TripleImporter.StoreType = TripleImporter.StoreType.none) {
+  fun writeAbstracts(storeType: StoreType = StoreType.none) {
     val path = getPath("wiki.abstracts.input.folder", "~/.pkg/data/abstract_tuples")
     val maxNumberOfTriples = ConfigReader.getInt("test.mode.max.triples", "10000000")
     val store = storeProvider.getStore(storeType, path)
@@ -69,7 +69,7 @@ class KGTripleImporter {
     (store as? VirtuosoFkgTripleDaoImpl)?.close()
   }
 
-  fun writeEntitiesWithoutInfoBox(storeType: TripleImporter.StoreType = TripleImporter.StoreType.none) {
+  fun writeEntitiesWithoutInfoBox(storeType: StoreType = StoreType.none) {
     val path = getPath("wiki.without.info.box.input.folder", "~/.pkg/data/without_infobox")
     val maxNumberOfFiles = ConfigReader.getInt("test.mode.max.files", "1")
     val store = storeProvider.getStore(storeType, path)
@@ -85,7 +85,9 @@ class KGTripleImporter {
       InputStreamReader(FileInputStream(p.toFile()), "UTF8").use {
         BufferedReader(it).use {
           val revisionIdMap: Map<String, String> = gson.fromJson(it, type)
-          entityClassImporter.writeNoInfoBoxEntity(revisionIdMap.keys, store)
+          revisionIdMap.keys.forEach { entity ->
+            entityClassImporter.addResourceAsThing(entity, store)
+          }
           logger.warn("$index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
         }
       }
@@ -95,7 +97,45 @@ class KGTripleImporter {
     (store as? VirtuosoFkgTripleDaoImpl)?.close()
   }
 
-  fun writeTriples(storeType: TripleImporter.StoreType = TripleImporter.StoreType.none) {
+  fun writeEntitiesWithInfoBox(storeType: StoreType = StoreType.none) {
+    holder.writeToKS()
+    holder.loadFromKS()
+
+    val path = getPath("wiki.with.info.box.input.folder", "~/.pkg/data/with_infobox")
+    val maxNumberOfFiles = ConfigReader.getInt("test.mode.max.files", "1")
+    val store = storeProvider.getStore(storeType, path)
+
+    val result = PathWalker.getPath(path, Regex("\\d+\\.json"))
+    val startTime = System.currentTimeMillis()
+
+    val type = object : TypeToken<Map<String, List<String>>>() {}.type
+    val gson = Gson()
+
+    result.forEachIndexed { index, p ->
+      if (index > maxNumberOfFiles) return@forEachIndexed
+      InputStreamReader(FileInputStream(p.toFile()), "UTF8").use {
+        BufferedReader(it).use {
+          val infoBoxes: Map<String, List<String>> = gson.fromJson(it, type)
+          infoBoxes.forEach { entity, infoboxes ->
+            val tress = mutableSetOf<String>()
+            infoboxes.forEach {
+              val normalizedTemplate = it.toLowerCase().replace('_', ' ')
+              val templateMapping = holder.getTemplateMapping(normalizedTemplate)
+              val tree = entityToClassLogic.getTree(templateMapping.ontologyClass)!!
+              tress.add(tree)
+            }
+            entityClassImporter.writeEntityTrees(entity, tress, store)
+          }
+          logger.warn("$index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
+        }
+      }
+    }
+
+    (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
+    (store as? VirtuosoFkgTripleDaoImpl)?.close()
+  }
+
+  fun writeTriples(storeType: StoreType = StoreType.none) {
     holder.writeToKS()
     holder.loadFromKS()
 
@@ -106,8 +146,6 @@ class KGTripleImporter {
 
     store.deleteAll()
 
-    val entityTree = mutableMapOf<String, MutableSet<String>>()
-    val notSeenTemplates = mutableMapOf<String, Int>()
     val notSeenProperties = mutableMapOf<String, Int>()
     var numberOfMapped = 0
     var numberOfMappedInTree = 0
@@ -154,19 +192,9 @@ class KGTripleImporter {
             // generate template-specific rules in first time of object
             val templateMapping = holder.getTemplateMapping(normalizedTemplate)
 
-            val newClassTree = entityToClassLogic.getTree(templateMapping.ontologyClass)!!
-            entityTree.getOrPut(subject, { mutableSetOf() }).add(newClassTree)
-
-            if (!entityTree.contains(subject)) {
-              if (templateMapping.rules!!.isEmpty()) {
-                val old = notSeenTemplates.getOrDefault(normalizedTemplate, 0)
-                notSeenTemplates[normalizedTemplate] = old + 1
-              }
-              templateMapping.rules!!.forEach {
-                numberOfMapped++
-                store.saveTriple(source = triple.source!!, subject = subject,
-                    objeck = objekt, rule = it)
-              }
+            templateMapping.rules!!.forEach {
+              numberOfMapped++
+              store.saveTriple(source = triple.source!!, subject = subject, objeck = objekt, rule = it)
             }
 
             val propertyMapping = templateMapping.properties!![property]
@@ -204,65 +232,15 @@ class KGTripleImporter {
     }
 
     entityToClassLogic.writeTree(store)
-    entityClassImporter.writeEntityTrees(entityTree, store)
     predicateImporter.writePredicates(store)
 
     (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
     (store as? VirtuosoFkgTripleDaoImpl)?.close()
 
-    logger.info("number of not seen templates ${notSeenTemplates.size}")
     logger.info("number of not seen properties ${notSeenProperties.size}")
     logger.info("number of not mapped properties $numberOfMapped")
     logger.info("number of mapped in tree $numberOfMappedInTree")
     logger.info("number of mapped is $numberOfMapped")
-  }
-
-  /**
-   * fix labels and removes (). for example: Majid Asgari (Artist) -> Majid Asgari
-   */
-  fun rewriteLabels(storeType: TripleImporter.StoreType = TripleImporter.StoreType.none) {
-
-    val path = getTriplesPath()
-    val store = storeProvider.getStore(storeType, path)
-    val maxNumberOfTriples = ConfigReader.getInt("test.mode.max.triples", "10000000")
-
-    val visitedSources = mutableSetOf<String>()
-
-    val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
-
-    var tripleNumber = 0
-    result.forEachIndexed { index, p ->
-      TripleJsonFileReader(p).use { reader ->
-        while (reader.hasNext()) {
-          val triple = reader.next()
-          tripleNumber++
-          if (tripleNumber > maxNumberOfTriples) break
-          try {
-            if (triple.subject == null || !triple.subject!!.contains('/')) continue
-            if (tripleNumber % 100000 == 0) logger.warn("triple number is $tripleNumber. $index file is $p. ")
-            visitedSources.add(triple.subject!!)
-          } catch (th: Throwable) {
-            logger.info("triple: $triple")
-            logger.error(th)
-          }
-        }
-      }
-    }
-
-    val VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)!!
-
-    visitedSources.forEach { source ->
-      val subject = PrefixService.convertFkgResourceUrl(source)
-      var label = source.substringAfterLast("/").replace('_', ' ')
-//      store.convertAndSave(source = subject, subject = subject, property = LABEL, objeck = label)
-      if (label.contains('(')) {
-        label = label.substringBeforeLast('(').trim()
-        store.convertAndSave(source = source, subject = subject, property = VARIANT_LABEL_URL, objeck = label)
-      }
-    }
-
-    (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
-    (store as? VirtuosoFkgTripleDaoImpl)?.close()
   }
 
   private fun FkgTripleDao.saveTriple(source: String, subject: String, objeck: String, rule: MapRule) {

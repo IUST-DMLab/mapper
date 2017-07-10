@@ -4,6 +4,7 @@ import ir.ac.iust.dml.kg.dbpediahelper.logic.*;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.ExportData;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.export.TemplateToOntologyExporter;
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.*;
+import ir.ac.iust.dml.kg.dbpediahelper.logic.type.StoreType;
 import ir.ac.iust.dml.kg.raw.utils.PrefixService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -91,47 +92,47 @@ public class MappingHelperRestServices {
   }
 
   @RequestMapping("/triples")
-  public String triples(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
+  public String triples(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
     tripleImporter.processTripleInputFiles(type);
     return "Imported!";
   }
 
   @RequestMapping("/withoutInfoBox")
-  public String withoutInfoBox(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
+  public String withoutInfoBox(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
     kgTripleImporter.writeEntitiesWithoutInfoBox(type);
     return "Imported!";
   }
 
+  @RequestMapping("/withInfoBox")
+  public String withInfoBox(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
+    kgTripleImporter.writeEntitiesWithInfoBox(type);
+    return "Imported!";
+  }
+
   @RequestMapping("/kgAbstracts")
-  public String kgAbstracts(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
+  public String kgAbstracts(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
     kgTripleImporter.writeAbstracts(type);
     return "Imported!";
   }
 
   @RequestMapping("/kgTriples")
-  public String kgTriples(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
+  public String kgTriples(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
     kgTripleImporter.writeTriples(type);
     return "Imported!";
   }
 
   @RequestMapping("/kgTables")
-  public String kgTables(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
+  public String kgTables(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
     KGTableImporter.writeTriples(type);
     return "Imported!";
   }
 
-  @RequestMapping("/rewriteLabels")
-  public String rewriteLabels(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
-    kgTripleImporter.rewriteLabels(type);
-    return "Imported!";
-  }
-
   @RequestMapping("/allTriples")
-  public String allTriples(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
+  public String allTriples(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
     kgTripleImporter.writeEntitiesWithoutInfoBox(type);
+    kgTripleImporter.writeEntitiesWithInfoBox(type);
     kgTripleImporter.writeTriples(type);
     kgTripleImporter.writeAbstracts(type);
-    kgTripleImporter.rewriteLabels(type);
     redirectLogic.write(type);
     ambiguityLogic.write(type);
     return "Imported!";
@@ -139,13 +140,13 @@ public class MappingHelperRestServices {
 
   @RequestMapping("/redirects")
   public String redirects() throws Exception {
-    redirectLogic.write(TripleImporter.StoreType.knowledgeStore);
+    redirectLogic.write(StoreType.knowledgeStore);
     return "Imported!";
   }
 
   @RequestMapping("/ambiguities")
   public String ambiguities() throws Exception {
-    ambiguityLogic.write(TripleImporter.StoreType.knowledgeStore);
+    ambiguityLogic.write(StoreType.knowledgeStore);
     return "Imported!";
   }
 
@@ -187,18 +188,17 @@ public class MappingHelperRestServices {
 
   @RequestMapping("/predicates")
   @ResponseBody
-  public Boolean predicates(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) {
+  public Boolean predicates(@RequestParam(defaultValue = "none") StoreType type) {
     predicateImporter.writePredicates(type);
     return true;
   }
 
   @RequestMapping("/completeDumpUpdate")
-  public void completeDumpUpdate(@RequestParam(defaultValue = "none") TripleImporter.StoreType type) throws Exception {
+  public void completeDumpUpdate(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
     migrationManager.migrate();
     migrationManager.save();
     KGTableImporter.writeTriples(type);
     allTriples(type);
-    kgTripleImporter.rewriteLabels(type);
     entityToClassLogic.writeEntityTypesToKnowledgeStore();
     predicateImporter.writePredicates(type);
   }

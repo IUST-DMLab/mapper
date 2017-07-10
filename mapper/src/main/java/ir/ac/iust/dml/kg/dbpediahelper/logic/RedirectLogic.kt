@@ -6,6 +6,7 @@ import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
+import ir.ac.iust.dml.kg.dbpediahelper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.PrefixService
@@ -30,7 +31,7 @@ class RedirectLogic {
   }
 
   @Throws(Exception::class)
-  fun write(storeType: TripleImporter.StoreType = TripleImporter.StoreType.knowledgeStore) {
+  fun write(storeType: StoreType = StoreType.knowledgeStore) {
     val redirectsFolder = ConfigReader.getPath("extractor.redirect.folder", "~/.pkg/data/redirects")
     Files.createDirectories(redirectsFolder.parent)
     if (!Files.exists(redirectsFolder)) {
@@ -38,8 +39,8 @@ class RedirectLogic {
     }
 
     val store = when (storeType) {
-      TripleImporter.StoreType.mysql -> tripleDao
-      TripleImporter.StoreType.virtuoso -> VirtuosoFkgTripleDaoImpl()
+      StoreType.mysql -> tripleDao
+      StoreType.virtuoso -> VirtuosoFkgTripleDaoImpl()
       else -> KnowledgeStoreFkgTripleDaoImpl()
     }
 

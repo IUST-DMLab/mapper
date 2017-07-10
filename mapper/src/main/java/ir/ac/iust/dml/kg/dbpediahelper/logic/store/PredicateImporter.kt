@@ -2,7 +2,7 @@ package ir.ac.iust.dml.kg.dbpediahelper.logic.store
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.dbpediahelper.logic.StoreProvider
-import ir.ac.iust.dml.kg.dbpediahelper.logic.TripleImporter
+import ir.ac.iust.dml.kg.dbpediahelper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.PrefixService
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,7 +22,7 @@ class PredicateImporter {
     private val LABEL = PrefixService.prefixToUri(PrefixService.LABEL_URL)!!
     private val TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)!!
 
-  fun writePredicates(type: TripleImporter.StoreType) {
+    fun writePredicates(type: StoreType) {
         holder.writeToKS()
         holder.loadFromKS()
     writePredicates(storeProvider.getStore(type))

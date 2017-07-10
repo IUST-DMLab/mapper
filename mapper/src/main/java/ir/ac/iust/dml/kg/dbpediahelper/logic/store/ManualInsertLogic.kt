@@ -4,7 +4,7 @@ import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.dbpediahelper.logic.EntityToClassLogic
 import ir.ac.iust.dml.kg.dbpediahelper.logic.StoreProvider
-import ir.ac.iust.dml.kg.dbpediahelper.logic.TripleImporter
+import ir.ac.iust.dml.kg.dbpediahelper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.PrefixService
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,8 +27,8 @@ class ManualInsertLogic {
 
   @PostConstruct
   fun setDao() {
-    virtuosoDao = provider.getStore(TripleImporter.StoreType.virtuoso)
-    kgDao = provider.getStore(TripleImporter.StoreType.knowledgeStore)
+    virtuosoDao = provider.getStore(StoreType.virtuoso)
+    kgDao = provider.getStore(StoreType.knowledgeStore)
     classLogic.reloadTreeCache()
   }
 

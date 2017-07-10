@@ -8,6 +8,7 @@ import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImp
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
+import ir.ac.iust.dml.kg.dbpediahelper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.PrefixService
@@ -33,10 +34,6 @@ class TripleImporter {
    @PreDestroy
    fun shutdown() {
       tripleGenerationTaskExecutor.shutdown()
-   }
-
-   enum class StoreType {
-      none, file, mysql, virtuoso, knowledgeStore
    }
 
    @Throws(Exception::class)

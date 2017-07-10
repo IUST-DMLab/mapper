@@ -13,45 +13,37 @@ class EntityClassImporter {
   val INSTANCE_OF = PrefixService.prefixToUri(PrefixService.INSTANCE_OF_URL)!!
   val TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)!!
   val THING = PrefixService.getFkgOntologyClass("Thing")
+  val WIKI_DUMP_URL = "http://dumps.wikimedia.org"
 
-  fun writeNoInfoBoxEntity(entities: Set<String>, store: FkgTripleDao) {
-    val source = "http://dumps.wikimedia.org"
-    entities.forEach { entity ->
-      val subject = PrefixService.getFkgResourceUrl(entity)
-      val fullLabel = entity.substringAfterLast('/').replace('_', ' ').trim()
-      store.convertAndSave(source, subject, fullLabel, VARIANT_LABEL)
-      if (fullLabel.contains("(")) {
-        val label = fullLabel.substringBefore("(").trim()
-        store.convertAndSave(source, subject, label, LABEL)
-        store.convertAndSave(source, subject, label, VARIANT_LABEL)
-      } else store.convertAndSave(source, subject, fullLabel, LABEL)
-      store.convertAndSave(source, subject, THING, INSTANCE_OF)
-      store.convertAndSave(source, subject, TYPE_OF_ALL_RESOURCES, TYPE_URL)
-      store.convertAndSave(source, subject, THING, TYPE_URL)
-    }
+  fun addResourceAsThing(entity: String, store: FkgTripleDao) = addResource(entity, store, THING, setOf(THING))
+
+  private fun addResource(entity: String, store: FkgTripleDao, instanceOf: String, classes: Set<String>) {
+    val subject = PrefixService.getFkgResourceUrl(entity)
+
+    val fullLabel = entity.substringAfterLast('/').replace('_', ' ').trim()
+    store.convertAndSave(WIKI_DUMP_URL, subject, fullLabel, VARIANT_LABEL)
+    if (fullLabel.contains("(")) {
+      val label = fullLabel.substringBefore("(").trim()
+      store.convertAndSave(WIKI_DUMP_URL, subject, label, LABEL)
+      store.convertAndSave(WIKI_DUMP_URL, subject, label, VARIANT_LABEL)
+    } else store.convertAndSave(WIKI_DUMP_URL, subject, fullLabel, LABEL)
+
+    store.convertAndSave(WIKI_DUMP_URL, subject, TYPE_OF_ALL_RESOURCES, TYPE_URL)
+
+    store.convertAndSave(WIKI_DUMP_URL, subject, instanceOf, INSTANCE_OF)
+    classes.forEach { store.convertAndSave(WIKI_DUMP_URL, subject, it, TYPE_URL) }
   }
 
-  fun writeEntityTrees(entityTree: MutableMap<String, MutableSet<String>>, store: FkgTripleDao) {
-    entityTree.forEach { entity, ontologyClass ->
-      var longestTree = listOf("Thing")
-      val allClasses = mutableSetOf<String>()
+  fun writeEntityTrees(entity: String, trees: MutableSet<String>, store: FkgTripleDao) {
+    var longestTree = listOf("Thing")
+    val allClasses = mutableSetOf<String>()
 
-      ontologyClass.forEach {
-        val t = it.split('/')
-        if (t.size > longestTree.size) longestTree = t
-        allClasses.addAll(t)
-      }
-
-      store.convertAndSave(entity, entity, entity.substringAfterLast('/').replace('_', ' ').trim(), LABEL)
-
-      store.convertAndSave(entity, entity, PrefixService.getFkgOntologyClass(longestTree.first()),
-          INSTANCE_OF)
-
-      store.convertAndSave(entity, entity, TYPE_OF_ALL_RESOURCES, TYPE_URL)
-
-      allClasses.forEach {
-        store.convertAndSave(entity, entity, PrefixService.getFkgOntologyClass(it), TYPE_URL)
-      }
+    trees.forEach {
+      val t = it.split('/')
+      if (t.size > longestTree.size) longestTree = t
+      allClasses.addAll(t)
     }
+
+    addResource(entity, store, longestTree.first(), allClasses)
   }
 }

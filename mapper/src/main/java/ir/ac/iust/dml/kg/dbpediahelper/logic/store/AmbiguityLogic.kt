@@ -7,7 +7,7 @@ import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImp
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.dbpediahelper.logic.RedirectLogic
-import ir.ac.iust.dml.kg.dbpediahelper.logic.TripleImporter
+import ir.ac.iust.dml.kg.dbpediahelper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.PrefixService
@@ -25,7 +25,7 @@ class AmbiguityLogic {
     val logger = Logger.getLogger(this.javaClass)!!
     @Autowired private lateinit var tripleDao: FkgTripleDao
 
-    fun write(storeType: TripleImporter.StoreType = TripleImporter.StoreType.knowledgeStore) {
+  fun write(storeType: StoreType = StoreType.knowledgeStore) {
 
         val disambiguationFolder = ConfigReader.getPath("extractor.disambiguations.folder", "~/.pkg/data/disambiguations")
         Files.createDirectories(disambiguationFolder.parent)
@@ -34,8 +34,8 @@ class AmbiguityLogic {
         }
 
         val store = when (storeType) {
-            TripleImporter.StoreType.mysql -> tripleDao
-            TripleImporter.StoreType.virtuoso -> VirtuosoFkgTripleDaoImpl()
+          StoreType.mysql -> tripleDao
+          StoreType.virtuoso -> VirtuosoFkgTripleDaoImpl()
             else -> KnowledgeStoreFkgTripleDaoImpl()
         }
 
