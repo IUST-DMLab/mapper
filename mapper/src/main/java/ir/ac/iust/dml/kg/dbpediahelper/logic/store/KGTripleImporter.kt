@@ -32,6 +32,42 @@ class KGTripleImporter {
 
   private val invalidPropertyRegex = Regex("\\d+")
 
+  fun writeAbstracts(storeType: TripleImporter.StoreType = TripleImporter.StoreType.none) {
+    val path = ConfigReader.getPath("wiki.abstracts.input.folder", "~/.pkg/data/abstract_tuples")
+    if (!Files.exists(path.parent)) Files.createDirectories(path.parent)
+    if (!Files.exists(path)) {
+      throw Exception("There is no file ${path.toAbsolutePath()} existed.")
+    }
+    val maxNumberOfTriples = ConfigReader.getInt("test.mode.max.triples", "10000000")
+    val store = storeProvider.getStore(storeType, path)
+
+    val result = PathWalker.getPath(path, Regex("\\d+\\.json"))
+    val startTime = System.currentTimeMillis()
+    var tripleNumber = 0
+    val ABSTRACT_PREDICATE = PrefixService.getFkgOntologyPropertyUrl("abstract")
+    result.forEachIndexed { index, p ->
+      TripleJsonFileReader(p).use { reader ->
+        while (reader.hasNext()) {
+          val triple = reader.next()
+          tripleNumber++
+          if (tripleNumber > maxNumberOfTriples) break
+          try {
+            if (triple.objekt == null) continue
+            if (tripleNumber % 1000 == 0)
+              logger.warn("triple number is $tripleNumber. $index file is $p. " +
+                  "time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
+            val subject = PrefixService.convertFkgResourceUrl(triple.subject!!)
+            store.save(source = triple.source!!, subject = subject,
+                objeck = triple.objekt!!, property = ABSTRACT_PREDICATE)
+          } catch (th: Throwable) {
+          }
+        }
+      }
+    }
+    (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
+    (store as? VirtuosoFkgTripleDaoImpl)?.close()
+  }
+
   fun writeTriples(storeType: TripleImporter.StoreType = TripleImporter.StoreType.none) {
     holder.writeToKS()
     holder.loadFromKS()
@@ -144,8 +180,8 @@ class KGTripleImporter {
     entityClassImporter.writeEntityTrees(entityTree, store)
     predicateImporter.writePredicates(store)
 
-    if (store is KnowledgeStoreFkgTripleDaoImpl) store.flush()
-    if (store is VirtuosoFkgTripleDaoImpl) store.close()
+    (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
+    (store as? VirtuosoFkgTripleDaoImpl)?.close()
 
     logger.info("number of not seen templates ${notSeenTemplates.size}")
     logger.info("number of not seen properties ${notSeenProperties.size}")
@@ -198,8 +234,8 @@ class KGTripleImporter {
       }
     }
 
-    if (store is KnowledgeStoreFkgTripleDaoImpl) store.flush()
-    if (store is VirtuosoFkgTripleDaoImpl) store.close()
+    (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
+    (store as? VirtuosoFkgTripleDaoImpl)?.close()
   }
 
   private fun getTriplesPath(): Path {

@@ -28,6 +28,7 @@ class Commander {
         "generateMapping" -> services.generateMapping() // deprecated
         "triples" -> services.triples(TripleImporter.StoreType.valueOf(arg!!)) // deprecated
         "kgTriples" -> services.kgTriples(TripleImporter.StoreType.valueOf(arg!!))
+        "abstracts" -> services.kgAbstracts(TripleImporter.StoreType.valueOf(arg!!))
         "kgTables" -> services.kgTables(TripleImporter.StoreType.valueOf(arg!!))
         "allTriples" -> services.allTriples(TripleImporter.StoreType.valueOf(arg!!))
         "rewriteLabels" -> services.rewriteLabels(TripleImporter.StoreType.valueOf(arg!!)) // fixes labels
