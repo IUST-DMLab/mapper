@@ -21,25 +21,21 @@ class Commander {
     logger.info("====================================")
     try {
       when (command) {
+        "ksMapLoad" -> services.ksMapLoad() // just for tests. can be removed.
+        "migrate" -> services.migrate() // migrates data from mysql to knowledge store
         "load" -> services.load() // deprecated
         "loadTypes" -> services.loadTypes() // deprecated
         "createStatsFile" -> services.createStatsFile() // deprecated
         "writeStats" -> services.writeStats() // deprecated
         "generateMapping" -> services.generateMapping() // deprecated
-        "triples" -> services.triples(StoreType.valueOf(arg!!)) // deprecated
-        "kgTriples" -> services.kgTriples(StoreType.valueOf(arg!!))
-        "abstracts" -> services.kgAbstracts(StoreType.valueOf(arg!!))
-        "withoutInfoBox" -> services.withoutInfoBox(StoreType.valueOf(arg!!))
-        "withInfoBox" -> services.withInfoBox(StoreType.valueOf(arg!!))
-        "kgTables" -> services.kgTables(StoreType.valueOf(arg!!))
-        "allTriples" -> services.allTriples(StoreType.valueOf(arg!!))
-        "redirects" -> services.redirects()
-        "ambiguities" -> services.ambiguities()
-        "entities" -> services.entities()
-        "predicates" -> services.predicates(StoreType.valueOf(arg!!))
-        "relations" -> services.relations() // deprecated
-        "migrate" -> services.migrate()
-        "ksMapLoad" -> services.ksMapLoad() // just for tests. can be removed.
+        "triples" -> services.triples(StoreType.valueOf(arg!!)) //writes wikipedia triples
+        "abstracts" -> services.abstracts(StoreType.valueOf(arg!!)) // writes wikipedia abstracts
+        "withoutInfoBox" -> services.withoutInfoBox(StoreType.valueOf(arg!!)) // write wikipedia entities without info boxes
+        "withInfoBox" -> services.withInfoBox(StoreType.valueOf(arg!!)) // write wikipedia entities with info boxes
+        "tables" -> services.tables(StoreType.valueOf(arg!!)) // write custom table as triples
+        "redirects" -> services.redirects() // writes all wikipedia redirects
+        "ambiguities" -> services.ambiguities() // writes all wikipedia ambiguities
+        "predicates" -> services.predicates(StoreType.valueOf(arg!!)) // writes all predicates
         "completeDumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(arg!!)) // all needed tasks in one place
       }
     } catch (th: Throwable) {

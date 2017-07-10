@@ -14,12 +14,10 @@ import ir.ac.iust.dml.kg.dbpediahelper.logic.dump.EntityDataDumpReader
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.PrefixService
-import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.nio.file.Files
-import java.util.*
 
 
 @Service
@@ -191,106 +189,6 @@ class EntityToClassLogic {
     val result = mutableMapOf<String, List<String>>()
     treeCache.keys.forEach { key -> result[key] = treeCache[key]!!.split("/").filter { key != it } }
     return result
-  }
-
-  fun writeEntityTypesToKnowledgeStore() {
-    val startTime = System.currentTimeMillis()
-    logger.info("starting at ${Date()}")
-    val maxNumberOfEntities = ConfigReader.getInt("test.mode.max.entities", "1000000")
-    logger.info("max number of entities is $maxNumberOfEntities")
-    val path = ConfigReader.getPath("wiki.triple.input.folder", "~/.pkg/data/triples")
-    Files.createDirectories(path.parent)
-    if (!Files.exists(path)) {
-      throw Exception("There is no file ${path.toAbsolutePath()} existed.")
-    }
-    reloadTreeCache()
-
-    val LABEL = PrefixService.prefixToUri(PrefixService.LABEL_URL)
-    val TYPE_OF_ALL_RESOURCES = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_RESOURCES)
-    val TYPE = PrefixService.prefixToUri(PrefixService.TYPE_URL)
-    val INSTANCE_OF = PrefixService.prefixToUri(PrefixService.INSTANCE_OF_URL)
-    val CLASS_TREE = PrefixService.prefixToUri(PrefixService.CLASS_TREE)
-
-    writeTree(knowledgeStoreDao)
-
-    val addedEntities = mutableSetOf<String>()
-    val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
-    var tripleNumber = 0
-    var entityNumber = 0
-    result.forEachIndexed { index, p ->
-      TripleJsonFileReader(p).use { reader ->
-        while (reader.hasNext()) {
-          val triple = reader.next()
-          tripleNumber++
-          if (tripleNumber % 5000 == 0)
-            logger.info("triple number is $tripleNumber. \tfile: $index\t" +
-                "time: ${(System.currentTimeMillis() - startTime) / 1000}\tsecs")
-          if (tripleNumber > maxNumberOfEntities) break
-          if (triple.subject == null) continue
-          if (!triple.subject!!.contains("://")) continue
-          try {
-            val entity = triple.subject!!.substringAfterLast('/').replace('_', ' ')
-            if (addedEntities.contains(entity)) continue
-            entityNumber++
-            if (entityNumber % 1000 == 0)
-              logger.info("entity number is $entityNumber.")
-            addedEntities.add(entity)
-
-            knowledgeStoreDao.save(FkgTriple(
-                subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
-                predicate = LABEL,
-                objekt = entity
-            ), null)
-
-            knowledgeStoreDao.save(FkgTriple(
-                subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
-                predicate = TYPE,
-                objekt = TYPE_OF_ALL_RESOURCES
-            ), null)
-
-            val mapping = templateDao.read(triple.templateNameFull!!, null)
-            if (mapping != null) {
-              knowledgeStoreDao.save(FkgTriple(
-                  subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
-                  predicate = INSTANCE_OF,
-                  objekt = PrefixService.getFkgOntologyClassUrl(mapping.ontologyClass!!)
-              ), null)
-
-              knowledgeStoreDao.save(FkgTriple(
-                  subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
-                  predicate = CLASS_TREE,
-                  objekt = treeCache[mapping.ontologyClass!!]
-              ), null)
-
-              treeCache[mapping.ontologyClass!!]!!.split("/").forEach {
-                knowledgeStoreDao.save(FkgTriple(
-                    subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
-                    predicate = TYPE,
-                    objekt = PrefixService.getFkgOntologyClassUrl(it)
-                ), null)
-              }
-            } else {
-              val typeUrl = "http://fa.wikipedia.org/wiki/template/" + triple.templateNameFull!!.replace(' ', '_')
-              knowledgeStoreDao.save(FkgTriple(
-                  subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
-                  predicate = INSTANCE_OF,
-                  objekt = typeUrl
-              ), null)
-              knowledgeStoreDao.save(FkgTriple(
-                  subject = PrefixService.convertFkgResourceUrl(triple.subject!!),
-                  predicate = TYPE,
-                  objekt = typeUrl
-              ), null)
-            }
-          } catch (th: Throwable) {
-            logger.info("triple: $triple")
-            logger.error(th)
-            th.printStackTrace()
-          }
-        }
-      }
-    }
-    knowledgeStoreDao.flush()
   }
 
   fun writeTree(dao: FkgTripleDao) {

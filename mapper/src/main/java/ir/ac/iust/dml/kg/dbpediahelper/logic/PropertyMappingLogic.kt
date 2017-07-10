@@ -4,19 +4,15 @@ import ir.ac.iust.dml.kg.access.dao.FkgPropertyMappingDao
 import ir.ac.iust.dml.kg.access.dao.FkgTemplateMappingDao
 import ir.ac.iust.dml.kg.access.dao.FkgTripleStatisticsDao
 import ir.ac.iust.dml.kg.access.dao.WikipediaPropertyTranslationDao
-import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
-import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.access.entities.enumerations.TripleStatisticsType
 import ir.ac.iust.dml.kg.dbpediahelper.logic.data.FkgPropertyMappingData
-import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
 import ir.ac.iust.dml.kg.raw.utils.PrefixService
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.*
 import javax.annotation.PostConstruct
 
 @Service
@@ -173,78 +169,6 @@ class PropertyMappingLogic {
          Thread.sleep(500)
       } while (pagedData.data.isNotEmpty() && page < 100)
       return true
-   }
-
-   fun writeResourcesToKnowledgeStore() {
-      val startTime = System.currentTimeMillis()
-      logger.info("starting at ${Date()}")
-      val maxNumberOfRelations = ConfigReader.getInt("test.mode.max.relations", "50000")
-      val language = if (maxNumberOfRelations != 50000) "fa" else null
-      val approved = if (maxNumberOfRelations != 50000) true else null
-      logger.info("max number of relations is $maxNumberOfRelations")
-
-      val knowledgeStoreDao = KnowledgeStoreFkgTripleDaoImpl()
-      val addedRelations = mutableSetOf<String>()
-      val addedLabels = mutableSetOf<String>()
-      var relationNumber = 0
-      var page = 0
-
-      val PROPERTY_URI = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_PROPERTIES)
-      val LABEL_URL = PrefixService.prefixToUri(PrefixService.LABEL_URL)
-      val PROPERTY_DOMAIN_URL = PrefixService.prefixToUri(PrefixService.PROPERTY_DOMAIN_URL)
-      val TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)
-      val VARIANT_LABEL_URL = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)
-
-      do {
-         val data = dao.search(pageSize = 100, page = page++, language = null,
-               templatePropertyLanguage = language, approved = approved)
-         for (relation in data.data) {
-            relationNumber++
-            if (relationNumber > maxNumberOfRelations) break
-            if (relationNumber % 100 == 0)
-               logger.info("relation number is $relationNumber.\t" +
-                     "time: ${(System.currentTimeMillis() - startTime) / 1000}\tsecs")
-            if (relation.status == MappingStatus.Multiple || relation.status == null) continue
-            if (relation.ontologyProperty == null) continue
-            try {
-               val property = relation.ontologyProperty!!.replace("dbo:", PrefixService.KG_ONTOLOGY_PREFIX + ":")
-               //TODO: why?!
-               var uri = PrefixService.prefixToUri(property)!!
-               if (uri.isBlank()) continue
-               if (!uri.contains(':')) uri = PrefixService.getFkgOntologyPropertyUrl(uri)
-               val label = relation.templateProperty!!.replace('_', ' ')
-               if (!addedRelations.contains(property)) {
-
-                  knowledgeStoreDao.save(FkgTriple(
-                      subject = uri, predicate = TYPE_URL, objekt = PROPERTY_URI
-                  ), null)
-
-                  knowledgeStoreDao.save(FkgTriple(
-                      subject = uri, predicate = LABEL_URL, objekt = label,
-                        language = relation.templatePropertyLanguage
-                  ), null)
-                  addedRelations.add(property)
-               }
-
-               val propertyAndLabel = property + "~" + label
-               if (!addedLabels.contains(propertyAndLabel)) {
-                  knowledgeStoreDao.save(FkgTriple(
-                      subject = uri, predicate = VARIANT_LABEL_URL,
-                        objekt = label, language = relation.templatePropertyLanguage
-                  ), null)
-                  addedRelations.add(property)
-               }
-               knowledgeStoreDao.save(FkgTriple(
-                   subject = uri, predicate = PROPERTY_DOMAIN_URL,
-                   objekt = PrefixService.convertFkgOntologyUrl(relation.ontologyClass!!)
-               ), null)
-            } catch (e: Throwable) {
-               e.printStackTrace()
-               logger.error(e)
-            }
-         }
-      } while (data.page < data.pageCount && relationNumber <= maxNumberOfRelations)
-      knowledgeStoreDao.flush()
    }
 
    fun predicateExport(page: Int, pageSize: Int, keyword: String?,

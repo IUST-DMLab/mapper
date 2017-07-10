@@ -20,8 +20,6 @@ public class MappingHelperRestServices {
   @Autowired
   private StatsLogic statsLogic;
   @Autowired
-  private TripleImporter tripleImporter;
-  @Autowired
   private TemplateToOntologyExporter templateToOntologyExporter;
   @Autowired
   private EntityToClassLogic entityToClassLogic;
@@ -38,7 +36,7 @@ public class MappingHelperRestServices {
   @Autowired
   private KGTripleImporter kgTripleImporter;
   @Autowired
-  private KGTableImporter KGTableImporter;
+  private KGTableImporter kgTableImporter;
   @Autowired
   private PredicateImporter predicateImporter;
 
@@ -91,12 +89,6 @@ public class MappingHelperRestServices {
     return String.valueOf(propertyMappingLogic.generateMapping());
   }
 
-  @RequestMapping("/triples")
-  public String triples(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
-    tripleImporter.processTripleInputFiles(type);
-    return "Imported!";
-  }
-
   @RequestMapping("/withoutInfoBox")
   public String withoutInfoBox(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
     kgTripleImporter.writeEntitiesWithoutInfoBox(type);
@@ -109,32 +101,21 @@ public class MappingHelperRestServices {
     return "Imported!";
   }
 
-  @RequestMapping("/kgAbstracts")
-  public String kgAbstracts(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
+  @RequestMapping("/abstracts")
+  public String abstracts(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
     kgTripleImporter.writeAbstracts(type);
     return "Imported!";
   }
 
-  @RequestMapping("/kgTriples")
-  public String kgTriples(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
+  @RequestMapping("/triples")
+  public String triples(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
     kgTripleImporter.writeTriples(type);
     return "Imported!";
   }
 
-  @RequestMapping("/kgTables")
-  public String kgTables(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
-    KGTableImporter.writeTriples(type);
-    return "Imported!";
-  }
-
-  @RequestMapping("/allTriples")
-  public String allTriples(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
-    kgTripleImporter.writeEntitiesWithoutInfoBox(type);
-    kgTripleImporter.writeEntitiesWithInfoBox(type);
-    kgTripleImporter.writeTriples(type);
-    kgTripleImporter.writeAbstracts(type);
-    redirectLogic.write(type);
-    ambiguityLogic.write(type);
+  @RequestMapping("/tables")
+  public String tables(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
+    kgTableImporter.writeTriples(type);
     return "Imported!";
   }
 
@@ -148,24 +129,6 @@ public class MappingHelperRestServices {
   public String ambiguities() throws Exception {
     ambiguityLogic.write(StoreType.knowledgeStore);
     return "Imported!";
-  }
-
-  @RequestMapping("/entities")
-  public String entities() throws Exception {
-    entityToClassLogic.writeEntityTypesToKnowledgeStore();
-    return "Imported!";
-  }
-
-  @RequestMapping("/relations")
-  public String relations() throws Exception {
-    propertyMappingLogic.writeResourcesToKnowledgeStore();
-    return "Imported!";
-  }
-
-  @RequestMapping("/fixWikiTemplateMapping")
-  public String fixWikiTemplateMapping() throws Exception {
-    tripleImporter.fixWikiTemplateMapping();
-    return "Fixed!";
   }
 
   @RequestMapping("/generate")
@@ -197,9 +160,12 @@ public class MappingHelperRestServices {
   public void completeDumpUpdate(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
     migrationManager.migrate();
     migrationManager.save();
-    KGTableImporter.writeTriples(type);
-    allTriples(type);
-    entityToClassLogic.writeEntityTypesToKnowledgeStore();
+    kgTripleImporter.writeEntitiesWithoutInfoBox(type);
+    kgTripleImporter.writeEntitiesWithInfoBox(type);
+    kgTripleImporter.writeTriples(type);
+    kgTripleImporter.writeAbstracts(type);
+    redirectLogic.write(type);
+    ambiguityLogic.write(type);
     predicateImporter.writePredicates(type);
   }
 }
