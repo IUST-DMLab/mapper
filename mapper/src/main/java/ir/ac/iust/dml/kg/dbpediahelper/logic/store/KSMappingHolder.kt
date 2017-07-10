@@ -1,11 +1,14 @@
 package ir.ac.iust.dml.kg.dbpediahelper.logic.store
 
+import ir.ac.iust.dml.kg.dbpediahelper.logic.EntityToClassLogic
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.entities.PropertyMapping
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.entities.TemplateMapping
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
+import ir.ac.iust.dml.kg.raw.utils.PropertyNormaller
 import ir.ac.iust.dml.kg.services.client.ApiClient
 import ir.ac.iust.dml.kg.services.client.swagger.V1mappingsApi
 import org.apache.log4j.Logger
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
@@ -13,6 +16,7 @@ class KSMappingHolder {
 
   private val logger = Logger.getLogger(this.javaClass)!!
   private val maps = mutableMapOf<String, TemplateMapping>()
+  @Autowired lateinit var ontologyLogic: EntityToClassLogic
 
   fun isValidTemplate(template: String) = maps.containsKey(template)
 
@@ -49,8 +53,10 @@ class KSMappingHolder {
       tm.rules = it.rules.map { KSMappingConverter.convert(it) }.toMutableSet()
       tm.ontologyClass = (it.rules.filter { it.predicate == "rdf:type" }
           .firstOrNull()?.constant ?: "fkgo:Thing").substringAfterLast(":")
+      tm.tree = ontologyLogic.getTree(tm.ontologyClass)?.split("/") ?: listOf(tm.ontologyClass)
       it.properties.forEach { pm ->
-        tm.properties!![pm.property] = PropertyMapping(
+        val property = PropertyNormaller.removeDigits(pm.property)
+        tm.properties!![property] = PropertyMapping(
             property = pm.property, weight = pm.weight,
             rules = pm.rules.map { KSMappingConverter.convert(it) }.toMutableSet(),
             recommendations = pm.recommendations.map { KSMappingConverter.convert(it) }.toMutableSet())

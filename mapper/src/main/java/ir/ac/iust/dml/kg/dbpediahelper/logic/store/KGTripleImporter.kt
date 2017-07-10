@@ -10,10 +10,7 @@ import ir.ac.iust.dml.kg.dbpediahelper.logic.EntityToClassLogic
 import ir.ac.iust.dml.kg.dbpediahelper.logic.StoreProvider
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.entities.MapRule
 import ir.ac.iust.dml.kg.dbpediahelper.logic.type.StoreType
-import ir.ac.iust.dml.kg.raw.utils.ConfigReader
-import ir.ac.iust.dml.kg.raw.utils.PathWalker
-import ir.ac.iust.dml.kg.raw.utils.PrefixService
-import ir.ac.iust.dml.kg.raw.utils.Transformers
+import ir.ac.iust.dml.kg.raw.utils.*
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,7 +28,6 @@ class KGTripleImporter {
   @Autowired private lateinit var holder: KSMappingHolder
   @Autowired private lateinit var entityToClassLogic: EntityToClassLogic
   @Autowired private lateinit var storeProvider: StoreProvider
-  @Autowired private lateinit var predicateImporter: PredicateImporter
   @Autowired private lateinit var entityClassImporter: EntityClassImporter
   private val transformers = Transformers()
 
@@ -110,6 +106,7 @@ class KGTripleImporter {
 
     val type = object : TypeToken<Map<String, List<String>>>() {}.type
     val gson = Gson()
+    var entityIndex = 0
 
     result.forEachIndexed { index, p ->
       if (index > maxNumberOfFiles) return@forEachIndexed
@@ -117,14 +114,25 @@ class KGTripleImporter {
         BufferedReader(it).use {
           val infoBoxes: Map<String, List<String>> = gson.fromJson(it, type)
           infoBoxes.forEach { entity, infoboxes ->
-            val tress = mutableSetOf<String>()
-            infoboxes.forEach {
-              val normalizedTemplate = it.toLowerCase().replace('_', ' ')
-              val templateMapping = holder.getTemplateMapping(normalizedTemplate)
-              val tree = entityToClassLogic.getTree(templateMapping.ontologyClass)!!
-              tress.add(tree)
+            entityIndex++
+            if (entityIndex % 1000 == 0)
+              logger.warn("$$entityIndex entities has been done." +
+                  " time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
+            try {
+              val tress = mutableSetOf<String>()
+              infoboxes.forEach {
+                val normalizedTemplate = it.toLowerCase().replace('_', ' ')
+                val templateMapping = holder.getTemplateMapping(normalizedTemplate)
+                var tree = entityToClassLogic.getTree(templateMapping.ontologyClass)
+                if (tree == null) tree = "Thing"
+                tress.add(tree)
+              }
+              entityClassImporter.writeEntityTrees(entity, tress, store)
+            } catch (th: Throwable) {
+              println("entity: >>>> $entity")
+              logger.error(th)
+              th.printStackTrace()
             }
-            entityClassImporter.writeEntityTrees(entity, tress, store)
           }
           logger.warn("$index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
         }
@@ -197,7 +205,7 @@ class KGTripleImporter {
               store.saveTriple(source = triple.source!!, subject = subject, objeck = objekt, rule = it)
             }
 
-            val propertyMapping = templateMapping.properties!![property]
+            val propertyMapping = templateMapping.properties!![PropertyNormaller.removeDigits(property)]
             if (propertyMapping == null || propertyMapping.rules.isEmpty()) {
               if (propertyMapping != null && !propertyMapping.recommendations.isEmpty()) {
                 // not too bad, we have at least some recommendations. this block is only for better clearance of code
@@ -230,9 +238,6 @@ class KGTripleImporter {
         }
       }
     }
-
-    entityToClassLogic.writeTree(store)
-    predicateImporter.writePredicates(store)
 
     (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
     (store as? VirtuosoFkgTripleDaoImpl)?.close()

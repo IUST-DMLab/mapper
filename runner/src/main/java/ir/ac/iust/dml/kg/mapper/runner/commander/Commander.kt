@@ -28,6 +28,7 @@ class Commander {
         "createStatsFile" -> services.createStatsFile() // deprecated
         "writeStats" -> services.writeStats() // deprecated
         "generateMapping" -> services.generateMapping() // deprecated
+        "tree" -> services.writeTree(StoreType.valueOf(arg!!)) //writes ontology tree form mysql. it will be deprecated
         "triples" -> services.triples(StoreType.valueOf(arg!!)) //writes wikipedia triples
         "abstracts" -> services.abstracts(StoreType.valueOf(arg!!)) // writes wikipedia abstracts
         "withoutInfoBox" -> services.withoutInfoBox(StoreType.valueOf(arg!!)) // write wikipedia entities without info boxes

@@ -4,13 +4,13 @@ import ir.ac.iust.dml.kg.access.dao.FkgClassDao
 import ir.ac.iust.dml.kg.access.dao.FkgEntityClassesDao
 import ir.ac.iust.dml.kg.access.dao.FkgTemplateMappingDao
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
-import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgEntityClasses
 import ir.ac.iust.dml.kg.access.entities.FkgOntologyClass
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.dbpediahelper.logic.data.FkgEntityClassesData
 import ir.ac.iust.dml.kg.dbpediahelper.logic.dump.EntityDataDumpReader
+import ir.ac.iust.dml.kg.dbpediahelper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.PrefixService
@@ -26,10 +26,10 @@ class EntityToClassLogic {
   @Autowired lateinit var dao: FkgEntityClassesDao
   @Autowired lateinit var templateDao: FkgTemplateMappingDao
   @Autowired lateinit var classDao: FkgClassDao
+  @Autowired lateinit var storeProvider: StoreProvider
   private val logger = Logger.getLogger(this.javaClass)!!
   private val treeCache = mutableMapOf<String, String>()
   private val childrenCache = mutableMapOf<String, List<String>>()
-  val knowledgeStoreDao = KnowledgeStoreFkgTripleDaoImpl()
 
   fun load() {
     val path = ConfigReader.getPath("entity.types.folder", "~/.pkg/data/entity_types_folder")
@@ -190,6 +190,8 @@ class EntityToClassLogic {
     treeCache.keys.forEach { key -> result[key] = treeCache[key]!!.split("/").filter { key != it } }
     return result
   }
+
+  fun writeTree(type: StoreType) = writeTree(storeProvider.getStore(type))
 
   fun writeTree(dao: FkgTripleDao) {
 

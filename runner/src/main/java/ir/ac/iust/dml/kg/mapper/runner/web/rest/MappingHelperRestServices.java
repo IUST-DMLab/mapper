@@ -160,6 +160,7 @@ public class MappingHelperRestServices {
   public void completeDumpUpdate(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
     migrationManager.migrate();
     migrationManager.save();
+    entityToClassLogic.writeTree(type);
     kgTripleImporter.writeEntitiesWithoutInfoBox(type);
     kgTripleImporter.writeEntitiesWithInfoBox(type);
     kgTripleImporter.writeTriples(type);
@@ -167,5 +168,10 @@ public class MappingHelperRestServices {
     redirectLogic.write(type);
     ambiguityLogic.write(type);
     predicateImporter.writePredicates(type);
+  }
+
+  @RequestMapping("/writeTree")
+  public void writeTree(@RequestParam(defaultValue = "none") StoreType type) {
+    entityToClassLogic.writeTree(type);
   }
 }
