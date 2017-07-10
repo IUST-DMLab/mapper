@@ -13,6 +13,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ImportResource;
 
 import java.util.Properties;
+import java.util.Random;
 
 @SpringBootApplication
 @ImportResource(value = {
@@ -32,7 +33,7 @@ public class Application {
   public static void main(String[] args) {
     SpringApplication app = new SpringApplication(Application.class);
     Properties properties = new Properties();
-    if (args.length > 0) properties.put("server.port", 9998);
+    if (args.length > 0) properties.put("server.port", 9200 + (new Random().nextInt(1000)));
     else properties.put("server.port", 8090);
     app.setDefaultProperties(properties);
     ConfigurableApplicationContext context = app.run(args);
