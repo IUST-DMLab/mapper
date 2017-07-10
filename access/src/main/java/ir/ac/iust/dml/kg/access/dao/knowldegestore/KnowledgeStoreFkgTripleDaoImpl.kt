@@ -45,10 +45,10 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
       logger.error("short triple here: ${t.source} ${t.predicate} ${t.objekt}")
       return
     }
-    if (t.objekt!!.length > 200) {
-      logger.error("too long triple here: ${t.source} ${t.predicate} ${t.objekt}")
-      return
-    }
+//    if (t.objekt!!.length > 200) {
+//      logger.error("too long triple here: ${t.source} ${t.predicate} ${t.objekt}")
+//      return
+//    }
     val data = TripleData()
     data.context = "http://fkg.iust.ac.ir/"
     data.module = "wiki"
