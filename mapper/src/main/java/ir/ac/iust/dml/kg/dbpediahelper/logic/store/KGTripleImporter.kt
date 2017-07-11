@@ -98,7 +98,7 @@ class KGTripleImporter {
     holder.loadFromKS()
 
     val path = getPath("wiki.with.info.box.input.folder", "~/.pkg/data/with_infobox")
-    val maxNumberOfFiles = ConfigReader.getInt("test.mode.max.files", "1")
+    val maxNumberOfFiles = ConfigReader.getInt("test.mode.max.files", "1000")
     val store = storeProvider.getStore(storeType, path)
 
     val result = PathWalker.getPath(path, Regex("\\d+\\.json"))
