@@ -157,11 +157,12 @@ public class MappingHelperRestServices {
   }
 
   @RequestMapping("/completeDumpUpdate")
-  public void completeDumpUpdate(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
+  public void completeDumpUpdate(@RequestParam(defaultValue = "none") StoreType type,
+                                 @RequestParam(defaultValue = "false") boolean entitiesWithoutInfoBox) throws Exception {
     migrationManager.migrate();
     migrationManager.save();
     entityToClassLogic.writeTree(type);
-    kgTripleImporter.writeEntitiesWithoutInfoBox(type);
+    if (entitiesWithoutInfoBox) kgTripleImporter.writeEntitiesWithoutInfoBox(type);
     kgTripleImporter.writeEntitiesWithInfoBox(type);
     kgTripleImporter.writeTriples(type);
     kgTripleImporter.writeAbstracts(type);
