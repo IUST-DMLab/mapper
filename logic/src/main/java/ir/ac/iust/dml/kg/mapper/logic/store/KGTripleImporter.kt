@@ -32,12 +32,13 @@ class KGTripleImporter {
   @Autowired private lateinit var entityToClassLogic: EntityToClassLogic
   @Autowired private lateinit var storeProvider: StoreProvider
   @Autowired private lateinit var entityClassImporter: EntityClassImporter
+  @Autowired private lateinit var notMappedPropertyHandler: NotMappedPropertyHandler
   private val transformers = Transformers()
 
   private val invalidPropertyRegex = Regex("\\d+")
 
   fun writeAbstracts(storeType: StoreType = StoreType.none) {
-    val path = PathUtils.getPath("wiki.folder.abstracts", "~/.pkg/data/abstracts")
+    val path = PathUtils.getAbstractPath()
     val maxNumberOfTriples = TestUtils.getMaxTuples()
     val store = storeProvider.getStore(storeType, path)
 
@@ -69,8 +70,8 @@ class KGTripleImporter {
   }
 
   fun writeEntitiesWithoutInfoBox(storeType: StoreType = StoreType.none) {
-    val path = PathUtils.getPath("wiki.folder.without.info.box", "~/.pkg/data/without_infobox")
-    val maxNumberOfFiles = TestUtils.getMaxFiles()
+    val path = PathUtils.getWithInfoboxPath()
+    val maxNumberOfEntities = TestUtils.getMaxTuples()
     val store = storeProvider.getStore(storeType, path)
 
     val result = PathWalker.getPath(path, Regex("\\d+-revision_ids\\.json"))
@@ -79,12 +80,15 @@ class KGTripleImporter {
     val type = object : TypeToken<Map<String, String>>() {}.type
     val gson = Gson()
 
+    var entityIndex = 0
+
     result.forEachIndexed { index, p ->
-      if (index > maxNumberOfFiles) return@forEachIndexed
       InputStreamReader(FileInputStream(p.toFile()), "UTF8").use {
         BufferedReader(it).use {
           val revisionIdMap: Map<String, String> = gson.fromJson(it, type)
           revisionIdMap.keys.forEach { entity ->
+            entityIndex++
+            if (entityIndex > maxNumberOfEntities) return@forEachIndexed
             entityClassImporter.addResourceAsThing(entity, store)
           }
           logger.warn("$index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
@@ -100,8 +104,8 @@ class KGTripleImporter {
     holder.writeToKS()
     holder.loadFromKS()
 
-    val path = PathUtils.getPath("wiki.folder.with.info.box", "~/.pkg/data/with_infobox")
-    val maxNumberOfFiles = TestUtils.getMaxFiles()
+    val path = PathUtils.getWithInfoboxPath()
+    val maxNumberOfEntities = TestUtils.getMaxTuples()
     val store = storeProvider.getStore(storeType, path)
 
     val result = PathWalker.getPath(path, Regex("\\d+\\.json"))
@@ -112,12 +116,12 @@ class KGTripleImporter {
     var entityIndex = 0
 
     result.forEachIndexed { index, p ->
-      if (index > maxNumberOfFiles) return@forEachIndexed
       InputStreamReader(FileInputStream(p.toFile()), "UTF8").use {
         BufferedReader(it).use {
           val infoBoxes: Map<String, List<String>> = gson.fromJson(it, type)
           infoBoxes.forEach { entity, infoboxes ->
             entityIndex++
+            if (entityIndex > maxNumberOfEntities) return@forEach
             if (entityIndex % 1000 == 0)
               logger.warn("$$entityIndex entities has been done." +
                   " time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
@@ -150,7 +154,7 @@ class KGTripleImporter {
     holder.writeToKS()
     holder.loadFromKS()
 
-    val path = getTriplesPath()
+    val path = PathUtils.getTriplesPath()
 
     val store = storeProvider.getStore(storeType, path)
     val maxNumberOfTriples = TestUtils.getMaxTuples()
@@ -224,6 +228,7 @@ class KGTripleImporter {
                     objeck = objekt, rule = classMaps[key]!!)
               } else {
                 numberOfNotMapped++
+                notMappedPropertyHandler.addToNotMapped(property)
                 store.convertAndSave(source = triple.source!!, subject = subject,
                     objeck = objekt, property = property)
               }
@@ -260,7 +265,5 @@ class KGTripleImporter {
         predicate = PrefixService.prefixToUri(rule.predicate),
         objekt = PrefixService.prefixToUri(value.toString())), null)
   }
-
-  private fun getTriplesPath() = PathUtils.getPath("wiki.folder.tuples", "~/.pkg/data/tuples")
 
 }

@@ -13,4 +13,12 @@ object PathUtils {
     }
     return path
   }
+
+  fun getAbstractPath() = getPath("wiki.folder.abstracts", "~/.pkg/data/abstracts")
+
+  fun getTriplesPath() = getPath("wiki.folder.tuples", "~/.pkg/data/tuples")
+
+  fun getWithoutInfoboxPath() = getPath("wiki.folder.without.info.box", "~/.pkg/data/without_infobox")
+
+  fun getWithInfoboxPath() = getPath("wiki.folder.with.info.box", "~/.pkg/data/with_infobox")
 }

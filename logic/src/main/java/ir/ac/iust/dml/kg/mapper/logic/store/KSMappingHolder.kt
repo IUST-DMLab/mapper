@@ -26,6 +26,9 @@ class KSMappingHolder {
   fun getPropertyMapping(template: String, property: String)
       = getTemplateMapping(template).properties!!.getOrPut(property, { PropertyMapping() })
 
+  fun examinePropertyMapping(template: String, property: String)
+      = getTemplateMapping(template).properties!![property]
+
   override fun toString() = buildString { maps.values.forEach { this.append(it).append('\n') } }
 
   private val mappingApi: V1mappingsApi

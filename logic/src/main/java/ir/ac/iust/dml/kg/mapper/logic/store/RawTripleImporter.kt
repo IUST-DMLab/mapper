@@ -2,9 +2,10 @@ package ir.ac.iust.dml.kg.mapper.logic.store
 
 import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
-import ir.ac.iust.dml.kg.mapper.logic.EntityToClassLogic
+import ir.ac.iust.dml.kg.mapper.logic.EntityInfoLogic
 import ir.ac.iust.dml.kg.mapper.logic.PathUtils
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
+import ir.ac.iust.dml.kg.mapper.logic.store.entities.MapRule
 import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
@@ -17,17 +18,23 @@ import org.springframework.stereotype.Service
 class RawTripleImporter {
   private val logger = Logger.getLogger(this.javaClass)!!
   @Autowired private lateinit var holder: KSMappingHolder
-  @Autowired private lateinit var entityToClassLogic: EntityToClassLogic
   @Autowired private lateinit var storeProvider: StoreProvider
+  @Autowired private lateinit var entityInfoLogic: EntityInfoLogic
+  @Autowired private lateinit var notMappedPropertyHandler: NotMappedPropertyHandler
 
   fun writeTriples(storeType: StoreType = StoreType.none) {
     val path = PathUtils.getPath("raw.folder.input", "~/raw/triples")
     val maxNumberOfTriples = TestUtils.getMaxTuples()
     val store = storeProvider.getStore(storeType, path)
 
-    val result = PathWalker.getPath(path, Regex("\\d+\\.json"))
+    val result = PathWalker.getPath(path, Regex(".*\\.json"))
     val startTime = System.currentTimeMillis()
     var tripleNumber = 0
+
+    entityInfoLogic.reload()
+    holder.writeToKS()
+    holder.loadFromKS()
+
     result.forEachIndexed { index, p ->
       ir.ac.iust.dml.kg.raw.triple.RawTripleImporter(p).use { reader ->
         while (reader.hasNext()) {
@@ -38,18 +45,29 @@ class RawTripleImporter {
             if (tripleNumber % 1000 == 0)
               logger.warn("triple number is $tripleNumber. $index file is $p. " +
                   "time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
-            val subject: String
-            val objekt: String
+            val subject = PrefixService.getFkgResourceUrl(triple.subject)
+            val objekt = if (entityInfoLogic.resources.containsKey(triple.`object`))
+              PrefixService.getFkgResourceUrl(triple.`object`) else triple.`object`
             val predicate: String
             if (triple.isNeedsMapping) {
-              subject = PrefixService.getFkgResourceUrl(triple.subject)
-              objekt = ""
-              predicate = ""
-            } else {
-              subject = triple.subject
-              predicate = triple.predicate
-              objekt = triple.`object`
-            }
+              val subjectInfoBoxes = entityInfoLogic.resources[subject]
+              val defaultProperty = PrefixService.convertFkgProperty(triple.predicate)!!
+              predicate =
+                  if (subjectInfoBoxes == null) defaultProperty
+                  else {
+                    var m = mutableSetOf<MapRule>()
+                    subjectInfoBoxes.forEach {
+                      val pm = holder.examinePropertyMapping(it, defaultProperty)
+                      if (pm != null && pm.rules.isNotEmpty()) {
+                        m = pm.rules
+                        return@forEach
+                      }
+                    }
+                    if (m.isNotEmpty()) m.iterator().next().predicate!!
+                    else defaultProperty
+                  }
+              if (predicate == defaultProperty) notMappedPropertyHandler.addToNotMapped(triple.predicate)
+            } else predicate = triple.predicate
             store.save(source = triple.sourceUrl, subject = subject,
                 objeck = objekt, property = predicate, version = triple.version,
                 extractionTime = triple.extractionTime, module = triple.module, rawText = triple.rawText,

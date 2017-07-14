@@ -37,6 +37,7 @@ class Commander {
         "redirects" -> services.redirects() // writes all wikipedia redirects
         "ambiguities" -> services.ambiguities() // writes all wikipedia ambiguities
         "predicates" -> services.predicates(StoreType.valueOf(arg!!)) // writes all predicates
+        "raw" -> services.raw(StoreType.valueOf(arg!!)) // writes all predicates
         "dumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(arg!!), false) // all needed tasks in one place
         "completeDumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(arg!!), true) // all needed tasks in one place
       }

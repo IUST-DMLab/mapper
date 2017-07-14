@@ -6,6 +6,7 @@ import ir.ac.iust.dml.kg.mapper.logic.export.TemplateToOntologyExporter;
 import ir.ac.iust.dml.kg.mapper.logic.store.*;
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType;
 import ir.ac.iust.dml.kg.raw.utils.PrefixService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,6 +40,10 @@ public class MappingHelperRestServices {
   private KGTableImporter kgTableImporter;
   @Autowired
   private PredicateImporter predicateImporter;
+  @Autowired
+  private NotMappedPropertyHandler notMappedPropertyHandler;
+  @Autowired
+  private RawTripleImporter rawTripleImporter;
 
   @RequestMapping("/migrate")
   public String migrate() throws Exception {
@@ -166,6 +171,8 @@ public class MappingHelperRestServices {
     kgTripleImporter.writeEntitiesWithInfoBox(type);
     kgTripleImporter.writeTriples(type);
     kgTableImporter.writeTriples(type);
+    rawTripleImporter.writeTriples(type);
+    notMappedPropertyHandler.writeNotMappedProperties(type);
     kgTripleImporter.writeAbstracts(type);
     redirectLogic.write(type);
     ambiguityLogic.write(type);
@@ -175,5 +182,10 @@ public class MappingHelperRestServices {
   @RequestMapping("/writeTree")
   public void writeTree(@RequestParam(defaultValue = "none") StoreType type) {
     entityToClassLogic.writeTree(type);
+  }
+
+  public boolean raw(@NotNull StoreType type) {
+    rawTripleImporter.writeTriples(type);
+    return true;
   }
 }
