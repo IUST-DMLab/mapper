@@ -1,10 +1,10 @@
 package ir.ac.iust.dml.kg.mapper.runner.web.rest;
 
-import ir.ac.iust.dml.kg.dbpediahelper.logic.*;
-import ir.ac.iust.dml.kg.dbpediahelper.logic.export.ExportData;
-import ir.ac.iust.dml.kg.dbpediahelper.logic.export.TemplateToOntologyExporter;
-import ir.ac.iust.dml.kg.dbpediahelper.logic.store.*;
-import ir.ac.iust.dml.kg.dbpediahelper.logic.type.StoreType;
+import ir.ac.iust.dml.kg.mapper.logic.*;
+import ir.ac.iust.dml.kg.mapper.logic.export.ExportData;
+import ir.ac.iust.dml.kg.mapper.logic.export.TemplateToOntologyExporter;
+import ir.ac.iust.dml.kg.mapper.logic.store.*;
+import ir.ac.iust.dml.kg.mapper.logic.type.StoreType;
 import ir.ac.iust.dml.kg.raw.utils.PrefixService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;

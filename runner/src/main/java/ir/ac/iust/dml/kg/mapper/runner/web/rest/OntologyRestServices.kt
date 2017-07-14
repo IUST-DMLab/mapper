@@ -1,9 +1,9 @@
 package ir.ac.iust.dml.kg.mapper.runner.web.rest
 
 import io.swagger.annotations.Api
-import ir.ac.iust.dml.kg.dbpediahelper.logic.store.OntologyLogic
-import ir.ac.iust.dml.kg.dbpediahelper.logic.store.data.OntologyClassData
-import ir.ac.iust.dml.kg.dbpediahelper.logic.store.data.OntologyPropertyData
+import ir.ac.iust.dml.kg.mapper.logic.store.OntologyLogic
+import ir.ac.iust.dml.kg.mapper.logic.store.data.OntologyClassData
+import ir.ac.iust.dml.kg.mapper.logic.store.data.OntologyPropertyData
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 

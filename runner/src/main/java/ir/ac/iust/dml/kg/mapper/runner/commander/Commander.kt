@@ -1,6 +1,6 @@
 package ir.ac.iust.dml.kg.mapper.runner.commander
 
-import ir.ac.iust.dml.kg.dbpediahelper.logic.type.StoreType
+import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.mapper.runner.web.rest.MappingHelperRestServices
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired

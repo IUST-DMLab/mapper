@@ -7,7 +7,7 @@
 		http://www.springframework.org/schema/context
 		http://www.springframework.org/schema/context/spring-context-3.1.xsd">
   <import resource="classpath*:access-context.xml"/>
-  <context:component-scan base-package="ir.ac.iust.dml.kg.dbpediahelper"/>
+  <context:component-scan base-package="ir.ac.iust.dml.kg.mapper"/>
 
   <bean id="statsGenerationTaskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
     <property name="corePoolSize" value="20"/>

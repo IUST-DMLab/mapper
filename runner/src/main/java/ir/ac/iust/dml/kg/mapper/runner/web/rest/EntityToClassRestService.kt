@@ -2,8 +2,8 @@ package ir.ac.iust.dml.kg.mapper.runner.web.rest
 
 import io.swagger.annotations.Api
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
-import ir.ac.iust.dml.kg.dbpediahelper.logic.EntityToClassLogic
-import ir.ac.iust.dml.kg.dbpediahelper.logic.data.FkgEntityClassesData
+import ir.ac.iust.dml.kg.mapper.logic.EntityToClassLogic
+import ir.ac.iust.dml.kg.mapper.logic.data.FkgEntityClassesData
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 

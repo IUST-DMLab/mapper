@@ -1,11 +1,11 @@
 package ir.ac.iust.dml.kg.mapper.runner.web.rest;
 
 import io.swagger.annotations.Api;
-import ir.ac.iust.dml.kg.ontologytranslator.logic.Importer;
-import ir.ac.iust.dml.kg.ontologytranslator.logic.Translator;
-import ir.ac.iust.dml.kg.ontologytranslator.logic.export.ExportData;
-import ir.ac.iust.dml.kg.ontologytranslator.logic.export.FkgClassData;
-import ir.ac.iust.dml.kg.ontologytranslator.logic.export.FkgClassExporter;
+import ir.ac.iust.dml.kg.mapper.deprecated.ontologytranslator.logic.Importer;
+import ir.ac.iust.dml.kg.mapper.deprecated.ontologytranslator.logic.Translator;
+import ir.ac.iust.dml.kg.mapper.deprecated.ontologytranslator.logic.export.ExportData;
+import ir.ac.iust.dml.kg.mapper.deprecated.ontologytranslator.logic.export.FkgClassData;
+import ir.ac.iust.dml.kg.mapper.deprecated.ontologytranslator.logic.export.FkgClassExporter;
 import ir.ac.iust.dml.kg.raw.utils.PagedData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

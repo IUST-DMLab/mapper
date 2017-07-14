@@ -3,9 +3,9 @@ package ir.ac.iust.dml.kg.mapper.runner.web.rest;
 import io.swagger.annotations.Api;
 import ir.ac.iust.dml.kg.access.dao.WikipediaPropertyTranslationDao;
 import ir.ac.iust.dml.kg.access.entities.WikipediaPropertyTranslation;
-import ir.ac.iust.dml.kg.templateequalities.logic.Loader;
-import ir.ac.iust.dml.kg.templateequalities.logic.export.ExportData;
-import ir.ac.iust.dml.kg.templateequalities.logic.export.Exporter;
+import ir.ac.iust.dml.kg.mapper.deprecated.templateequalities.logic.Loader;
+import ir.ac.iust.dml.kg.mapper.deprecated.templateequalities.logic.export.ExportData;
+import ir.ac.iust.dml.kg.mapper.deprecated.templateequalities.logic.export.Exporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

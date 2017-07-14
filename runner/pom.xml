@@ -17,6 +17,7 @@
     </properties>
 
     <build>
+        <finalName>mapper</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -62,20 +63,9 @@
         </dependency>
         <dependency>
             <groupId>ir.ac.iust.dml.kg.mapping</groupId>
-            <artifactId>template-property-equals</artifactId>
-            <version>${parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ir.ac.iust.dml.kg.mapping</groupId>
             <artifactId>mapper</artifactId>
             <version>${parent.version}</version>
         </dependency>
-        <dependency>
-            <groupId>ir.ac.iust.dml.kg.mapping</groupId>
-            <artifactId>dbpedia-ontology-translator</artifactId>
-            <version>${parent.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

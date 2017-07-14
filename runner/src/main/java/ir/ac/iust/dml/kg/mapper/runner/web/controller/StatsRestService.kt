@@ -1,7 +1,7 @@
 package ir.ac.iust.dml.kg.mapper.runner.web.controller
 
 import io.swagger.annotations.Api
-import ir.ac.iust.dml.kg.dbpediahelper.logic.StatsLogic
+import ir.ac.iust.dml.kg.mapper.logic.StatsLogic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController

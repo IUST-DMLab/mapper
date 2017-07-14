@@ -18,9 +18,9 @@ import java.util.Random;
 @SpringBootApplication
 @ImportResource(value = {
         "classpath:access-context.xml",
-        "classpath:template-equals-context.xml",
+    "classpath:template-equals-context.xml",
         "classpath:mapper-context.xml",
-        "classpath:ontology-translation-context.xml"
+    "classpath:ontology-translation-context.xml"
 })
 @EnableAutoConfiguration(exclude = {
         Jackson2ObjectMapperPrettier.class,
