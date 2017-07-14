@@ -32,7 +32,7 @@ class EntityToClassLogic {
   private val childrenCache = mutableMapOf<String, List<String>>()
 
   fun load() {
-    val path = ConfigReader.getPath("entity.types.folder", "~/.pkg/data/entity_types_folder")
+    val path = ConfigReader.getPath("wiki.folder.with.info.box", "~/.pkg/data/with_infobox")
     Files.createDirectories(path.parent)
     if (!Files.exists(path)) {
       throw Exception("There is no file ${path.toAbsolutePath()} existed.")
