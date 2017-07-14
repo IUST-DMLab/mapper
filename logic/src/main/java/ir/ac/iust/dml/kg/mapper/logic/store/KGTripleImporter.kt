@@ -7,11 +7,15 @@ import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImp
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.mapper.logic.EntityToClassLogic
+import ir.ac.iust.dml.kg.mapper.logic.PathUtils
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.store.entities.MapRule
 import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
-import ir.ac.iust.dml.kg.raw.utils.*
+import ir.ac.iust.dml.kg.raw.utils.PathWalker
+import ir.ac.iust.dml.kg.raw.utils.PrefixService
+import ir.ac.iust.dml.kg.raw.utils.PropertyNormaller
+import ir.ac.iust.dml.kg.raw.utils.Transformers
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,8 +23,6 @@ import org.springframework.stereotype.Service
 import java.io.BufferedReader
 import java.io.FileInputStream
 import java.io.InputStreamReader
-import java.nio.file.Files
-import java.nio.file.Path
 
 @Service
 class KGTripleImporter {
@@ -35,7 +37,7 @@ class KGTripleImporter {
   private val invalidPropertyRegex = Regex("\\d+")
 
   fun writeAbstracts(storeType: StoreType = StoreType.none) {
-    val path = getPath("wiki.folder.abstracts", "~/.pkg/data/abstracts")
+    val path = PathUtils.getPath("wiki.folder.abstracts", "~/.pkg/data/abstracts")
     val maxNumberOfTriples = TestUtils.getMaxTuples()
     val store = storeProvider.getStore(storeType, path)
 
@@ -67,7 +69,7 @@ class KGTripleImporter {
   }
 
   fun writeEntitiesWithoutInfoBox(storeType: StoreType = StoreType.none) {
-    val path = getPath("wiki.folder.without.info.box", "~/.pkg/data/without_infobox")
+    val path = PathUtils.getPath("wiki.folder.without.info.box", "~/.pkg/data/without_infobox")
     val maxNumberOfFiles = TestUtils.getMaxFiles()
     val store = storeProvider.getStore(storeType, path)
 
@@ -98,7 +100,7 @@ class KGTripleImporter {
     holder.writeToKS()
     holder.loadFromKS()
 
-    val path = getPath("wiki.folder.with.info.box", "~/.pkg/data/with_infobox")
+    val path = PathUtils.getPath("wiki.folder.with.info.box", "~/.pkg/data/with_infobox")
     val maxNumberOfFiles = TestUtils.getMaxFiles()
     val store = storeProvider.getStore(storeType, path)
 
@@ -259,14 +261,6 @@ class KGTripleImporter {
         objekt = PrefixService.prefixToUri(value.toString())), null)
   }
 
-  private fun getTriplesPath() = getPath("wiki.folder.tuples", "~/.pkg/data/tuples")
+  private fun getTriplesPath() = PathUtils.getPath("wiki.folder.tuples", "~/.pkg/data/tuples")
 
-  private fun getPath(key: String, defaultValue: String): Path {
-    val path = ConfigReader.getPath(key, defaultValue)
-    if (!Files.exists(path.parent)) Files.createDirectories(path.parent)
-    if (!Files.exists(path)) {
-      throw Exception("There is no file ${path.toAbsolutePath()} existed.")
-    }
-    return path
-  }
 }

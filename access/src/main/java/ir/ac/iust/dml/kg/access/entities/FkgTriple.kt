@@ -12,26 +12,39 @@ import javax.persistence.*
         )))
 @Table(name = "fkg_triple")
 class FkgTriple(
-        @Id
+    @Id
         @Column(name = "id")
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long? = null,
-        @Column(name = "source")
+    @Column(name = "source")
         var source: String? = null,
-        @Column(name = "subject")
+    @Column(name = "subject")
         var subject: String? = null,
-        @Column(name = "predicate")
+    @Column(name = "predicate")
         var predicate: String? = null,
-        @Column(name = "object")
+    @Column(name = "object")
         var objekt: String? = null,
-        @Column(name = "template_type")
+    @Column(name = "template_type")
         var templateName: String? = null,
-        @Column(name = "raw_property")
+    @Column(name = "raw_property")
         var rawProperty: String? = null,
-        @Index(name = "t_status")
+    @Index(name = "t_status")
         @Enumerated
         @Column(name = "status")
         var status: MappingStatus? = null,
-        @Column(name = "language")
+    @Index(name = "t_module")
+    @Column(name = "module")
+    var module: String? = null,
+    @Index(name = "t_version")
+    @Column(name = "version")
+    var version: String? = null,
+    @Index(name = "t_extraction_time")
+    @Column(name = "extraction_time")
+    var extractionTime: Long? = null,
+    @Column(name = "raw_text")
+    var rawText: String? = null,
+    @Column(name = "accuracy")
+    var accuracy: Double? = null,
+    @Column(name = "language")
         var language: String? = null
 )

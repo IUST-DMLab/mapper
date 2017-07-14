@@ -25,7 +25,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
   init {
     val client = ApiClient()
     client.basePath = ConfigReader.getString("knowledge.store.url", "http://localhost:8091/rs")
-    client.connectTimeout = 1200000
+    client.connectTimeout = 4800000
     tripleApi = V1triplesApi(client)
   }
 
@@ -51,10 +51,11 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
     }
     val data = TripleData()
     data.context = "http://fkg.iust.ac.ir/"
-    data.module = "wiki"
+    data.module = t.module ?: "wiki"
     data.urls = Collections.singletonList(t.source)
     data.subject = t.subject
     data.predicate = if (!t.predicate!!.contains("://")) PrefixService.prefixToUri(t.predicate) else t.predicate
+    data.precession = t.accuracy
     if (!PrefixService.isUrlFast(t.predicate)) {
       logger.error(data.predicate + ": " + t.predicate)
       return
@@ -86,6 +87,11 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
           "approved" to mapping.approved.toString()
       )
     }
+
+    if (t.version != null) data.parameters["version"] = t.version
+    if (t.extractionTime != null) data.parameters["extractionTime"] = t.extractionTime.toString()
+    if (t.rawText != null) data.parameters["rawText"] = t.rawText
+
 
     if (approved) {
       // TODO: approve and write to knowledge store`

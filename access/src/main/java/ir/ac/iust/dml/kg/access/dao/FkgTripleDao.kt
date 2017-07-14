@@ -29,4 +29,11 @@ abstract class FkgTripleDao {
   fun save(source: String, subject: String, objeck: String, property: String) {
     this.save(FkgTriple(source = source, subject = subject, predicate = property, objekt = objeck), null)
   }
+
+  fun save(source: String, subject: String, objeck: String, module: String,
+           property: String, rawText: String? = null, accuracy: Double? = null, extractionTime: Long? = null,
+           version: String? = null) {
+    this.save(FkgTriple(source = source, subject = subject, predicate = property, objekt = objeck,
+        accuracy = accuracy, rawText = rawText, module = module, extractionTime = extractionTime, version = version), null)
+  }
 }
