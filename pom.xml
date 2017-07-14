@@ -5,15 +5,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>ir.ac.iust.dml.kg.mapping</groupId>
-  <artifactId>parent</artifactId>
-  <version>0.5.3</version>
+  <artifactId>mapping-parent</artifactId>
+  <version>0.6.0</version>
   <packaging>pom</packaging>
-  <name>Mapping service Parent Project</name>
 
   <modules>
-    <module>utils</module>
     <module>access</module>
-    <module>mapper</module>
+    <module>logic</module>
     <module>runner</module>
   </modules>
 

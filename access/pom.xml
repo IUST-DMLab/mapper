@@ -3,12 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>access</artifactId>
+  <artifactId>mapping-access</artifactId>
   <parent>
     <relativePath>../</relativePath>
     <groupId>ir.ac.iust.dml.kg.mapping</groupId>
     <artifactId>parent</artifactId>
-      <version>0.5.3</version>
+    <version>0.6.0</version>
   </parent>
 
   <properties>
@@ -18,11 +18,6 @@
   <build>
   </build>
   <dependencies>
-    <dependency>
-      <groupId>ir.ac.iust.dml.kg.mapping</groupId>
-        <artifactId>mapping-utils</artifactId>
-      <version>${parent.version}</version>
-    </dependency>
     <dependency>
       <groupId>ir.ac.iust.dml.kg.services</groupId>
       <artifactId>knowledge-store-client</artifactId>
