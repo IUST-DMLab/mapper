@@ -165,6 +165,7 @@ public class MappingHelperRestServices {
     if (entitiesWithoutInfoBox) kgTripleImporter.writeEntitiesWithoutInfoBox(type);
     kgTripleImporter.writeEntitiesWithInfoBox(type);
     kgTripleImporter.writeTriples(type);
+    kgTableImporter.writeTriples(type);
     kgTripleImporter.writeAbstracts(type);
     redirectLogic.write(type);
     ambiguityLogic.write(type);

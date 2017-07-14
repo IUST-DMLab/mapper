@@ -9,6 +9,7 @@ import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.dbpediahelper.logic.EntityToClassLogic
 import ir.ac.iust.dml.kg.dbpediahelper.logic.StoreProvider
 import ir.ac.iust.dml.kg.dbpediahelper.logic.store.entities.MapRule
+import ir.ac.iust.dml.kg.dbpediahelper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.dbpediahelper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.*
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
@@ -34,8 +35,8 @@ class KGTripleImporter {
   private val invalidPropertyRegex = Regex("\\d+")
 
   fun writeAbstracts(storeType: StoreType = StoreType.none) {
-    val path = getPath("wiki.abstracts.input.folder", "~/.pkg/data/abstract_tuples")
-    val maxNumberOfTriples = ConfigReader.getInt("test.mode.max.triples", "10000000")
+    val path = getPath("wiki.folder.abstracts", "~/.pkg/data/abstracts")
+    val maxNumberOfTriples = TestUtils.getMaxTuples()
     val store = storeProvider.getStore(storeType, path)
 
     val result = PathWalker.getPath(path, Regex("\\d+\\.json"))
@@ -66,8 +67,8 @@ class KGTripleImporter {
   }
 
   fun writeEntitiesWithoutInfoBox(storeType: StoreType = StoreType.none) {
-    val path = getPath("wiki.without.info.box.input.folder", "~/.pkg/data/without_infobox")
-    val maxNumberOfFiles = ConfigReader.getInt("test.mode.max.files", "1")
+    val path = getPath("wiki.folder.without.info.box", "~/.pkg/data/without_infobox")
+    val maxNumberOfFiles = TestUtils.getMaxFiles()
     val store = storeProvider.getStore(storeType, path)
 
     val result = PathWalker.getPath(path, Regex("\\d+-revision_ids\\.json"))
@@ -97,8 +98,8 @@ class KGTripleImporter {
     holder.writeToKS()
     holder.loadFromKS()
 
-    val path = getPath("wiki.with.info.box.input.folder", "~/.pkg/data/with_infobox")
-    val maxNumberOfFiles = ConfigReader.getInt("test.mode.max.files", "1000")
+    val path = getPath("wiki.folder.with.info.box", "~/.pkg/data/with_infobox")
+    val maxNumberOfFiles = TestUtils.getMaxFiles()
     val store = storeProvider.getStore(storeType, path)
 
     val result = PathWalker.getPath(path, Regex("\\d+\\.json"))
@@ -150,7 +151,7 @@ class KGTripleImporter {
     val path = getTriplesPath()
 
     val store = storeProvider.getStore(storeType, path)
-    val maxNumberOfTriples = ConfigReader.getInt("test.mode.max.triples", "10000000")
+    val maxNumberOfTriples = TestUtils.getMaxTuples()
 
     store.deleteAll()
 
@@ -258,7 +259,7 @@ class KGTripleImporter {
         objekt = PrefixService.prefixToUri(value.toString())), null)
   }
 
-  private fun getTriplesPath() = getPath("wiki.triple.input.folder", "~/.pkg/data/triples")
+  private fun getTriplesPath() = getPath("wiki.folder.tuples", "~/.pkg/data/tuples")
 
   private fun getPath(key: String, defaultValue: String): Path {
     val path = ConfigReader.getPath(key, defaultValue)

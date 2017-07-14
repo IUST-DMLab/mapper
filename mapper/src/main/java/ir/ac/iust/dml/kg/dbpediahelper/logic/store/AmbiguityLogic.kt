@@ -7,6 +7,7 @@ import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImp
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.dbpediahelper.logic.RedirectLogic
+import ir.ac.iust.dml.kg.dbpediahelper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.dbpediahelper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
@@ -27,7 +28,7 @@ class AmbiguityLogic {
 
   fun write(storeType: StoreType = StoreType.knowledgeStore) {
 
-        val disambiguationFolder = ConfigReader.getPath("extractor.disambiguations.folder", "~/.pkg/data/disambiguations")
+    val disambiguationFolder = ConfigReader.getPath("wiki.folder.disambiguations", "~/.pkg/data/disambiguations")
         Files.createDirectories(disambiguationFolder.parent)
         if (!Files.exists(disambiguationFolder)) {
             throw Exception("There is no file ${disambiguationFolder.toAbsolutePath()} existed.")
@@ -41,7 +42,7 @@ class AmbiguityLogic {
 
         val gson = Gson()
 
-        val maxNumberOfDisambiguation = ConfigReader.getInt("test.mode.max.disambiguation", "10000000")
+    val maxNumberOfDisambiguation = TestUtils.getMaxTuples()
         val DISAMBIGUATED_FROM = PrefixService.prefixToUri(PrefixService.DISAMBIGUATED_FROM_URI)
 
         val type = object : TypeToken<List<RedirectLogic.Ambiguity>>() {}.type

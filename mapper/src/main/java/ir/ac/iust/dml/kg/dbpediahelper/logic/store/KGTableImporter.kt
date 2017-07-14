@@ -4,6 +4,7 @@ import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImp
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.dbpediahelper.logic.EntityToClassLogic
 import ir.ac.iust.dml.kg.dbpediahelper.logic.StoreProvider
+import ir.ac.iust.dml.kg.dbpediahelper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.dbpediahelper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
@@ -23,7 +24,7 @@ class KGTableImporter {
   @Autowired private lateinit var storeProvider: StoreProvider
 
   private fun getTriplesPath(): Path {
-    val path = ConfigReader.getPath("wiki.table.input.folder", "~/.pkg/data/tables")
+    val path = ConfigReader.getPath("tables.folder", "~/.pkg/data/tables")
     if (!Files.exists(path.parent)) Files.createDirectories(path.parent)
     if (!Files.exists(path)) {
       throw Exception("There is no file ${path.toAbsolutePath()} existed.")
@@ -35,7 +36,7 @@ class KGTableImporter {
     val path = getTriplesPath()
 
     val store = storeProvider.getStore(storeType, path)
-    val maxNumberOfTriples = ConfigReader.getInt("test.mode.max.triples", "10000000")
+    val maxNumberOfTriples = TestUtils.getMaxTuples()
 
     store.deleteAll()
 

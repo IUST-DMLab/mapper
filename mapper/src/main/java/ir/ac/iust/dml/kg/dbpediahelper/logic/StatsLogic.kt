@@ -32,7 +32,7 @@ class StatsLogic {
 
    fun createStatsFile() {
       val startTime = System.currentTimeMillis()
-      val path = ConfigReader.getPath("wiki.triple.input.folder", "~/.pkg/data/triples")
+      val path = ConfigReader.getPath("wiki.folder.tuples", "~/.pkg/data/tuples")
       Files.createDirectories(path.parent)
       if (!Files.exists(path)) {
          throw Exception("There is no file ${path.toAbsolutePath()} existed.")

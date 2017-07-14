@@ -6,6 +6,7 @@ import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
+import ir.ac.iust.dml.kg.dbpediahelper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.dbpediahelper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
@@ -32,8 +33,8 @@ class RedirectLogic {
 
   @Throws(Exception::class)
   fun write(storeType: StoreType = StoreType.knowledgeStore) {
-    val redirectsFolder = ConfigReader.getPath("extractor.redirect.folder", "~/.pkg/data/redirects")
-    Files.createDirectories(redirectsFolder.parent)
+    val redirectsFolder = ConfigReader.getPath("wiki.folder.redirects", "~/.pkg/data/redirects")
+    if (!Files.exists(redirectsFolder.parent)) Files.createDirectories(redirectsFolder.parent)
     if (!Files.exists(redirectsFolder)) {
       throw Exception("There is no file ${redirectsFolder.toAbsolutePath()} existed.")
     }
@@ -47,7 +48,7 @@ class RedirectLogic {
     val gson = Gson()
     val type = object : TypeToken<Map<String, String>>() {}.type
 
-    val maxNumberOfRedirects = ConfigReader.getInt("test.mode.max.redirects", "10000000")
+    val maxNumberOfRedirects = TestUtils.getMaxTuples()
 
     val VARIANT_LABEL = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)
     val REDIRECT = PrefixService.prefixToUri(PrefixService.REDIRECTS_URI)
