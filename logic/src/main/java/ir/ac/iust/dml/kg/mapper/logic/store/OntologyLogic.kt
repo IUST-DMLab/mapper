@@ -142,7 +142,10 @@ class OntologyLogic {
     classData.subClassOf = objectOfPredicate(classUrl, rdfsSubClassOf)
     classData.equivalentClasses = objectsOfPredicate(classUrl, owlEqClass)
     classData.disjointWith = objectsOfPredicate(classUrl, owlDisjointWith)
-    classData.properties = subjectsOfPredicate(rdfsDomain, classUrl)
+    val properties = subjectsOfPredicate(rdfsDomain, classUrl)
+    properties.forEach {
+      classData.properties.add(propertyData(it))
+    }
 
     return classData
   }
@@ -157,7 +160,7 @@ class OntologyLogic {
     if (data.subClassOf != null) insertAndVote(data.url, rdfsSubClassOf, data.subClassOf!!)
     data.equivalentClasses.forEach { insertAndVote(data.url, owlEqClass, it) }
     data.disjointWith.forEach { insertAndVote(data.url, owlDisjointWith, it) }
-    data.properties.forEach { insertAndVote(it, rdfsDomain, data.url!!) }
+    data.properties.forEach { insertAndVote(it.url, rdfsDomain, data.url!!) }
     return true
   }
 
