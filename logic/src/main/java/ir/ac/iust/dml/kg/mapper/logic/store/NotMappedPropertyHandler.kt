@@ -35,7 +35,7 @@ class NotMappedPropertyHandler {
     notMappedProperties.forEachIndexed { index, property ->
       maxNumberOfTriples++
       val name = property.substringAfterLast("/")
-      val propertyUrl = PrefixService.getFkgOntologyPropertyUrl(name)
+      val propertyUrl = PrefixService.convertFkgProperty(name)!!
       store.save(SOURCE_URL, propertyUrl, TYPE_OF_ALL_NOT_MAPPED_PROPERTIES, TYPE_URL)
       store.save(SOURCE_URL, propertyUrl, name, LABEL)
       store.save(SOURCE_URL, propertyUrl, name, VARIANT_LABEL_URL)
