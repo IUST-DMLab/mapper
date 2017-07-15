@@ -4,6 +4,7 @@ import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImp
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.mapper.logic.EntityToClassLogic
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
+import ir.ac.iust.dml.kg.mapper.logic.data.InfoBoxAndCount
 import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
@@ -85,7 +86,11 @@ class KGTableImporter {
       }
     }
 
-    entityTree.forEach { entity, tress -> entityClassImporter.writeEntityTrees(entity, tress, store) }
+    entityTree.forEach { entity, tress ->
+      entityClassImporter.writeEntityTrees(entity,
+          tress.map { InfoBoxAndCount(infoBox = "donCare", propertyCount = 1, tree = it.split("/")) }.toMutableSet(),
+          store)
+    }
 
     (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
     (store as? VirtuosoFkgTripleDaoImpl)?.close()

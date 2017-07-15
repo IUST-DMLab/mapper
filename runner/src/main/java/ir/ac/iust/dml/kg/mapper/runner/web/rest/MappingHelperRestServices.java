@@ -115,6 +115,7 @@ public class MappingHelperRestServices {
   @RequestMapping("/triples")
   public String triples(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
     kgTripleImporter.writeTriples(type);
+    notMappedPropertyHandler.writeNotMappedProperties(type);
     return "Imported!";
   }
 
@@ -186,6 +187,7 @@ public class MappingHelperRestServices {
 
   public boolean raw(@NotNull StoreType type) {
     rawTripleImporter.writeTriples(type);
+    notMappedPropertyHandler.writeNotMappedProperties(type);
     return true;
   }
 }

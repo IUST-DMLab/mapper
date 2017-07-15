@@ -14,7 +14,7 @@ import java.io.InputStreamReader
 class EntityInfoLogic {
 
   private val logger = Logger.getLogger(this.javaClass)!!
-  val resources = mutableMapOf<String, List<String>>()
+  val resources = mutableMapOf<String, MutableList<String>>()
 
   fun reload() {
     resources.clear()
@@ -36,17 +36,22 @@ class EntityInfoLogic {
     }
 
     path = PathUtils.getWithInfoboxPath()
-    result = PathWalker.getPath(path, Regex("\\d+\\.json"))
-    type = object : TypeToken<Map<String, List<String>>>() {}.type
+    result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
+    val startTime = System.currentTimeMillis()
+    type = object : TypeToken<Map<String, Map<String, List<Map<String, String>>>>>() {}.type
 
-    result.forEachIndexed { _, p ->
+    result.forEachIndexed { index, p ->
       InputStreamReader(FileInputStream(p.toFile()), "UTF8").use {
         BufferedReader(it).use {
-          val infoBoxes: Map<String, List<String>> = gson.fromJson(it, type)
-          resources.putAll(infoBoxes)
+          val infoBoxes: Map<String, Map<String, List<Map<String, String>>>> = gson.fromJson(it, type)
+          infoBoxes.forEach { infoBox, entityInfo ->
+            entityInfo.forEach { entity, properties ->
+              resources.getOrPut(entity, { mutableListOf() }).add(infoBox)
+            }
+          }
         }
-        if (resources.size > maxNumberOfTriples * 2) return@forEachIndexed
       }
+      logger.warn("$index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
     }
   }
 }

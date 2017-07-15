@@ -9,6 +9,7 @@ import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.mapper.logic.EntityToClassLogic
 import ir.ac.iust.dml.kg.mapper.logic.PathUtils
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
+import ir.ac.iust.dml.kg.mapper.logic.data.InfoBoxAndCount
 import ir.ac.iust.dml.kg.mapper.logic.store.entities.MapRule
 import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
@@ -39,38 +40,40 @@ class KGTripleImporter {
 
   fun writeAbstracts(storeType: StoreType = StoreType.none) {
     val path = PathUtils.getAbstractPath()
-    val maxNumberOfTriples = TestUtils.getMaxTuples()
+    val maxNumberOfEntities = TestUtils.getMaxTuples()
     val store = storeProvider.getStore(storeType, path)
+
+    val type = object : TypeToken<Map<String, String>>() {}.type
+    val gson = Gson()
 
     val result = PathWalker.getPath(path, Regex("\\d+\\.json"))
     val startTime = System.currentTimeMillis()
-    var tripleNumber = 0
     val ABSTRACT_PREDICATE = PrefixService.getFkgOntologyPropertyUrl("abstract")
+
+    var entityIndex = 0
+
     result.forEachIndexed { index, p ->
-      TripleJsonFileReader(p).use { reader ->
-        while (reader.hasNext()) {
-          val triple = reader.next()
-          tripleNumber++
-          if (tripleNumber > maxNumberOfTriples) break
-          try {
-            if (triple.objekt == null) continue
-            if (tripleNumber % 1000 == 0)
-              logger.warn("triple number is $tripleNumber. $index file is $p. " +
-                  "time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
-            val subject = PrefixService.convertFkgResourceUrl(triple.subject!!)
-            store.save(source = triple.source!!, subject = subject,
-                objeck = triple.objekt!!, property = ABSTRACT_PREDICATE)
-          } catch (th: Throwable) {
+      InputStreamReader(FileInputStream(p.toFile()), "UTF8").use {
+        BufferedReader(it).use {
+          val revisionIdMap: Map<String, String> = gson.fromJson(it, type)
+          revisionIdMap.forEach { entity, abstract ->
+            entityIndex++
+            if (entityIndex > maxNumberOfEntities) return@forEach
+            val subject = PrefixService.getFkgResourceUrl(entity)
+            store.save(source = "http://fa.wikipedia.org/wiki/" + entity.replace(' ', '_'),
+                subject = subject, objeck = abstract, property = ABSTRACT_PREDICATE)
           }
+          logger.warn("$index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
         }
       }
     }
+
     (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
     (store as? VirtuosoFkgTripleDaoImpl)?.close()
   }
 
   fun writeEntitiesWithoutInfoBox(storeType: StoreType = StoreType.none) {
-    val path = PathUtils.getWithInfoboxPath()
+    val path = PathUtils.getWithoutInfoboxPath()
     val maxNumberOfEntities = TestUtils.getMaxTuples()
     val store = storeProvider.getStore(storeType, path)
 
@@ -108,41 +111,52 @@ class KGTripleImporter {
     val maxNumberOfEntities = TestUtils.getMaxTuples()
     val store = storeProvider.getStore(storeType, path)
 
-    val result = PathWalker.getPath(path, Regex("\\d+\\.json"))
+    val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
     val startTime = System.currentTimeMillis()
 
-    val type = object : TypeToken<Map<String, List<String>>>() {}.type
+    val type = object : TypeToken<Map<String, Map<String, List<Map<String, String>>>>>() {}.type
     val gson = Gson()
     var entityIndex = 0
+
+    val classInfoBoxes = mutableMapOf<String, MutableList<InfoBoxAndCount>>()
 
     result.forEachIndexed { index, p ->
       InputStreamReader(FileInputStream(p.toFile()), "UTF8").use {
         BufferedReader(it).use {
-          val infoBoxes: Map<String, List<String>> = gson.fromJson(it, type)
-          infoBoxes.forEach { entity, infoboxes ->
-            entityIndex++
-            if (entityIndex > maxNumberOfEntities) return@forEach
-            if (entityIndex % 1000 == 0)
-              logger.warn("$$entityIndex entities has been done." +
-                  " time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
-            try {
-              val tress = mutableSetOf<String>()
-              infoboxes.forEach {
-                val normalizedTemplate = it.toLowerCase().replace('_', ' ')
-                val templateMapping = holder.getTemplateMapping(normalizedTemplate)
-                var tree = entityToClassLogic.getTree(templateMapping.ontologyClass)
-                if (tree == null) tree = "Thing"
-                tress.add(tree)
-              }
-              entityClassImporter.writeEntityTrees(entity, tress, store)
-            } catch (th: Throwable) {
-              println("entity: >>>> $entity")
-              logger.error(th)
-              th.printStackTrace()
+          val infoBoxes: Map<String, Map<String, List<Map<String, String>>>> = gson.fromJson(it, type)
+          infoBoxes.forEach { infoBox, entityInfo ->
+            entityInfo.forEach { entity, properties ->
+              classInfoBoxes.getOrPut(entity, { mutableListOf() })
+                  .add(InfoBoxAndCount(infoBox,
+                      if (properties.isNotEmpty()) properties[0].size else 0))
             }
           }
-          logger.warn("$index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
         }
+      }
+      logger.warn("$index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
+    }
+
+    classInfoBoxes.forEach { entity, infoboxes ->
+      entityIndex++
+      if (entityIndex > maxNumberOfEntities) return@forEach
+      if (entityIndex % 1000 == 0)
+        logger.warn("$$entityIndex entities has been done." +
+            " time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
+      try {
+        val tress = mutableSetOf<InfoBoxAndCount>()
+        infoboxes.forEach {
+          val normalizedTemplate = it.infoBox.toLowerCase().replace('_', ' ')
+          val templateMapping = holder.getTemplateMapping(normalizedTemplate)
+          var tree = entityToClassLogic.getTree(templateMapping.ontologyClass)
+          if (tree == null) tree = "Thing"
+          it.tree = tree.split("/")
+          tress.add(it)
+        }
+        entityClassImporter.writeEntityTrees(entity, tress, store)
+      } catch (th: Throwable) {
+        println("entity: >>>> $entity")
+        logger.error(th)
+        th.printStackTrace()
       }
     }
 
