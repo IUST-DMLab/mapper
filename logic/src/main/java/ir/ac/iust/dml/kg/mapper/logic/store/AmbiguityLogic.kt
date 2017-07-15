@@ -29,7 +29,7 @@ class AmbiguityLogic {
   fun write(storeType: StoreType = StoreType.knowledgeStore) {
 
     val disambiguationFolder = ConfigReader.getPath("wiki.folder.disambiguations", "~/.pkg/data/disambiguations")
-        Files.createDirectories(disambiguationFolder.parent)
+    if (!Files.exists(disambiguationFolder.parent)) Files.createDirectories(disambiguationFolder.parent)
         if (!Files.exists(disambiguationFolder)) {
             throw Exception("There is no file ${disambiguationFolder.toAbsolutePath()} existed.")
         }
