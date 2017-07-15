@@ -8,8 +8,8 @@
   <parent>
     <relativePath>../</relativePath>
     <groupId>ir.ac.iust.dml.kg.mapping</groupId>
-    <artifactId>parent</artifactId>
-    <version>0.6.0</version>
+    <artifactId>mapping-parent</artifactId>
+    <version>0.6.1</version>
   </parent>
 
   <properties>
