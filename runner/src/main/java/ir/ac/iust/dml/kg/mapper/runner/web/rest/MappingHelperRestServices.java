@@ -167,7 +167,7 @@ public class MappingHelperRestServices {
   @ResponseBody
   public Boolean properties(@RequestParam(defaultValue = "none") StoreType type,
                             @RequestParam(defaultValue = "true") boolean resolveAmbiguity) {
-    kgTripleImporter.writeTriples(type, true);
+    kgTripleImporter.writeTriples(type, false);
     notMappedPropertyHandler.writeNotMappedProperties(type, resolveAmbiguity);
     return true;
   }
