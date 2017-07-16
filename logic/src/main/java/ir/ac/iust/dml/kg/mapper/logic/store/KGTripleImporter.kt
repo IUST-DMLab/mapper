@@ -164,7 +164,7 @@ class KGTripleImporter {
     (store as? VirtuosoFkgTripleDaoImpl)?.close()
   }
 
-  fun writeTriples(storeType: StoreType = StoreType.none) {
+  fun writeTriples(storeType: StoreType = StoreType.none, insert: Boolean = true) {
     holder.writeToKS()
     holder.loadFromKS()
 
@@ -173,7 +173,7 @@ class KGTripleImporter {
     val store = storeProvider.getStore(storeType, path)
     val maxNumberOfTriples = TestUtils.getMaxTuples()
 
-    store.deleteAll()
+    if (insert) store.deleteAll()
 
     val notSeenProperties = mutableMapOf<String, Int>()
     var numberOfMapped = 0
@@ -223,7 +223,7 @@ class KGTripleImporter {
 
             templateMapping.rules!!.forEach {
               numberOfMapped++
-              store.saveTriple(source = triple.source!!, subject = subject, objeck = objekt, rule = it)
+              if (insert) store.saveTriple(source = triple.source!!, subject = subject, objeck = objekt, rule = it)
             }
 
             val propertyMapping = templateMapping.properties!![PropertyNormaller.removeDigits(property)]
@@ -238,18 +238,18 @@ class KGTripleImporter {
               val key = templateMapping.ontologyClass + "~" + property
               if (classMaps.containsKey(key)) {
                 numberOfMappedInTree++
-                store.saveTriple(source = triple.source!!, subject = subject,
+                if (insert) store.saveTriple(source = triple.source!!, subject = subject,
                     objeck = objekt, rule = classMaps[key]!!)
               } else {
                 numberOfNotMapped++
                 notMappedPropertyHandler.addToNotMapped(property)
-                store.convertAndSave(source = triple.source!!, subject = subject,
+                if (insert) store.convertAndSave(source = triple.source!!, subject = subject,
                     objeck = objekt, property = property)
               }
             } else {
               numberOfMapped++
               propertyMapping.rules.forEach {
-                store.saveTriple(source = triple.source!!, subject = subject,
+                if (insert) store.saveTriple(source = triple.source!!, subject = subject,
                     objeck = objekt, rule = it)
               }
             }
@@ -261,8 +261,10 @@ class KGTripleImporter {
       }
     }
 
-    (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
-    (store as? VirtuosoFkgTripleDaoImpl)?.close()
+    if (insert) {
+      (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
+      (store as? VirtuosoFkgTripleDaoImpl)?.close()
+    }
 
     logger.info("number of not seen properties ${notSeenProperties.size}")
     logger.info("number of not mapped properties $numberOfMapped")

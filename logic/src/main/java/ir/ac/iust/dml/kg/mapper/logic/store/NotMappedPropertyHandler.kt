@@ -28,7 +28,7 @@ class NotMappedPropertyHandler {
     notMappedProperties.add(property)
   }
 
-  fun writeNotMappedProperties(storeType: StoreType = StoreType.none) {
+  fun writeNotMappedProperties(storeType: StoreType = StoreType.none, resolveAmbiguity: Boolean) {
     val store = storeProvider.getStore(storeType)
     var maxNumberOfTriples = TestUtils.getMaxTuples()
     val startTime = System.currentTimeMillis()
@@ -40,14 +40,16 @@ class NotMappedPropertyHandler {
       store.save(SOURCE_URL, propertyUrl, name, LABEL)
       store.save(SOURCE_URL, propertyUrl, name, VARIANT_LABEL_URL)
 
-      val result = store.read(predicate = VARIANT_LABEL_URL, objekt = name)
-          .filter { triple -> triple.objekt == name && triple.subject != propertyUrl }
-      if (result.isNotEmpty()) {
-        store.convertAndSave(source = propertyUrl, subject = propertyUrl,
-            property = DISAMBIGUATED_FROM_URL, objeck = name)
-        result.forEach {
-          store.convertAndSave(source = it.source ?: it.subject!!,
-              subject = it.subject!!, property = DISAMBIGUATED_FROM_URL, objeck = it.objekt!!)
+      if (resolveAmbiguity) {
+        val result = store.read(predicate = VARIANT_LABEL_URL, objekt = name)
+            .filter { triple -> triple.objekt == name && triple.subject != propertyUrl }
+        if (result.isNotEmpty()) {
+          store.convertAndSave(source = propertyUrl, subject = propertyUrl,
+              property = DISAMBIGUATED_FROM_URL, objeck = name)
+          result.forEach {
+            store.convertAndSave(source = it.source ?: it.subject!!,
+                subject = it.subject!!, property = DISAMBIGUATED_FROM_URL, objeck = it.objekt!!)
+          }
         }
       }
       logger.warn("$index of ${notMappedProperties.size} properties written. " +

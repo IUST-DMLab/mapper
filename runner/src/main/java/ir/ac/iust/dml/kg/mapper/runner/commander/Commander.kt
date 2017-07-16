@@ -37,7 +37,9 @@ class Commander {
         "redirects" -> services.redirects() // writes all wikipedia redirects
         "ambiguities" -> services.ambiguities() // writes all wikipedia ambiguities
         "predicates" -> services.predicates(StoreType.valueOf(arg!!), true) // writes all predicates
-        "predicatesFast" -> services.predicates(StoreType.valueOf(arg!!), false) // writes all predicates
+        "predicatesFast" -> services.predicates(StoreType.valueOf(arg!!), false) // writes all predicates without ambiguation resolving
+        "properties" -> services.properties(StoreType.valueOf(arg!!), true) // writes all not mapped properties
+        "propertiesFast" -> services.properties(StoreType.valueOf(arg!!), false) // writes all not mapped properties without ambiguation resolving
         "raw" -> services.raw(StoreType.valueOf(arg!!)) // writes all predicates
         "dumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(arg!!), false) // all needed tasks in one place
         "completeDumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(arg!!), true) // all needed tasks in one place

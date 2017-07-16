@@ -114,8 +114,8 @@ public class MappingHelperRestServices {
 
   @RequestMapping("/triples")
   public String triples(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
-    kgTripleImporter.writeTriples(type);
-    notMappedPropertyHandler.writeNotMappedProperties(type);
+    kgTripleImporter.writeTriples(type, true);
+    notMappedPropertyHandler.writeNotMappedProperties(type, true);
     return "Imported!";
   }
 
@@ -163,6 +163,15 @@ public class MappingHelperRestServices {
     return true;
   }
 
+  @RequestMapping("/properties")
+  @ResponseBody
+  public Boolean properties(@RequestParam(defaultValue = "none") StoreType type,
+                            @RequestParam(defaultValue = "true") boolean resolveAmbiguity) {
+    kgTripleImporter.writeTriples(type, true);
+    notMappedPropertyHandler.writeNotMappedProperties(type, resolveAmbiguity);
+    return true;
+  }
+
   @RequestMapping("/completeDumpUpdate")
   public void completeDumpUpdate(@RequestParam(defaultValue = "none") StoreType type,
                                  @RequestParam(defaultValue = "false") boolean entitiesWithoutInfoBox) throws Exception {
@@ -171,10 +180,10 @@ public class MappingHelperRestServices {
     entityToClassLogic.writeTree(type);
     if (entitiesWithoutInfoBox) kgTripleImporter.writeEntitiesWithoutInfoBox(type);
     kgTripleImporter.writeEntitiesWithInfoBox(type);
-    kgTripleImporter.writeTriples(type);
+    kgTripleImporter.writeTriples(type, true);
     kgTableImporter.writeTriples(type);
     rawTripleImporter.writeTriples(type);
-    notMappedPropertyHandler.writeNotMappedProperties(type);
+    notMappedPropertyHandler.writeNotMappedProperties(type, true);
     kgTripleImporter.writeAbstracts(type);
     redirectLogic.write(type);
     ambiguityLogic.write(type);
@@ -188,7 +197,7 @@ public class MappingHelperRestServices {
 
   public boolean raw(@NotNull StoreType type) {
     rawTripleImporter.writeTriples(type);
-    notMappedPropertyHandler.writeNotMappedProperties(type);
+    notMappedPropertyHandler.writeNotMappedProperties(type, true);
     return true;
   }
 }
