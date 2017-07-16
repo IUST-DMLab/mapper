@@ -157,8 +157,9 @@ public class MappingHelperRestServices {
 
   @RequestMapping("/predicates")
   @ResponseBody
-  public Boolean predicates(@RequestParam(defaultValue = "none") StoreType type) {
-    predicateImporter.writePredicates(type);
+  public Boolean predicates(@RequestParam(defaultValue = "none") StoreType type,
+                            @RequestParam(defaultValue = "true") boolean resolveAmbiguity) {
+    predicateImporter.writePredicates(type, resolveAmbiguity);
     return true;
   }
 
@@ -177,7 +178,7 @@ public class MappingHelperRestServices {
     kgTripleImporter.writeAbstracts(type);
     redirectLogic.write(type);
     ambiguityLogic.write(type);
-    predicateImporter.writePredicates(type);
+    predicateImporter.writePredicates(type, true);
   }
 
   @RequestMapping("/writeTree")

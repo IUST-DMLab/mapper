@@ -36,7 +36,8 @@ class Commander {
         "tables" -> services.tables(StoreType.valueOf(arg!!)) // write custom table as triples
         "redirects" -> services.redirects() // writes all wikipedia redirects
         "ambiguities" -> services.ambiguities() // writes all wikipedia ambiguities
-        "predicates" -> services.predicates(StoreType.valueOf(arg!!)) // writes all predicates
+        "predicates" -> services.predicates(StoreType.valueOf(arg!!), true) // writes all predicates
+        "predicatesFast" -> services.predicates(StoreType.valueOf(arg!!), false) // writes all predicates
         "raw" -> services.raw(StoreType.valueOf(arg!!)) // writes all predicates
         "dumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(arg!!), false) // all needed tasks in one place
         "completeDumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(arg!!), true) // all needed tasks in one place

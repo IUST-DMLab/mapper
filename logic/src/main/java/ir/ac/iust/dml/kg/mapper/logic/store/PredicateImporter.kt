@@ -22,13 +22,13 @@ class PredicateImporter {
   private val LABEL = PrefixService.prefixToUri(PrefixService.LABEL_URL)!!
   private val TYPE_URL = PrefixService.prefixToUri(PrefixService.TYPE_URL)!!
 
-  fun writePredicates(type: StoreType) {
+  fun writePredicates(type: StoreType, resolveAmbiguity: Boolean) {
     holder.writeToKS()
     holder.loadFromKS()
-    writePredicates(storeProvider.getStore(type))
+    writePredicates(storeProvider.getStore(type), resolveAmbiguity)
   }
 
-  fun writePredicates(store: FkgTripleDao) {
+  fun writePredicates(store: FkgTripleDao, resolveAmbiguity: Boolean) {
     data class PredicateData(var labels: MutableMap<String, Double> = mutableMapOf(),
                              var domains: MutableSet<String> = mutableSetOf())
 
@@ -64,13 +64,15 @@ class PredicateImporter {
         store.convertAndSave(source = pu, subject = pu, property = LABEL, objeck = labels[0].first)
       labels.forEach {
         store.convertAndSave(source = pu, subject = pu, property = VARIANT_LABEL_URL, objeck = it.first)
-        val result = store.read(predicate = VARIANT_LABEL_URL, objekt = it.first)
-            .filter { triple -> triple.objekt == it.first && triple.subject != pu }
-        if (result.isNotEmpty()) {
-          store.convertAndSave(source = pu, subject = pu, property = DISAMBIGUATED_FROM_URL, objeck = it.first)
-          result.forEach {
-            store.convertAndSave(source = it.source ?: it.subject!!,
-                subject = it.subject!!, property = DISAMBIGUATED_FROM_URL, objeck = it.objekt!!)
+        if (resolveAmbiguity) {
+          val result = store.read(predicate = VARIANT_LABEL_URL, objekt = it.first)
+              .filter { triple -> triple.objekt == it.first && triple.subject != pu }
+          if (result.isNotEmpty()) {
+            store.convertAndSave(source = pu, subject = pu, property = DISAMBIGUATED_FROM_URL, objeck = it.first)
+            result.forEach {
+              store.convertAndSave(source = it.source ?: it.subject!!,
+                  subject = it.subject!!, property = DISAMBIGUATED_FROM_URL, objeck = it.objekt!!)
+            }
           }
         }
       }
