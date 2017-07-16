@@ -57,7 +57,11 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
     data.predicate = if (!t.predicate!!.contains("://")) PrefixService.prefixToUri(t.predicate) else t.predicate
     data.precession = t.accuracy
     if (!PrefixService.isUrlFast(t.predicate)) {
-      logger.error(data.predicate + ": " + t.predicate)
+      logger.error("wrong subject format: " + data.predicate + ": " + t.predicate)
+      return
+    }
+    if (!PrefixService.isUrlFast(t.subject)) {
+      logger.error("wrong subject format: " + data.subject + ": " + t.subject)
       return
     }
 
