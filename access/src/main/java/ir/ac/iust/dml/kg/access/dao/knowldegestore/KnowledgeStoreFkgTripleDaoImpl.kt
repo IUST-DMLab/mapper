@@ -14,6 +14,7 @@ import ir.ac.iust.dml.kg.services.client.swagger.model.TripleData
 import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValueData
 import org.apache.log4j.Logger
 import java.util.*
+import java.util.regex.Pattern
 
 class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
 
@@ -38,6 +39,12 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
         logger.error(e)
       }
     }
+  }
+
+  private val p = Pattern.compile("[\\\\|`\"<>{}^\\[\\]]", Pattern.CASE_INSENSITIVE);
+  private fun isValidUri(uri: String): Boolean {
+    val m = p.matcher(uri)
+    return !m.find()
   }
 
   override fun save(t: FkgTriple, mapping: FkgPropertyMapping?, approved: Boolean) {
@@ -99,6 +106,22 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
 
     if (approved) {
       // TODO: approve and write to knowledge store`
+    }
+
+    // TODO:
+    if ((!isValidUri(data.subject))) {
+      logger.error("wrong subject url: " + data.subject)
+      return
+    }
+
+    if ((!isValidUri(data.predicate))) {
+      logger.error("wrong predicate url: " + data.predicate)
+      return
+    }
+
+    if (data.`object`.type == TypedValueData.TypeEnum.RESOURCE && !isValidUri(data.`object`.value)) {
+      logger.error("wrong object url: " + data.`object`.value)
+      return
     }
 
     buffer.add(data)
