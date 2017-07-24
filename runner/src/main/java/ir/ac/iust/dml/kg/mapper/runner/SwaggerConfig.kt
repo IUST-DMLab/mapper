@@ -20,7 +20,7 @@ open class SwaggerConfig : WebMvcConfigurerAdapter() {
    @Bean
    open fun api(): Docket {
       return Docket(DocumentationType.SWAGGER_2).select().apis(RequestHandlerSelectors.any())
-            .paths(PathSelectors.regex(".*/rest/v1/.*"))
+          .paths(PathSelectors.regex(".*/rest/v\\d+/.*"))
             .build().apiInfo(apiInfo())
    }
 
