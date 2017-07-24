@@ -16,7 +16,7 @@ class MappingRestServices {
   @ResponseBody
   fun insert(@RequestBody data: TemplateData) = logic.insert(data)
 
-  @RequestMapping("search", method = arrayOf(RequestMethod.POST))
+  @RequestMapping("search", method = arrayOf(RequestMethod.GET))
   @ResponseBody
   fun search(@RequestParam(defaultValue = "0") page: Int,
              @RequestParam(defaultValue = "20") pageSize: Int,
@@ -32,7 +32,7 @@ class MappingRestServices {
       logic.search(page, pageSize, templateName, templateNameLike, className, classNameLike,
           propertyName, propertyNameLike, predicateName, predicateNameLike, approved)
 
-  @RequestMapping("searchProperty", method = arrayOf(RequestMethod.POST))
+  @RequestMapping("searchProperty", method = arrayOf(RequestMethod.GET))
   @ResponseBody
   fun searchProperty(@RequestParam(defaultValue = "0") page: Int,
                      @RequestParam(defaultValue = "20") pageSize: Int,
