@@ -32,4 +32,22 @@ class MappingRestServices {
       logic.search(page, pageSize, templateName, templateNameLike, className, classNameLike,
           propertyName, propertyNameLike, predicateName, predicateNameLike, approved)
 
+  @RequestMapping("searchProperty", method = arrayOf(RequestMethod.POST))
+  @ResponseBody
+  fun searchProperty(@RequestParam(defaultValue = "0") page: Int,
+                     @RequestParam(defaultValue = "20") pageSize: Int,
+                     @RequestParam(required = false) templateName: String?,
+                     @RequestParam(required = false, defaultValue = "false") templateNameLike: Boolean,
+                     @RequestParam(required = false) className: String?,
+                     @RequestParam(required = false, defaultValue = "false") classNameLike: Boolean,
+                     @RequestParam(required = false) propertyName: String?,
+                     @RequestParam(required = false, defaultValue = "false") propertyNameLike: Boolean,
+                     @RequestParam(required = false) predicateName: String?,
+                     @RequestParam(required = false, defaultValue = "false") predicateNameLike: Boolean,
+                     @RequestParam(required = false) allNull: Boolean?,
+                     @RequestParam(required = false) oneNull: Boolean?,
+                     @RequestParam(required = false) approved: Boolean?) =
+      logic.searchProperty(page, pageSize, propertyName, propertyNameLike, templateName, templateNameLike,
+          className, classNameLike, predicateName, predicateNameLike, allNull, oneNull, approved)
+
 }
