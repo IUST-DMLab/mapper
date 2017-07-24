@@ -273,6 +273,7 @@ class KGTripleImporter {
   }
 
   private fun FkgTripleDao.saveTriple(source: String, subject: String, objeck: String, rule: MapRule) {
+    if (rule.predicate == null) return
     val value = if (rule.transform != null) {
       Transformers::class.java.getMethod(rule.transform, String::class.java).invoke(transformers, objeck)
     } else if (rule.constant != null) rule.constant
