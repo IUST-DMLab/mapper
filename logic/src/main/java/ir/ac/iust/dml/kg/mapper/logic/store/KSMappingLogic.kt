@@ -77,7 +77,7 @@ class KSMappingLogic {
     }
     if (approved != null) {
       filtered = filtered.filter {
-        it.properties.filter { it.recommendations.isNotEmpty() == approved }.isNotEmpty()
+        it.properties.filter { it.recommendations.isEmpty() == approved }.isNotEmpty()
       }
     }
     return asPages(page, pageSize, filtered)
