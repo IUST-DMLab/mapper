@@ -101,8 +101,10 @@ class KSMappingLogic {
       filtered = filtered.filter { compare(propertyNameLike, it.property, propertyName) }
     if (templateName != null)
       filtered = filtered.filter { it.templates.filter { compare(templateNameLike, it, templateName) }.isNotEmpty() }
-    if (className != null)
-      filtered = filtered.filter { it.classes.filter { compare(classNameLike, it, className) }.isNotEmpty() }
+    if (className != null) {
+      val fixedClassName = if (className.startsWith("fkgo:")) className else "fkgo:" + className
+      filtered = filtered.filter { it.classes.filter { compare(classNameLike, it, fixedClassName) }.isNotEmpty() }
+    }
     if (predicateName != null)
       filtered = filtered.filter { it.predicates.filter { compare(predicateNameLike, it, predicateName) }.isNotEmpty() }
     if (allNull != null)
