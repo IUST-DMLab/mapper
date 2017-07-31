@@ -24,7 +24,6 @@ class Commander {
         "ksMapLoad" -> services.ksMapLoad() // just for tests. can be removed.
         "migrate" -> services.migrate() // migrates data from mysql to knowledge store
         "load" -> services.load() // deprecated
-        "loadTypes" -> services.loadTypes() // deprecated
         "createStatsFile" -> services.createStatsFile() // deprecated
         "writeStats" -> services.writeStats() // deprecated
         "generateMapping" -> services.generateMapping() // deprecated

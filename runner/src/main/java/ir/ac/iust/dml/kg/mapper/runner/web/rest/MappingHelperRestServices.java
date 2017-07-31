@@ -63,13 +63,6 @@ public class MappingHelperRestServices {
     return "Loaded!";
   }
 
-
-  @RequestMapping("/loadTypes")
-  public String loadTypes() throws Exception {
-    entityToClassLogic.load();
-    return "Loaded!";
-  }
-
   @RequestMapping("/createStatsFile")
   public String createStatsFile() throws Exception {
     statsLogic.createStatsFile();
