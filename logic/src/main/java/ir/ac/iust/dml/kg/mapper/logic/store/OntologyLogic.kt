@@ -11,11 +11,13 @@ import ir.ac.iust.dml.kg.services.client.swagger.V1expertsApi
 import ir.ac.iust.dml.kg.services.client.swagger.V1triplesApi
 import ir.ac.iust.dml.kg.services.client.swagger.model.TripleData
 import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValueData
+import org.apache.log4j.Logger
 import org.springframework.stereotype.Service
 
 @Service
 class OntologyLogic {
 
+  private val logger = Logger.getLogger(this.javaClass)!!
   val tripleApi: V1triplesApi
   val expertApi: V1expertsApi
   private val treeCache = mutableMapOf<String, String>()
@@ -160,6 +162,12 @@ class OntologyLogic {
       if (it.`object`.lang == "en") classData.enLabel = it.`object`.value
     }
 
+    val variantLabels = search(false, classUrl, URIs.variantLabel, null, 0, 10)
+    variantLabels.data.forEach {
+      if (it.`object`.lang == "fa") classData.faVariantLabels.add(it.`object`.value)
+      if (it.`object`.lang == "en") classData.enVariantLabels.add(it.`object`.value)
+    }
+
     val comments = search(false, classUrl, URIs.comment, null, 0, 10)
     comments.data.forEach {
       if (it.`object`.lang == "fa") classData.faComment = it.`object`.value
@@ -177,31 +185,43 @@ class OntologyLogic {
     return classData
   }
 
+  private fun remove(subject: String?, predicate: String?, `object`: String?) {
+    if (subject == null || predicate == null || `object` == null) return
+    logger.info("removing $subject, $predicate, $`object`")
+    tripleApi.remove1(subject, predicate, `object`, null)
+  }
+
   fun saveClass(data: OntologyClassData): Boolean {
     if (data.url == null) return false
+
+    val oldData = classData(data.url!!)
+    if ((oldData.faLabel != null) && (oldData.faLabel != data.faLabel))
+      remove(data.url, URIs.label, oldData.faLabel)
+    if ((oldData.enLabel != null) && (oldData.enLabel != data.enLabel))
+      remove(data.url, URIs.label, oldData.enLabel)
+    if ((oldData.faComment != null) && (oldData.faComment != data.faComment))
+      remove(data.url, URIs.comment, oldData.faComment)
+    if ((oldData.enComment != null) && (oldData.enComment != data.enComment))
+      remove(data.url, URIs.comment, oldData.enComment)
+    if ((oldData.subClassOf != null) && (oldData.subClassOf != data.subClassOf))
+      remove(data.url, URIs.subClassOf, oldData.subClassOf)
+    oldData.faVariantLabels.subtract(data.faVariantLabels).forEach { remove(data.url, URIs.variantLabel, it) }
+    oldData.enVariantLabels.subtract(data.enVariantLabels).forEach { remove(data.url, URIs.variantLabel, it) }
+    oldData.equivalentClasses.subtract(data.equivalentClasses).forEach { remove(data.url, URIs.equivalentClass, it) }
+    oldData.disjointWith.subtract(data.disjointWith).forEach { remove(data.url, URIs.disjointWith, it) }
+    oldData.properties.subtract(data.properties).forEach { remove(data.url, URIs.propertyDomain, it.url) }
+
     insertAndVote(data.url, URIs.type, URIs.typeOfAllClasses)
     if (data.faLabel != null) insertAndVote(data.url, URIs.label, data.faLabel!!)
     if (data.enLabel != null) insertAndVote(data.url, URIs.label, data.enLabel!!)
     if (data.faComment != null) insertAndVote(data.url, URIs.comment, data.faComment!!)
     if (data.enComment != null) insertAndVote(data.url, URIs.comment, data.enComment!!)
     if (data.subClassOf != null) insertAndVote(data.url, URIs.subClassOf, data.subClassOf!!)
+    data.faVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it) }
+    data.enVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it) }
     data.equivalentClasses.forEach { insertAndVote(data.url, URIs.equivalentClass, it) }
     data.disjointWith.forEach { insertAndVote(data.url, URIs.disjointWith, it) }
     data.properties.forEach { insertAndVote(it.url, URIs.propertyDomain, data.url!!) }
-    return true
-  }
-
-  fun saveProperty(data: OntologyPropertyData): Boolean {
-    if (data.url == null) return false
-    insertAndVote(data.url, URIs.type, URIs.typeOfAllProperties)
-    if (data.faLabel != null) insertAndVote(data.url, URIs.label, data.faLabel!!)
-    if (data.enLabel != null) insertAndVote(data.url, URIs.label, data.enLabel!!)
-    data.faVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it) }
-    data.enVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it) }
-    data.types.forEach { insertAndVote(data.url, URIs.type, it) }
-    data.domains.forEach { insertAndVote(data.url, URIs.propertyDomain, it) }
-    data.ranges.forEach { insertAndVote(data.url, URIs.propertyRange, it) }
-    data.equivalentProperties.forEach { insertAndVote(it, URIs.equivalentProperty, data.url!!) }
     return true
   }
 
@@ -226,6 +246,32 @@ class OntologyLogic {
     propertyData.equivalentProperties.addAll(objectsOfPredicate(propertyUrl, URIs.equivalentProperty))
 
     return propertyData
+  }
+
+  fun saveProperty(data: OntologyPropertyData): Boolean {
+    if (data.url == null) return false
+
+    val oldData = propertyData(data.url!!)
+    if ((oldData.faLabel != null) && (oldData.faLabel != data.faLabel))
+      remove(data.url, URIs.label, oldData.faLabel)
+    if ((oldData.enLabel != null) && (oldData.enLabel != data.enLabel))
+      remove(data.url, URIs.label, oldData.enLabel)
+    oldData.faVariantLabels.subtract(data.faVariantLabels).forEach { remove(data.url, URIs.variantLabel, it) }
+    oldData.enVariantLabels.subtract(data.enVariantLabels).forEach { remove(data.url, URIs.variantLabel, it) }
+    oldData.domains.subtract(data.domains).forEach { remove(data.url, URIs.propertyDomain, it) }
+    oldData.ranges.subtract(data.ranges).forEach { remove(data.url, URIs.propertyRange, it) }
+    oldData.equivalentProperties.subtract(data.equivalentProperties).forEach { remove(data.url, URIs.equivalentProperty, it) }
+
+    insertAndVote(data.url, URIs.type, URIs.typeOfAllProperties)
+    if (data.faLabel != null) insertAndVote(data.url, URIs.label, data.faLabel!!)
+    if (data.enLabel != null) insertAndVote(data.url, URIs.label, data.enLabel!!)
+    data.faVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it) }
+    data.enVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it) }
+    data.types.forEach { insertAndVote(data.url, URIs.type, it) }
+    data.domains.forEach { insertAndVote(data.url, URIs.propertyDomain, it) }
+    data.ranges.forEach { insertAndVote(data.url, URIs.propertyRange, it) }
+    data.equivalentProperties.forEach { insertAndVote(it, URIs.equivalentProperty, data.url!!) }
+    return true
   }
 
 }

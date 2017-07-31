@@ -12,6 +12,8 @@ data class OntologyClassData(
     var url: String? = null,
     var faLabel: String? = null,
     var enLabel: String? = null,
+    var faVariantLabels: MutableList<String> = mutableListOf(),
+    var enVariantLabels: MutableList<String> = mutableListOf(),
     var faComment: String? = null,
     var enComment: String? = null,
     var subClassOf: String? = null,
