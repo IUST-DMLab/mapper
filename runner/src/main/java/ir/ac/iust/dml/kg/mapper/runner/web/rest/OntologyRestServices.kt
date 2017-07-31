@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.*
 class OntologyRestServices {
   @Autowired lateinit var logic: OntologyLogic
 
+  @RequestMapping("reload", method = arrayOf(RequestMethod.GET))
+  @ResponseBody
+  fun reload() = logic.reloadTreeCache()
+
   @RequestMapping("classes", method = arrayOf(RequestMethod.GET))
   @ResponseBody
   fun classes(@RequestParam(required = false, defaultValue = "0") page: Int?,

@@ -2,8 +2,11 @@ package ir.ac.iust.dml.kg.mapper.logic.store
 
 import ir.ac.iust.dml.kg.access.dao.FkgPropertyMappingDao
 import ir.ac.iust.dml.kg.access.dao.FkgTemplateMappingDao
+import ir.ac.iust.dml.kg.mapper.logic.EntityToClassLogic
+import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.store.entities.MapRule
 import ir.ac.iust.dml.kg.mapper.logic.store.entities.ValueType
+import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
 import ir.ac.iust.dml.kg.raw.utils.URIs
 import org.apache.log4j.Logger
@@ -17,10 +20,13 @@ class MigrationManager {
   @Autowired private lateinit var templateDao: FkgTemplateMappingDao
   @Autowired private lateinit var propertyDao: FkgPropertyMappingDao
   @Autowired private lateinit var holder: KSMappingHolder
+  @Autowired private lateinit var storeProvider: StoreProvider
+  @Autowired private lateinit var entityToClassLogic: EntityToClassLogic
 
   fun migrate() {
     migrateTemplateMapping()
     migratePropertyMapping()
+    entityToClassLogic.writeTree(storeProvider.getStore(StoreType.knowledgeStore))
   }
 
   fun save() = holder.writeToKS()
@@ -103,7 +109,7 @@ class MigrationManager {
       val tm = holder.getTemplateMapping(templateName)
       tm.rules!!.add(MapRule(
           predicate = URIs.typePrefixed,
-          constant = URIs.getFkgOntologyClassPrefixed(it.ontologyClass!!),
+          constant = if (it.ontologyClass == null) null else URIs.getFkgOntologyClassPrefixed(it.ontologyClass!!),
           type = ValueType.Resource
       ))
       tm.weight = it.tupleCount!!.toDouble()

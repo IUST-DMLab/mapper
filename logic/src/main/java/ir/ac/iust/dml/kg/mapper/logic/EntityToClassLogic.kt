@@ -3,6 +3,8 @@ package ir.ac.iust.dml.kg.mapper.logic
 import ir.ac.iust.dml.kg.access.dao.FkgClassDao
 import ir.ac.iust.dml.kg.access.dao.FkgEntityClassesDao
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
+import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
+import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgOntologyClass
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
@@ -20,20 +22,20 @@ class EntityToClassLogic {
   @Autowired lateinit var storeProvider: StoreProvider
   private val logger = Logger.getLogger(this.javaClass)!!
   private val treeCache = mutableMapOf<String, String>()
-  private val childrenCache = mutableMapOf<String, List<String>>()
+//  private val childrenCache = mutableMapOf<String, List<String>>()
 
-  fun getTree(ontologyClass: String) = treeCache[ontologyClass]
+//  fun getTree(ontologyClass: String) = treeCache[ontologyClass]
 
-  fun getChildren(ontologyClass: String) = childrenCache[ontologyClass]
+//  fun getChildren(ontologyClass: String) = childrenCache[ontologyClass]
 
-  fun reloadTreeCache() {
+  private fun reloadTreeCache() {
     treeCache.clear()
     val allClasses = classDao.search(page = 0, pageSize = 0)
     allClasses.data.forEach { ontologyClass ->
       treeCache[ontologyClass.name!!] = getTree(ontologyClass)!!
-      val children = mutableListOf<String>()
-      fillChildren(ontologyClass, children)
-      childrenCache[ontologyClass.name!!] = children
+//      val children = mutableListOf<String>()
+//      fillChildren(ontologyClass, children)
+//      childrenCache[ontologyClass.name!!] = children
     }
   }
 
@@ -41,6 +43,7 @@ class EntityToClassLogic {
 
   val otherLabelsSplitRegex = Regex("(\\s*[,،]\\s*)+")
   fun writeTree(dao: FkgTripleDao) {
+    reloadTreeCache()
     logger.info("writing tree started.")
     treeCache.forEach { key, value ->
       val splits = value.split("/")
@@ -59,30 +62,34 @@ class EntityToClassLogic {
       val subjectUrl = URIs.getFkgOntologyClassUri(it.name!!)
       dao.save(FkgTriple(subject = subjectUrl,
           predicate = URIs.type, objekt = URIs.typeOfAllClasses), null)
-      dao.save(FkgTriple(subject = subjectUrl,
-          predicate = URIs.comment, objekt = it.comment), null)
+      if (it.comment != null && it.comment!!.isNotBlank())
+        dao.save(FkgTriple(subject = subjectUrl,
+            predicate = URIs.comment, objekt = it.comment), null)
       dao.save(FkgTriple(subject = subjectUrl,
           predicate = URIs.label, objekt = it.faLabel, language = "fa"), null)
       dao.save(FkgTriple(subject = subjectUrl,
           predicate = URIs.label, objekt = it.enLabel, language = "en"), null)
       if (it.faOtherLabels != null)
-        if (!it.faOtherLabels!!.trim().isEmpty())
+        if (it.faOtherLabels!!.isNotBlank())
           it.faOtherLabels!!.split(otherLabelsSplitRegex).filter { it.trim().isNotEmpty() }.forEach {
             dao.save(FkgTriple(subject = subjectUrl,
                 predicate = URIs.variantLabel, objekt = it, language = "fa"), null)
           }
     }
 
+    (dao as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
+    (dao as? VirtuosoFkgTripleDaoImpl)?.close()
+
     logger.info("writing tree ended.")
   }
 
-  private fun fillChildren(ontologyClass: FkgOntologyClass, list: MutableList<String> = mutableListOf()) {
-    val children = classDao.getChildren(ontologyClass.id!!)
-    children.forEach {
-      list.add(it.name!!)
-      fillChildren(it, list)
-    }
-  }
+//  private fun fillChildren(ontologyClass: FkgOntologyClass, list: MutableList<String> = mutableListOf()) {
+//    val children = classDao.getChildren(ontologyClass.id!!)
+//    children.forEach {
+//      list.add(it.name!!)
+//      fillChildren(it, list)
+//    }
+//  }
 
   private fun getTree(ontologyClass: FkgOntologyClass): String? {
     var oc: FkgOntologyClass? = ontologyClass

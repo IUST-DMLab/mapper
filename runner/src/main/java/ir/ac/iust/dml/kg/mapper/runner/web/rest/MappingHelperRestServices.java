@@ -1,6 +1,9 @@
 package ir.ac.iust.dml.kg.mapper.runner.web.rest;
 
-import ir.ac.iust.dml.kg.mapper.logic.*;
+import ir.ac.iust.dml.kg.mapper.logic.MappingLoader;
+import ir.ac.iust.dml.kg.mapper.logic.PropertyMappingLogic;
+import ir.ac.iust.dml.kg.mapper.logic.RedirectLogic;
+import ir.ac.iust.dml.kg.mapper.logic.StatsLogic;
 import ir.ac.iust.dml.kg.mapper.logic.export.ExportData;
 import ir.ac.iust.dml.kg.mapper.logic.export.TemplateToOntologyExporter;
 import ir.ac.iust.dml.kg.mapper.logic.store.*;
@@ -21,8 +24,6 @@ public class MappingHelperRestServices {
   private StatsLogic statsLogic;
   @Autowired
   private TemplateToOntologyExporter templateToOntologyExporter;
-  @Autowired
-  private EntityToClassLogic entityToClassLogic;
   @Autowired
   private PropertyMappingLogic propertyMappingLogic;
   @Autowired
@@ -163,7 +164,6 @@ public class MappingHelperRestServices {
                                  @RequestParam(defaultValue = "false") boolean entitiesWithoutInfoBox) throws Exception {
     migrationManager.migrate();
     migrationManager.save();
-    entityToClassLogic.writeTree(type);
     if (entitiesWithoutInfoBox) kgTripleImporter.writeEntitiesWithoutInfoBox(type);
     kgTripleImporter.writeEntitiesWithInfoBox(type);
     kgTripleImporter.writeTriples(type, true);
@@ -174,11 +174,6 @@ public class MappingHelperRestServices {
     redirectLogic.write(type);
     ambiguityLogic.write(type);
     predicateImporter.writePredicates(type, true);
-  }
-
-  @RequestMapping("/writeTree")
-  public void writeTree(@RequestParam(defaultValue = "none") StoreType type) {
-    entityToClassLogic.writeTree(type);
   }
 
   public boolean raw(@NotNull StoreType type) {

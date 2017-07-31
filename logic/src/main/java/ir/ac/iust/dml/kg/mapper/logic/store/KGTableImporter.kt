@@ -2,7 +2,6 @@ package ir.ac.iust.dml.kg.mapper.logic.store
 
 import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
-import ir.ac.iust.dml.kg.mapper.logic.EntityToClassLogic
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.data.InfoBoxAndCount
 import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
@@ -20,7 +19,7 @@ import java.nio.file.Path
 @Service
 class KGTableImporter {
   private val logger = Logger.getLogger(this.javaClass)!!
-  @Autowired private lateinit var entityToClassLogic: EntityToClassLogic
+  @Autowired private lateinit var ontologyLogic: OntologyLogic
   @Autowired private lateinit var entityClassImporter: EntityClassImporter
   @Autowired private lateinit var storeProvider: StoreProvider
 
@@ -60,7 +59,7 @@ class KGTableImporter {
         "نام خانوادگی" to "foaf:familyName"
     )
 
-    entityToClassLogic.reloadTreeCache()
+    ontologyLogic.reloadTreeCache()
 
     var tripleNumber = 0
     result.forEachIndexed { index, p ->
@@ -72,7 +71,7 @@ class KGTableImporter {
             val subject = URIs.getFkgResourceUri(triple.subject!!)
             val ontologyClass = triple.ontologyClass!!
 
-            val newClassTree = entityToClassLogic.getTree(ontologyClass)!!
+            val newClassTree = ontologyLogic.getTree(ontologyClass)!!
             entityTree.getOrPut(subject, { mutableSetOf() }).add(newClassTree)
             val predicate =
                 if (propertyMap.containsKey(triple.predicate)) URIs.prefixedToUri(propertyMap[triple.predicate!!])!!

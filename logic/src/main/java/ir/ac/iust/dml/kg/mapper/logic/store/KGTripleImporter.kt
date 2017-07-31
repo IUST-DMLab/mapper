@@ -6,7 +6,6 @@ import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
-import ir.ac.iust.dml.kg.mapper.logic.EntityToClassLogic
 import ir.ac.iust.dml.kg.mapper.logic.PathUtils
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.data.InfoBoxAndCount
@@ -30,7 +29,7 @@ class KGTripleImporter {
 
   private val logger = Logger.getLogger(this.javaClass)!!
   @Autowired private lateinit var holder: KSMappingHolder
-  @Autowired private lateinit var entityToClassLogic: EntityToClassLogic
+  @Autowired private lateinit var ontologyLogic: OntologyLogic
   @Autowired private lateinit var storeProvider: StoreProvider
   @Autowired private lateinit var entityClassImporter: EntityClassImporter
   @Autowired private lateinit var notMappedPropertyHandler: NotMappedPropertyHandler
@@ -147,7 +146,7 @@ class KGTripleImporter {
         infoboxes.forEach {
           val normalizedTemplate = it.infoBox.toLowerCase().replace('_', ' ')
           val templateMapping = holder.getTemplateMapping(normalizedTemplate)
-          var tree = entityToClassLogic.getTree(templateMapping.ontologyClass)
+          var tree = ontologyLogic.getTree(templateMapping.ontologyClass)
           if (tree == null) tree = "Thing"
           it.tree = tree.split("/")
           tress.add(it)
@@ -182,13 +181,13 @@ class KGTripleImporter {
 
     val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
     val startTime = System.currentTimeMillis()
-    entityToClassLogic.reloadTreeCache()
+    ontologyLogic.reloadTreeCache()
 
     val classMaps = mutableMapOf<String, MapRule>()
     holder.all().forEach { templateMapping ->
       templateMapping.properties!!.forEach { property, mapping ->
         if (mapping.rules.size == 1)
-          entityToClassLogic.getChildren(templateMapping.ontologyClass)?.forEach {
+          ontologyLogic.getChildren(templateMapping.ontologyClass)?.forEach {
             classMaps[it + "~" + property] = mapping.rules.first()
           }
       }

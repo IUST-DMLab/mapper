@@ -2,7 +2,6 @@ package ir.ac.iust.dml.kg.mapper.logic.store
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
-import ir.ac.iust.dml.kg.mapper.logic.EntityToClassLogic
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.URIs
@@ -14,7 +13,7 @@ import org.springframework.stereotype.Service
 class ManualInsertLogic {
   private val logger = Logger.getLogger(this.javaClass)!!
   @Autowired lateinit var provider: StoreProvider
-  @Autowired private lateinit var classLogic: EntityToClassLogic
+  @Autowired private lateinit var ontologyLogic: OntologyLogic
   private var initialized = false
   private lateinit var virtuosoDao: FkgTripleDao
   private lateinit var kgDao: FkgTripleDao
@@ -23,7 +22,7 @@ class ManualInsertLogic {
     initialized = true
     virtuosoDao = provider.getStore(StoreType.virtuoso)
     kgDao = provider.getStore(StoreType.knowledgeStore)
-    classLogic.reloadTreeCache()
+    ontologyLogic.reloadTreeCache()
   }
 
   fun saveResource(resourceUrl: String, ontologyClass: String?, label: String?,
@@ -41,7 +40,7 @@ class ManualInsertLogic {
       checkAmbiguity(url, variantLabel)
     }
     if (ontologyClass != null) {
-      val tree = classLogic.getTree(ontologyClass)
+      val tree = ontologyLogic.getTree(ontologyClass)
       tree?.split("/")?.forEach { saveTriple(url, URIs.type, URIs.convertAnyUrisToFkgOntologyUri(it), permanent) }
     }
     return true

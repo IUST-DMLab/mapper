@@ -18,6 +18,8 @@ class OntologyLogic {
 
   val tripleApi: V1triplesApi
   val expertApi: V1expertsApi
+  private val treeCache = mutableMapOf<String, String>()
+  private val childrenCache = mutableMapOf<String, List<String>>()
 
   init {
     val client = ApiClient()
@@ -27,9 +29,45 @@ class OntologyLogic {
     expertApi = V1expertsApi(client)
   }
 
+  fun reloadTreeCache() {
+    var page = 0
+    do {
+      val classes = getType(null, URIs.typeOfAllClasses, page++, 100)
+      classes.data.forEach { classUrl ->
+        val name = classUrl.substringAfterLast("/")
+        val parents = mutableListOf<String>()
+        fillParents(classUrl, parents)
+        treeCache[name] = parents.map { it.substringAfterLast("/") }.joinToString("/")
+        val children = mutableListOf<String>()
+        fillChildren(classUrl, children)
+        childrenCache[name] = children.map { it.substringAfterLast("/") }
+      }
+    } while (classes.data.isNotEmpty())
+  }
+
+  private fun fillParents(classUrl: String, parents: MutableList<String>) {
+    val pages = tripleApi.search1(null, false, classUrl, false,
+        URIs.subClassOf, false, null, false, 0, 1)
+    if (pages.data.isNotEmpty()) {
+      val parentClassUrl = pages.data.first().`object`.value
+      parents.add(parentClassUrl)
+      fillParents(parentClassUrl, parents)
+    }
+  }
+
+  private fun fillChildren(classUrl: String, children: MutableList<String>) {
+    val pages = tripleApi.search1(null, false, null, false,
+        URIs.subClassOf, false, classUrl, false, 0, 10000)
+    children.addAll(pages.data.map { it.subject })
+  }
+
+  fun getTree(ontologyClass: String) = treeCache[ontologyClass]
+
+  fun getChildren(ontologyClass: String) = childrenCache[ontologyClass]
+
   private fun search(like: Boolean, subject: String?, predicate: String?, `object`: String?, page: Int, pageSize: Int?) =
-      tripleApi.search1(null, false, subject, false, predicate,
-          false, `object`, false, page, pageSize)
+      tripleApi.search1(null, like, subject, like, predicate,
+          like, `object`, like, page, pageSize)
 
   private fun getType(keyword: String?, type: String, page: Int, pageSize: Int): PagedData<String> {
     val result = search(true, keyword, URIs.type, type, page, pageSize)

@@ -1,6 +1,5 @@
 package ir.ac.iust.dml.kg.mapper.logic.store
 
-import ir.ac.iust.dml.kg.mapper.logic.EntityToClassLogic
 import ir.ac.iust.dml.kg.mapper.logic.store.entities.PropertyMapping
 import ir.ac.iust.dml.kg.mapper.logic.store.entities.TemplateMapping
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
@@ -17,7 +16,7 @@ class KSMappingHolder {
 
   private val logger = Logger.getLogger(this.javaClass)!!
   private val maps = mutableMapOf<String, TemplateMapping>()
-  @Autowired lateinit var ontologyLogic: EntityToClassLogic
+  @Autowired lateinit var ontologyLogic: OntologyLogic
 
   fun isValidTemplate(template: String) = maps.containsKey(template)
 

@@ -27,7 +27,6 @@ class Commander {
         "createStatsFile" -> services.createStatsFile() // deprecated
         "writeStats" -> services.writeStats() // deprecated
         "generateMapping" -> services.generateMapping() // deprecated
-        "tree" -> services.writeTree(StoreType.valueOf(arg!!)) //writes ontology tree form mysql. it will be deprecated
         "triples" -> services.triples(StoreType.valueOf(arg!!)) //writes wikipedia triples
         "abstracts" -> services.abstracts(StoreType.valueOf(arg!!)) // writes wikipedia abstracts
         "withoutInfoBox" -> services.withoutInfoBox(StoreType.valueOf(arg!!)) // write wikipedia entities without info boxes
@@ -44,6 +43,7 @@ class Commander {
         "completeDumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(arg!!), true) // all needed tasks in one place
       }
     } catch (th: Throwable) {
+      th.printStackTrace()
       logger.error(th)
     }
     logger.info("running command $command ended at ${Date()}. Bye bye!")
