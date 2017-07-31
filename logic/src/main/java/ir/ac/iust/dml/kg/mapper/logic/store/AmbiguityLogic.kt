@@ -11,7 +11,7 @@ import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
-import ir.ac.iust.dml.kg.raw.utils.PrefixService
+import ir.ac.iust.dml.kg.raw.utils.URIs
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -23,53 +23,51 @@ import java.nio.file.Files
 @Service
 class AmbiguityLogic {
 
-    val logger = Logger.getLogger(this.javaClass)!!
-    @Autowired private lateinit var tripleDao: FkgTripleDao
+  val logger = Logger.getLogger(this.javaClass)!!
+  @Autowired private lateinit var tripleDao: FkgTripleDao
 
   fun write(storeType: StoreType = StoreType.knowledgeStore) {
 
     val disambiguationFolder = ConfigReader.getPath("wiki.folder.disambiguations", "~/.pkg/data/disambiguations")
     if (!Files.exists(disambiguationFolder.parent)) Files.createDirectories(disambiguationFolder.parent)
-        if (!Files.exists(disambiguationFolder)) {
-            throw Exception("There is no file ${disambiguationFolder.toAbsolutePath()} existed.")
-        }
-
-        val store = when (storeType) {
-          StoreType.mysql -> tripleDao
-          StoreType.virtuoso -> VirtuosoFkgTripleDaoImpl()
-            else -> KnowledgeStoreFkgTripleDaoImpl()
-        }
-
-        val gson = Gson()
-
-    val maxNumberOfDisambiguation = TestUtils.getMaxTuples()
-        val DISAMBIGUATED_FROM = PrefixService.prefixToUri(PrefixService.DISAMBIGUATED_FROM_URI)
-
-        val type = object : TypeToken<List<RedirectLogic.Ambiguity>>() {}.type
-        val files = PathWalker.getPath(disambiguationFolder)
-        var i = 0
-        files.forEach {
-            try {
-                BufferedReader(InputStreamReader(FileInputStream(it.toFile()), "UTF8")).use { reader ->
-                    val map: List<RedirectLogic.Ambiguity> = gson.fromJson(reader, type)
-                    map.forEach { a ->
-                        a.field.forEach { f ->
-                            i++
-                            if (i < maxNumberOfDisambiguation) {
-                                if (i % 1000 == 0) logger.info("writing disambiguation $i: $a to $f")
-                                store.save(FkgTriple(
-                                        subject = PrefixService.getFkgResourceUrl(f),
-                                        predicate = DISAMBIGUATED_FROM,
-                                        objekt = if (a.title!!.contains("(ابهام زدایی)")) a.title!!.substringBefore("(ابهام زدایی)")
-                                        else a.title
-                                ), null, true)
-                            }
-                        }
-                    }
-                }
-            } catch (th: Throwable) {
-                logger.error(th)
-            }
-        }
+    if (!Files.exists(disambiguationFolder)) {
+      throw Exception("There is no file ${disambiguationFolder.toAbsolutePath()} existed.")
     }
+
+    val store = when (storeType) {
+      StoreType.mysql -> tripleDao
+      StoreType.virtuoso -> VirtuosoFkgTripleDaoImpl()
+      else -> KnowledgeStoreFkgTripleDaoImpl()
+    }
+
+    val gson = Gson()
+    val maxNumberOfDisambiguation = TestUtils.getMaxTuples()
+    val type = object : TypeToken<List<RedirectLogic.Ambiguity>>() {}.type
+    val files = PathWalker.getPath(disambiguationFolder)
+    var i = 0
+    files.forEach {
+      try {
+        BufferedReader(InputStreamReader(FileInputStream(it.toFile()), "UTF8")).use { reader ->
+          val map: List<RedirectLogic.Ambiguity> = gson.fromJson(reader, type)
+          map.forEach { a ->
+            a.field.forEach { f ->
+              i++
+              if (i < maxNumberOfDisambiguation) {
+                if (i % 1000 == 0) logger.info("writing disambiguation $i: $a to $f")
+                store.save(FkgTriple(
+                    subject = URIs.getFkgResourceUri(f),
+                    predicate = URIs.disambiguatedFrom,
+                    objekt = if (a.title!!.contains("(ابهام زدایی)"))
+                      a.title!!.substringBefore("(ابهام زدایی)")
+                    else a.title
+                ), null, true)
+              }
+            }
+          }
+        }
+      } catch (th: Throwable) {
+        logger.error(th)
+      }
+    }
+  }
 }

@@ -6,32 +6,32 @@ import javax.persistence.*
 
 @Entity
 @org.hibernate.annotations.Table(appliesTo = "fkg_triple",
-        indexes = arrayOf(Index(
-                name = "t_source_predicate_object",
-                columnNames = arrayOf("subject", "predicate", "object")
-        )))
+    indexes = arrayOf(Index(
+        name = "t_source_predicate_object",
+        columnNames = arrayOf("subject", "predicate", "object")
+    )))
 @Table(name = "fkg_triple")
 class FkgTriple(
     @Id
-        @Column(name = "id")
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        var id: Long? = null,
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Long? = null,
     @Column(name = "source")
-        var source: String? = null,
+    var source: String? = null,
     @Column(name = "subject")
-        var subject: String? = null,
+    var subject: String? = null,
     @Column(name = "predicate")
-        var predicate: String? = null,
+    var predicate: String? = null,
     @Column(name = "object")
-        var objekt: String? = null,
+    var objekt: String? = null,
     @Column(name = "template_type")
-        var templateName: String? = null,
+    var templateName: String? = null,
     @Column(name = "raw_property")
-        var rawProperty: String? = null,
+    var rawProperty: String? = null,
     @Index(name = "t_status")
-        @Enumerated
-        @Column(name = "status")
-        var status: MappingStatus? = null,
+    @Enumerated
+    @Column(name = "status")
+    var status: MappingStatus? = null,
     @Index(name = "t_module")
     @Column(name = "module")
     var module: String? = null,
@@ -46,5 +46,5 @@ class FkgTriple(
     @Column(name = "accuracy")
     var accuracy: Double? = null,
     @Column(name = "language")
-        var language: String? = null
+    var language: String? = null
 )

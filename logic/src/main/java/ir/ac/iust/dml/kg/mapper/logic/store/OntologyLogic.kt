@@ -5,7 +5,7 @@ import ir.ac.iust.dml.kg.mapper.logic.store.data.OntologyPropertyData
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
 import ir.ac.iust.dml.kg.raw.utils.PagedData
-import ir.ac.iust.dml.kg.raw.utils.PrefixService
+import ir.ac.iust.dml.kg.raw.utils.URIs
 import ir.ac.iust.dml.kg.services.client.ApiClient
 import ir.ac.iust.dml.kg.services.client.swagger.V1expertsApi
 import ir.ac.iust.dml.kg.services.client.swagger.V1triplesApi
@@ -18,18 +18,6 @@ class OntologyLogic {
 
   val tripleApi: V1triplesApi
   val expertApi: V1expertsApi
-  val rdfType = PrefixService.prefixToUri(PrefixService.TYPE_URL)!!
-  val rdfsLabel = PrefixService.prefixToUri(PrefixService.LABEL_URL)!!
-  val fkgVariantLabel = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)!!
-  val owlClass = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_CLASSES)!!
-  val owlObjectProperty = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_PROPERTIES)!!
-  val rdfsDomain = PrefixService.prefixToUri(PrefixService.PROPERTY_DOMAIN_URL)!!
-  val rdfsRange = PrefixService.prefixToUri(PrefixService.PROPERTY_RANGE_URL)!!
-  val owlEqClass = PrefixService.prefixToUri(PrefixService.EQUIVALENT_CLASS_URL)!!
-  val owlEqProperty = PrefixService.prefixToUri(PrefixService.EQUIVALENT_PROPERTY_URL)!!
-  val rdfsSubClassOf = PrefixService.prefixToUri(PrefixService.SUB_CLASS_OF)!!
-  val rdfsComment = PrefixService.prefixToUri(PrefixService.COMMENT_URL)!!
-  val owlDisjointWith = PrefixService.prefixToUri(PrefixService.DISJOINT_WITH_URL)!!
 
   init {
     val client = ApiClient()
@@ -44,7 +32,7 @@ class OntologyLogic {
           false, `object`, false, page, pageSize)
 
   private fun getType(keyword: String?, type: String, page: Int, pageSize: Int): PagedData<String> {
-    val result = search(true, keyword, rdfType, type, page, pageSize)
+    val result = search(true, keyword, URIs.type, type, page, pageSize)
     val data = result.data.map { it.subject }.toMutableList()
     return PagedData<String>(data, page, pageSize, result.pageCount, result.totalSize)
   }
@@ -93,13 +81,13 @@ class OntologyLogic {
     return true
   }
 
-  fun classes(page: Int, pageSize: Int, keyword: String?) = getType(keyword, owlClass, page, pageSize)
+  fun classes(page: Int, pageSize: Int, keyword: String?) = getType(keyword, URIs.typeOfAllClasses, page, pageSize)
 
   data class OntologyNode(var url: String, var label: String? = null,
                           var children: MutableList<OntologyNode> = mutableListOf<OntologyNode>())
 
   fun classTree(rootUrl: String?, maxDepth: Int? = null, label: Boolean = false): OntologyNode {
-    val root = OntologyNode(rootUrl ?: PrefixService.getFkgOntologyClassUrl("Thing"))
+    val root = OntologyNode(rootUrl ?: URIs.getFkgOntologyClassUri("Thing"))
     fillNode(root, label, 0, maxDepth ?: 100)
     return root
   }
@@ -107,7 +95,7 @@ class OntologyLogic {
   fun fillNode(node: OntologyNode, label: Boolean, depth: Int, maxDepth: Int?) {
     if (label) node.label = getLabel(node.url)
     if (maxDepth != null && depth == maxDepth) return
-    val children = search(false, null, rdfsSubClassOf, node.url, 0, null).data
+    val children = search(false, null, URIs.subClassOf, node.url, 0, null).data
     children.forEach {
       val child = OntologyNode(it.subject)
       fillNode(child, label, depth + 1, maxDepth)
@@ -117,32 +105,33 @@ class OntologyLogic {
 
   fun getLabel(url: String): String? {
     try {
-      return search(false, url, rdfsLabel, null, 0, 1).data.firstOrNull()?.`object`?.value
+      return search(false, url, URIs.label, null, 0, 1).data.firstOrNull()?.`object`?.value
     } catch (th: Throwable) {
       return null
     }
   }
 
-  fun properties(page: Int, pageSize: Int, keyword: String?) = getType(keyword, owlObjectProperty, page, pageSize)
+  fun properties(page: Int, pageSize: Int, keyword: String?)
+      = getType(keyword, URIs.typeOfAllProperties, page, pageSize)
 
   fun classData(classUrl: String): OntologyClassData {
     val classData = OntologyClassData(url = classUrl)
-    val labels = search(false, classUrl, rdfsLabel, null, 0, 10)
+    val labels = search(false, classUrl, URIs.label, null, 0, 10)
     labels.data.forEach {
       if (it.`object`.lang == "fa") classData.faLabel = it.`object`.value
       if (it.`object`.lang == "en") classData.enLabel = it.`object`.value
     }
 
-    val comments = search(false, classUrl, rdfsComment, null, 0, 10)
+    val comments = search(false, classUrl, URIs.comment, null, 0, 10)
     comments.data.forEach {
       if (it.`object`.lang == "fa") classData.faComment = it.`object`.value
       if (it.`object`.lang == "en") classData.enComment = it.`object`.value
     }
 
-    classData.subClassOf = objectOfPredicate(classUrl, rdfsSubClassOf)
-    classData.equivalentClasses = objectsOfPredicate(classUrl, owlEqClass)
-    classData.disjointWith = objectsOfPredicate(classUrl, owlDisjointWith)
-    val properties = subjectsOfPredicate(rdfsDomain, classUrl)
+    classData.subClassOf = objectOfPredicate(classUrl, URIs.subClassOf)
+    classData.equivalentClasses = objectsOfPredicate(classUrl, URIs.equivalentClass)
+    classData.disjointWith = objectsOfPredicate(classUrl, URIs.disjointWith)
+    val properties = subjectsOfPredicate(URIs.propertyDomain, classUrl)
     properties.forEach {
       classData.properties.add(propertyData(it))
     }
@@ -152,51 +141,51 @@ class OntologyLogic {
 
   fun saveClass(data: OntologyClassData): Boolean {
     if (data.url == null) return false
-    insertAndVote(data.url, rdfType, owlClass)
-    if (data.faLabel != null) insertAndVote(data.url, rdfsLabel, data.faLabel!!)
-    if (data.enLabel != null) insertAndVote(data.url, rdfsLabel, data.enLabel!!)
-    if (data.faComment != null) insertAndVote(data.url, rdfsComment, data.faComment!!)
-    if (data.enComment != null) insertAndVote(data.url, rdfsComment, data.enComment!!)
-    if (data.subClassOf != null) insertAndVote(data.url, rdfsSubClassOf, data.subClassOf!!)
-    data.equivalentClasses.forEach { insertAndVote(data.url, owlEqClass, it) }
-    data.disjointWith.forEach { insertAndVote(data.url, owlDisjointWith, it) }
-    data.properties.forEach { insertAndVote(it.url, rdfsDomain, data.url!!) }
+    insertAndVote(data.url, URIs.type, URIs.typeOfAllClasses)
+    if (data.faLabel != null) insertAndVote(data.url, URIs.label, data.faLabel!!)
+    if (data.enLabel != null) insertAndVote(data.url, URIs.label, data.enLabel!!)
+    if (data.faComment != null) insertAndVote(data.url, URIs.comment, data.faComment!!)
+    if (data.enComment != null) insertAndVote(data.url, URIs.comment, data.enComment!!)
+    if (data.subClassOf != null) insertAndVote(data.url, URIs.subClassOf, data.subClassOf!!)
+    data.equivalentClasses.forEach { insertAndVote(data.url, URIs.equivalentClass, it) }
+    data.disjointWith.forEach { insertAndVote(data.url, URIs.disjointWith, it) }
+    data.properties.forEach { insertAndVote(it.url, URIs.propertyDomain, data.url!!) }
     return true
   }
 
   fun saveProperty(data: OntologyPropertyData): Boolean {
     if (data.url == null) return false
-    insertAndVote(data.url, rdfType, owlObjectProperty)
-    if (data.faLabel != null) insertAndVote(data.url, rdfsLabel, data.faLabel!!)
-    if (data.enLabel != null) insertAndVote(data.url, rdfsLabel, data.enLabel!!)
-    data.faVariantLabels.forEach { insertAndVote(data.url, fkgVariantLabel, it) }
-    data.enVariantLabels.forEach { insertAndVote(data.url, fkgVariantLabel, it) }
-    data.types.forEach { insertAndVote(data.url, rdfType, it) }
-    data.domains.forEach { insertAndVote(data.url, rdfsDomain, it) }
-    data.ranges.forEach { insertAndVote(data.url, rdfsRange, it) }
-    data.equivalentProperties.forEach { insertAndVote(it, owlEqProperty, data.url!!) }
+    insertAndVote(data.url, URIs.type, URIs.typeOfAllProperties)
+    if (data.faLabel != null) insertAndVote(data.url, URIs.label, data.faLabel!!)
+    if (data.enLabel != null) insertAndVote(data.url, URIs.label, data.enLabel!!)
+    data.faVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it) }
+    data.enVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it) }
+    data.types.forEach { insertAndVote(data.url, URIs.type, it) }
+    data.domains.forEach { insertAndVote(data.url, URIs.propertyDomain, it) }
+    data.ranges.forEach { insertAndVote(data.url, URIs.propertyRange, it) }
+    data.equivalentProperties.forEach { insertAndVote(it, URIs.equivalentProperty, data.url!!) }
     return true
   }
 
   fun propertyData(propertyUrl: String): OntologyPropertyData {
     val propertyData = OntologyPropertyData(url = propertyUrl)
 
-    val labels = search(false, propertyUrl, rdfsLabel, null, 0, 10)
+    val labels = search(false, propertyUrl, URIs.label, null, 0, 10)
     labels.data.forEach {
       if (it.`object`.lang == "fa") propertyData.faLabel = it.`object`.value
       if (it.`object`.lang == "en") propertyData.enLabel = it.`object`.value
     }
 
-    val variantLabels = search(false, propertyUrl, fkgVariantLabel, null, 0, 10)
+    val variantLabels = search(false, propertyUrl, URIs.variantLabel, null, 0, 10)
     variantLabels.data.forEach {
       if (it.`object`.lang == "fa") propertyData.faVariantLabels.add(it.`object`.value)
       if (it.`object`.lang == "en") propertyData.enVariantLabels.add(it.`object`.value)
     }
 
-    propertyData.types.addAll(objectsOfPredicate(propertyUrl, rdfType))
-    propertyData.domains.addAll(objectsOfPredicate(propertyUrl, rdfsDomain))
-    propertyData.ranges.addAll(objectsOfPredicate(propertyUrl, rdfsRange))
-    propertyData.equivalentProperties.addAll(objectsOfPredicate(propertyUrl, owlEqProperty))
+    propertyData.types.addAll(objectsOfPredicate(propertyUrl, URIs.type))
+    propertyData.domains.addAll(objectsOfPredicate(propertyUrl, URIs.propertyDomain))
+    propertyData.ranges.addAll(objectsOfPredicate(propertyUrl, URIs.propertyRange))
+    propertyData.equivalentProperties.addAll(objectsOfPredicate(propertyUrl, URIs.equivalentProperty))
 
     return propertyData
   }

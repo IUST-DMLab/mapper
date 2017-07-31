@@ -46,7 +46,7 @@ open class FkgTripleStatisticsDaoImpl : FkgTripleStatisticsDao {
     val session = this.sessionFactory.openSession()
     val criteria = session.createCriteria(FkgTripleStatistics::class.java)
     criteria.add(Restrictions.eq("property", property))
-     criteria.add(Restrictions.eq("templateName", templateType))
+    criteria.add(Restrictions.eq("templateName", templateType))
     criteria.add(Restrictions.eq("countType", TripleStatisticsType.typedProperty))
     val triple = criteria.uniqueResult() as FkgTripleStatistics?
     session.close()
@@ -57,7 +57,7 @@ open class FkgTripleStatisticsDaoImpl : FkgTripleStatisticsDao {
     val session = this.sessionFactory.openSession()
     val criteria = session.createCriteria(FkgTripleStatistics::class.java)
     criteria.add(Restrictions.eq("entity", entity))
-     criteria.add(Restrictions.eq("templateName", templateType))
+    criteria.add(Restrictions.eq("templateName", templateType))
     criteria.add(Restrictions.eq("countType", TripleStatisticsType.typedEntity))
     val triple = criteria.uniqueResult() as FkgTripleStatistics?
     session.close()
@@ -67,7 +67,7 @@ open class FkgTripleStatisticsDaoImpl : FkgTripleStatisticsDao {
   override fun readType(templateType: String): FkgTripleStatistics? {
     val session = this.sessionFactory.openSession()
     val criteria = session.createCriteria(FkgTripleStatistics::class.java)
-     criteria.add(Restrictions.eq("templateName", templateType))
+    criteria.add(Restrictions.eq("templateName", templateType))
     criteria.add(Restrictions.eq("countType", TripleStatisticsType.type))
     val triple = criteria.uniqueResult() as FkgTripleStatistics?
     session.close()

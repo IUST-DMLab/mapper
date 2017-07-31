@@ -9,7 +9,7 @@ import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
-import ir.ac.iust.dml.kg.raw.utils.PrefixService
+import ir.ac.iust.dml.kg.raw.utils.URIs
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TableJsonFileReader
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -69,14 +69,14 @@ class KGTableImporter {
           val triple = reader.next()
           try {
             if (triple.subject == null || triple.objekt == null) continue
-            val subject = PrefixService.getFkgResourceUrl(triple.subject!!)
+            val subject = URIs.getFkgResourceUri(triple.subject!!)
             val ontologyClass = triple.ontologyClass!!
 
             val newClassTree = entityToClassLogic.getTree(ontologyClass)!!
             entityTree.getOrPut(subject, { mutableSetOf() }).add(newClassTree)
             val predicate =
-                if (propertyMap.containsKey(triple.predicate)) PrefixService.prefixToUri(propertyMap[triple.predicate!!])!!
-                else PrefixService.convertFkgProperty(triple.predicate!!)!!
+                if (propertyMap.containsKey(triple.predicate)) URIs.prefixedToUri(propertyMap[triple.predicate!!])!!
+                else URIs.convertToNotMappedFkgPropertyUri(triple.predicate!!)!!
 
             store.save(triple.source!!, subject, triple.objekt!!, predicate)
           } catch (e: Throwable) {

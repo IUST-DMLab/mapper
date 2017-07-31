@@ -30,7 +30,7 @@ class FileFkgTripleDaoImpl(val path: Path, val flushSize: Int = 1000) : FkgTripl
         val p = path.resolve("${fileIndex / 100}").resolve("$fileIndex.json")
         if (!Files.exists(p.parent)) Files.createDirectories(p.parent)
         gson.toJson(notFlushedTriples, BufferedWriter(OutputStreamWriter(
-                FileOutputStream(p.toFile()), "UTF-8")))
+            FileOutputStream(p.toFile()), "UTF-8")))
         notFlushedTriples.clear()
         fileIndex++
       }

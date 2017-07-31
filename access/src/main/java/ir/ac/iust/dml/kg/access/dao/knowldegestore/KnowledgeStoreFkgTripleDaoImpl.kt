@@ -7,7 +7,7 @@ import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
 import ir.ac.iust.dml.kg.raw.utils.PagedData
-import ir.ac.iust.dml.kg.raw.utils.PrefixService
+import ir.ac.iust.dml.kg.raw.utils.URIs
 import ir.ac.iust.dml.kg.services.client.ApiClient
 import ir.ac.iust.dml.kg.services.client.swagger.V1triplesApi
 import ir.ac.iust.dml.kg.services.client.swagger.model.TripleData
@@ -61,20 +61,20 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
     data.module = t.module ?: "wiki"
     data.urls = Collections.singletonList(t.source)
     data.subject = t.subject
-    data.predicate = if (!t.predicate!!.contains("://")) PrefixService.prefixToUri(t.predicate) else t.predicate
+    data.predicate = if (!t.predicate!!.contains("://")) URIs.prefixedToUri(t.predicate) else t.predicate
     data.precession = t.accuracy
-    if (!PrefixService.isUrlFast(t.predicate)) {
+    if (!URIs.isHttpUriFast(t.predicate)) {
       logger.error("wrong subject format: " + data.predicate + ": " + t.predicate)
       return
     }
-    if (!PrefixService.isUrlFast(t.subject)) {
+    if (!URIs.isHttpUriFast(t.subject)) {
       logger.error("wrong subject format: " + data.subject + ": " + t.subject)
       return
     }
 
     val objectData = TypedValueData()
     objectData.type =
-        if (PrefixService.isUrlFast(t.objekt))
+        if (URIs.isHttpUriFast(t.objekt))
           TypedValueData.TypeEnum.RESOURCE
         else TypedValueData.TypeEnum.STRING
 
@@ -149,7 +149,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
         false, objekt, false, null, null)
     result.data.forEach {
       list.add(FkgTriple(source = it.sources.firstOrNull()?.urls?.firstOrNull(),
-              subject = it.subject, predicate = it.predicate, objekt = it.`object`?.value))
+          subject = it.subject, predicate = it.predicate, objekt = it.`object`?.value))
     }
     return list
   }

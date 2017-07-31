@@ -5,7 +5,6 @@ import ir.ac.iust.dml.kg.mapper.logic.export.ExportData;
 import ir.ac.iust.dml.kg.mapper.logic.export.TemplateToOntologyExporter;
 import ir.ac.iust.dml.kg.mapper.logic.store.*;
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType;
-import ir.ac.iust.dml.kg.raw.utils.PrefixService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,12 +55,6 @@ public class MappingHelperRestServices {
   public String ksMapLoad() throws Exception {
     ksMappingHolder.loadFromKS();
     return "Loaded!";
-  }
-
-  @RequestMapping("/prefixes")
-  public String prefixes() throws Exception {
-    PrefixService.INSTANCE.reload();
-    return "Reloaded!";
   }
 
   @RequestMapping("/load")

@@ -17,27 +17,27 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
 @EnableSwagger2
 @EnableWebMvc
 open class SwaggerConfig : WebMvcConfigurerAdapter() {
-   @Bean
-   open fun api(): Docket {
-      return Docket(DocumentationType.SWAGGER_2).select().apis(RequestHandlerSelectors.any())
-          .paths(PathSelectors.regex(".*/rest/v\\d+/.*"))
-            .build().apiInfo(apiInfo())
-   }
+  @Bean
+  open fun api(): Docket {
+    return Docket(DocumentationType.SWAGGER_2).select().apis(RequestHandlerSelectors.any())
+        .paths(PathSelectors.regex(".*/rest/v\\d+/.*"))
+        .build().apiInfo(apiInfo())
+  }
 
-   private fun apiInfo(): ApiInfo {
-      val contact = Contact("دانشگاه علم و صنعت ایران",
-            "dml.iust.ac.ir", "majid.asgari@gmail.com")
-      val apiInfo = ApiInfo("سرور نگاشت",
-            "منتشر شده در ۱۳۹۶",
-            "0.1.0", null, contact, null, null)
-      return apiInfo
-   }
+  private fun apiInfo(): ApiInfo {
+    val contact = Contact("دانشگاه علم و صنعت ایران",
+        "dml.iust.ac.ir", "majid.asgari@gmail.com")
+    val apiInfo = ApiInfo("سرور نگاشت",
+        "منتشر شده در ۱۳۹۶",
+        "0.1.0", null, contact, null, null)
+    return apiInfo
+  }
 
-   override fun addResourceHandlers(registry: ResourceHandlerRegistry?) {
-      registry!!.addResourceHandler("swagger-ui.html")
-            .addResourceLocations("classpath:/META-INF/resources/")
+  override fun addResourceHandlers(registry: ResourceHandlerRegistry?) {
+    registry!!.addResourceHandler("swagger-ui.html")
+        .addResourceLocations("classpath:/META-INF/resources/")
 
-      registry.addResourceHandler("/webjars/**")
-            .addResourceLocations("classpath:/META-INF/resources/webjars/")
-   }
+    registry.addResourceHandler("/webjars/**")
+        .addResourceLocations("classpath:/META-INF/resources/webjars/")
+  }
 }

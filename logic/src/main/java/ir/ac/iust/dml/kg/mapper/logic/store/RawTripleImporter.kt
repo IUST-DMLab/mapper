@@ -9,7 +9,7 @@ import ir.ac.iust.dml.kg.mapper.logic.store.entities.MapRule
 import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
-import ir.ac.iust.dml.kg.raw.utils.PrefixService
+import ir.ac.iust.dml.kg.raw.utils.URIs
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -45,13 +45,13 @@ class RawTripleImporter {
             if (tripleNumber % 1000 == 0)
               logger.warn("triple number is $tripleNumber. $index file is $p. " +
                   "time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
-            val subject = PrefixService.getFkgResourceUrl(triple.subject)
+            val subject = URIs.getFkgResourceUri(triple.subject)
             val objekt = if (entityInfoLogic.resources.containsKey(triple.`object`))
-              PrefixService.getFkgResourceUrl(triple.`object`) else triple.`object`
+              URIs.getFkgResourceUri(triple.`object`) else triple.`object`
             val predicate: String
             if (triple.isNeedsMapping) {
               val subjectInfoBoxes = entityInfoLogic.resources[subject]
-              val defaultProperty = PrefixService.convertFkgProperty(triple.predicate)!!
+              val defaultProperty = URIs.convertToNotMappedFkgPropertyUri(triple.predicate)!!
               predicate =
                   if (subjectInfoBoxes == null) defaultProperty
                   else {

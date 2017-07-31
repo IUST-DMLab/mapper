@@ -14,7 +14,7 @@ object SqlJpaTools {
     c.setFirstResult(page * pageSize).setMaxResults(pageSize)
     val data = c.list() as MutableList<T>
     val count = c.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
-            .setProjection(Projections.rowCount()).uniqueResult() as Long
+        .setProjection(Projections.rowCount()).uniqueResult() as Long
     return PagedData(data, page, pageSize, count / pageSize.toLong(), count)
   }
 
@@ -28,8 +28,8 @@ object SqlJpaTools {
     if (orders != null) for (order in orders) c.addOrder(order)
     val data = c.list() as MutableList<T>
     val count = c.setFirstResult(0).setMaxResults(1)
-            .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
-            .setProjection(Projections.rowCount()).uniqueResult() as Long
+        .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
+        .setProjection(Projections.rowCount()).uniqueResult() as Long
     if (pageSize == 0)
       return PagedData(data, page, pageSize, 1, count)
     else

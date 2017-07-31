@@ -10,29 +10,29 @@ import java.nio.file.Files
  */
 
 fun main(args: Array<String>) {
-   val path = ConfigReader.getPath("wiki.dump.article", "~/.pkg/data/fawiki-latest-pages-articles.xml")
-   Files.createDirectories(path.parent)
-   if (!Files.exists(path)) {
-      throw Exception("There is no file ${path.toAbsolutePath()} existed.")
-   }
+  val path = ConfigReader.getPath("wiki.dump.article", "~/.pkg/data/fawiki-latest-pages-articles.xml")
+  Files.createDirectories(path.parent)
+  if (!Files.exists(path)) {
+    throw Exception("There is no file ${path.toAbsolutePath()} existed.")
+  }
 
-   var count = 0
-   val startTime = System.currentTimeMillis()
-   WikiDumpReader(path).use {
-      reader ->
-      WikiDumpWriter(path.parent.resolve("just_templates.xml")).use {
-         writer ->
-         while (reader.hasNext()) {
-            val article = reader.next()
-            if (count % 10000 == 0) println(count)
-            if (article.ns == 10
-                  && (article.title!!.startsWith("الگو:جعبه") || article.title!!.startsWith("الگو:Infobox"))
-                  && article.revision!!.text!!.contains("data1"))
-               writer.write(article)
-            count++
-         }
+  var count = 0
+  val startTime = System.currentTimeMillis()
+  WikiDumpReader(path).use {
+    reader ->
+    WikiDumpWriter(path.parent.resolve("just_templates.xml")).use {
+      writer ->
+      while (reader.hasNext()) {
+        val article = reader.next()
+        if (count % 10000 == 0) println(count)
+        if (article.ns == 10
+            && (article.title!!.startsWith("الگو:جعبه") || article.title!!.startsWith("الگو:Infobox"))
+            && article.revision!!.text!!.contains("data1"))
+          writer.write(article)
+        count++
       }
-   }
+    }
+  }
 
-   println("running time: ${(System.currentTimeMillis() - startTime) / 1000} seconds")
+  println("running time: ${(System.currentTimeMillis() - startTime) / 1000} seconds")
 }

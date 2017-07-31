@@ -5,7 +5,7 @@ import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImp
 import ir.ac.iust.dml.kg.mapper.logic.EntityToClassLogic
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
-import ir.ac.iust.dml.kg.raw.utils.PrefixService
+import ir.ac.iust.dml.kg.raw.utils.URIs
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -18,12 +18,6 @@ class ManualInsertLogic {
   private var initialized = false
   private lateinit var virtuosoDao: FkgTripleDao
   private lateinit var kgDao: FkgTripleDao
-  private val rdfType = PrefixService.prefixToUri(PrefixService.TYPE_URL)!!
-  private val rdfsLabel = PrefixService.prefixToUri(PrefixService.LABEL_URL)!!
-  private val fkgVariantLabel = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)!!
-  private val disambiguatedFrom = PrefixService.prefixToUri(PrefixService.DISAMBIGUATED_FROM_URI)!!
-  private val owlObjectProperty = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_PROPERTIES)!!
-  private val owlNamedIndividual = PrefixService.prefixToUri(PrefixService.TYPE_OF_ALL_RESOURCES)!!
 
   fun init() {
     initialized = true
@@ -32,37 +26,38 @@ class ManualInsertLogic {
     classLogic.reloadTreeCache()
   }
 
-  fun saveResource(resourceUrl: String, ontologyClass: String?, label: String?, variantLabel: String?, permanent: Boolean): Boolean {
+  fun saveResource(resourceUrl: String, ontologyClass: String?, label: String?,
+                   variantLabel: String?, permanent: Boolean): Boolean {
     if (!initialized) init()
-    val url = if (!resourceUrl.startsWith("http://")) PrefixService.getFkgResourceUrl(resourceUrl) else resourceUrl
-    saveTriple(url, rdfType, owlNamedIndividual, permanent)
+    val url = if (!resourceUrl.startsWith("http://")) URIs.getFkgResourceUri(resourceUrl) else resourceUrl
+    saveTriple(url, URIs.type, URIs.typeOfAllResources, permanent)
     if (label != null) {
-      saveTriple(url, rdfsLabel, label, permanent)
-      saveTriple(url, fkgVariantLabel, label, permanent)
+      saveTriple(url, URIs.label, label, permanent)
+      saveTriple(url, URIs.variantLabel, label, permanent)
       checkAmbiguity(url, label)
     }
     if (variantLabel != null) {
-      saveTriple(url, fkgVariantLabel, variantLabel, permanent)
+      saveTriple(url, URIs.variantLabel, variantLabel, permanent)
       checkAmbiguity(url, variantLabel)
     }
     if (ontologyClass != null) {
       val tree = classLogic.getTree(ontologyClass)
-      tree?.split("/")?.forEach { saveTriple(url, rdfType, PrefixService.convertFkgOntologyUrl(it), permanent) }
+      tree?.split("/")?.forEach { saveTriple(url, URIs.type, URIs.convertAnyUrisToFkgOntologyUri(it), permanent) }
     }
     return true
   }
 
   fun savePredicate(predicateUrl: String, label: String?, variantLabel: String?, permanent: Boolean): Boolean {
     if (!initialized) init()
-    val url = if (!predicateUrl.startsWith("http://")) PrefixService.getFkgOntologyPropertyUrl(predicateUrl) else predicateUrl
-    saveTriple(url, rdfType, owlObjectProperty, permanent)
+    val url = if (!predicateUrl.startsWith("http://")) URIs.getFkgOntologyPropertyUri(predicateUrl) else predicateUrl
+    saveTriple(url, URIs.type, URIs.typeOfAllProperties, permanent)
     if (label != null) {
-      saveTriple(url, rdfsLabel, label, permanent)
-      saveTriple(url, fkgVariantLabel, label, permanent)
+      saveTriple(url, URIs.label, label, permanent)
+      saveTriple(url, URIs.variantLabel, label, permanent)
       checkAmbiguity(url, label)
     }
     if (variantLabel != null) {
-      saveTriple(url, fkgVariantLabel, variantLabel, permanent)
+      saveTriple(url, URIs.variantLabel, variantLabel, permanent)
       checkAmbiguity(url, variantLabel)
     }
     return true
@@ -71,13 +66,13 @@ class ManualInsertLogic {
   // TODO share this piece of code with PredicateImporter
   fun checkAmbiguity(subject: String, label: String) {
     if (!initialized) init()
-    val result = kgDao.read(predicate = fkgVariantLabel, objekt = label)
+    val result = kgDao.read(predicate = URIs.variantLabel, objekt = label)
         .filter { triple -> triple.objekt == label && triple.subject != subject }
     if (result.isNotEmpty()) {
-      saveAll(source = subject, subject = subject, property = disambiguatedFrom, objeck = label)
+      saveAll(source = subject, subject = subject, property = URIs.disambiguatedFrom, objeck = label)
       result.forEach {
         saveAll(source = it.source ?: it.subject!!, subject = it.subject!!,
-            property = disambiguatedFrom, objeck = it.objekt!!)
+            property = URIs.disambiguatedFrom, objeck = it.objekt!!)
       }
     }
   }
@@ -91,7 +86,7 @@ class ManualInsertLogic {
 
   fun saveTriple(subjectUrl: String, predicateUrl: String, objectUrl: String, permanent: Boolean): Boolean {
     if (!initialized) init()
-    val sourceUrl = PrefixService.getFkgManualUrl(subjectUrl.substringAfterLast('/'))
+    val sourceUrl = URIs.getFkgManualUri(subjectUrl.substringAfterLast('/'))
     logger.info("save permanent: $permanent")
     virtuosoDao.save(sourceUrl, subjectUrl, objectUrl, predicateUrl)
     kgDao.save(sourceUrl, subjectUrl, objectUrl, predicateUrl)

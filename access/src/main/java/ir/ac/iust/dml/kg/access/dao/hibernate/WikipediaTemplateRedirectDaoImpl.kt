@@ -32,7 +32,7 @@ open class WikipediaTemplateRedirectDaoImpl : WikipediaTemplateRedirectDao {
 
   @Suppress("UNCHECKED_CAST")
   override fun read(nameFa: String?, nameEn: String?, like: Boolean):
-          MutableList<WikipediaTemplateRedirect> {
+      MutableList<WikipediaTemplateRedirect> {
     val session = this.sessionFactory.openSession()
     val criteria = session.createCriteria(WikipediaTemplateRedirect::class.java)
     if (nameFa != null)

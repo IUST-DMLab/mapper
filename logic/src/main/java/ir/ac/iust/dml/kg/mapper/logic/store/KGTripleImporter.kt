@@ -14,9 +14,9 @@ import ir.ac.iust.dml.kg.mapper.logic.store.entities.MapRule
 import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
-import ir.ac.iust.dml.kg.raw.utils.PrefixService
 import ir.ac.iust.dml.kg.raw.utils.PropertyNormaller
 import ir.ac.iust.dml.kg.raw.utils.Transformers
+import ir.ac.iust.dml.kg.raw.utils.URIs
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -48,7 +48,7 @@ class KGTripleImporter {
 
     val result = PathWalker.getPath(path, Regex("\\d+\\.json"))
     val startTime = System.currentTimeMillis()
-    val ABSTRACT_PREDICATE = PrefixService.getFkgOntologyPropertyUrl("abstract")
+    val ABSTRACT_PREDICATE = URIs.getFkgOntologyPropertyUri("abstract")
 
     var entityIndex = 0
 
@@ -59,7 +59,7 @@ class KGTripleImporter {
           revisionIdMap.forEach { entity, abstract ->
             entityIndex++
             if (entityIndex > maxNumberOfEntities) return@forEach
-            val subject = PrefixService.getFkgResourceUrl(entity)
+            val subject = URIs.getFkgResourceUri(entity)
             store.save(source = "http://fa.wikipedia.org/wiki/" + entity.replace(' ', '_'),
                 subject = subject, objeck = abstract, property = ABSTRACT_PREDICATE)
           }
@@ -215,8 +215,8 @@ class KGTripleImporter {
             val property = triple.predicate!!
             // some properties are invalid based on rdf standards
             if (property.trim().isBlank() || property.matches(invalidPropertyRegex)) continue
-            val subject = PrefixService.convertFkgResourceUrl(triple.subject!!)
-            val objekt = PrefixService.convertFkgResourceUrl(triple.objekt!!)
+            val subject = URIs.convertWikiUriToResourceUri(triple.subject!!)
+            val objekt = URIs.convertWikiUriToResourceUri(triple.objekt!!)
 
             // generate template-specific rules in first time of object
             val templateMapping = holder.getTemplateMapping(normalizedTemplate)
@@ -279,8 +279,8 @@ class KGTripleImporter {
     } else if (rule.constant != null) rule.constant
     else objeck
     this.save(FkgTriple(source = source, subject = subject,
-        predicate = PrefixService.prefixToUri(rule.predicate),
-        objekt = PrefixService.prefixToUri(value.toString())), null)
+        predicate = URIs.prefixedToUri(rule.predicate),
+        objekt = URIs.prefixedToUri(value.toString())), null)
   }
 
 }

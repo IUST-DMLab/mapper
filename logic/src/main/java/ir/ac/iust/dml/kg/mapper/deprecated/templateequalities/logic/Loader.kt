@@ -15,28 +15,28 @@ import java.nio.file.Files
 @Service
 class Loader {
 
-   @Autowired
-   lateinit var dao: WikipediaPropertyTranslationDao
-   val logger = Logger.getLogger(this.javaClass)!!
+  @Autowired
+  lateinit var dao: WikipediaPropertyTranslationDao
+  val logger = Logger.getLogger(this.javaClass)!!
 
-   @Throws(Exception::class)
-   fun load() {
-      val path = ConfigReader.getPath("wiki.dump.article", "~/.pkg/data/fawiki-latest-pages-articles.xml")
-      Files.createDirectories(path.parent)
-      if (!Files.exists(path)) {
-         throw Exception("There is no file ${path.toAbsolutePath()} existed.")
+  @Throws(Exception::class)
+  fun load() {
+    val path = ConfigReader.getPath("wiki.dump.article", "~/.pkg/data/fawiki-latest-pages-articles.xml")
+    Files.createDirectories(path.parent)
+    if (!Files.exists(path)) {
+      throw Exception("There is no file ${path.toAbsolutePath()} existed.")
+    }
+
+    InfoboxTemplateReader.read(path, object : MappingDiscoveryListener {
+      override fun discovered(article: WikiArticle, mappings: MutableMap<String, String>) {
+        val name = article.title!!.substringAfter("الگو:").trim().toLowerCase()
+        for ((key, value) in mappings) {
+          if (value.length < 20 && key.length < 20)
+            dao.save(WikipediaPropertyTranslation(templateName = name, enProperty = value, faProperty = key,
+                notTranslated = LanguageChecker.isEnglish(key)))
+        }
+        println("${article.title}: ${mappings.size} mappings")
       }
-
-      InfoboxTemplateReader.read(path, object : MappingDiscoveryListener {
-         override fun discovered(article: WikiArticle, mappings: MutableMap<String, String>) {
-            val name = article.title!!.substringAfter("الگو:").trim().toLowerCase()
-            for ((key, value) in mappings) {
-               if (value.length < 20 && key.length < 20)
-                  dao.save(WikipediaPropertyTranslation(templateName = name, enProperty = value, faProperty = key,
-                        notTranslated = LanguageChecker.isEnglish(key)))
-            }
-            println("${article.title}: ${mappings.size} mappings")
-         }
-      })
-   }
+    })
+  }
 }

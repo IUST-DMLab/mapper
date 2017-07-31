@@ -4,8 +4,8 @@ import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.raw.utils.PagedData
-import ir.ac.iust.dml.kg.raw.utils.PrefixService
 import ir.ac.iust.dml.kg.raw.utils.Transformers
+import ir.ac.iust.dml.kg.raw.utils.URIs
 
 abstract class FkgTripleDao {
 
@@ -22,8 +22,8 @@ abstract class FkgTripleDao {
 
   fun convertAndSave(source: String, subject: String, objeck: String, property: String) {
     this.save(FkgTriple(source = source, subject = subject,
-        predicate = PrefixService.convertFkgProperty(property),
-        objekt = PrefixService.prefixToUri(objeck)), null)
+        predicate = URIs.convertToNotMappedFkgPropertyUri(property),
+        objekt = URIs.prefixedToUri(objeck)), null)
   }
 
   fun save(source: String, subject: String, objeck: String, property: String) {

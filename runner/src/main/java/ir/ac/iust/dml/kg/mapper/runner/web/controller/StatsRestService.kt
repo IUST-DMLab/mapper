@@ -12,6 +12,6 @@ import org.springframework.web.bind.annotation.RestController
 @Api(tags = arrayOf("stats"), description = "جمع‌کننده آمار")
 class StatsRestService {
 
-   @Autowired lateinit var logic: StatsLogic
+  @Autowired lateinit var logic: StatsLogic
 
 }

@@ -10,7 +10,7 @@ import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
-import ir.ac.iust.dml.kg.raw.utils.PrefixService
+import ir.ac.iust.dml.kg.raw.utils.URIs
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -50,9 +50,6 @@ class RedirectLogic {
 
     val maxNumberOfRedirects = TestUtils.getMaxTuples()
 
-    val VARIANT_LABEL = PrefixService.prefixToUri(PrefixService.VARIANT_LABEL_URL)
-    val REDIRECT = PrefixService.prefixToUri(PrefixService.REDIRECTS_URI)
-
     val files = PathWalker.getPath(redirectsFolder, Regex("[01]-redirects.json"))
     var i = 0
     files.forEach {
@@ -64,13 +61,13 @@ class RedirectLogic {
             if (i < maxNumberOfRedirects) {
               if (i % 1000 == 0) logger.info("writing redirect $i: $t to $u")
               store.save(FkgTriple(
-                  subject = PrefixService.getFkgResourceUrl(u),
-                  predicate = REDIRECT,
+                  subject = URIs.getFkgResourceUri(u),
+                  predicate = URIs.redirect,
                   objekt = "http://fa.wikipedia.org/wiki/" + t.replace(' ', '_')
               ), null, true)
               store.save(FkgTriple(
-                  subject = PrefixService.getFkgResourceUrl(u),
-                  predicate = VARIANT_LABEL,
+                  subject = URIs.getFkgResourceUri(u),
+                  predicate = URIs.variantLabel,
                   objekt = t.replace('_', ' ')
               ), null, true)
             }

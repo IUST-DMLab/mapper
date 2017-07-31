@@ -38,10 +38,10 @@ open class FkgTemplateMappingDaoImpl : FkgTemplateMappingDao {
     val criteria = session.createCriteria(FkgTemplateMapping::class.java)
     if (endsWith) {
       criteria.add(Restrictions.or(
-              Restrictions.eq("templateName", "infobox $templateName"),
-              Restrictions.eq("templateName", "chembox $templateName"),
-              Restrictions.eq("templateName", "جعبه $templateName"),
-              Restrictions.eq("templateName", "جعبه اطلاعات $templateName")))
+          Restrictions.eq("templateName", "infobox $templateName"),
+          Restrictions.eq("templateName", "chembox $templateName"),
+          Restrictions.eq("templateName", "جعبه $templateName"),
+          Restrictions.eq("templateName", "جعبه اطلاعات $templateName")))
     } else criteria.add(Restrictions.eq("templateName", templateName))
     if (className != null) criteria.add(Restrictions.eq("ontologyClass", className))
     val list = criteria.list() as List<FkgTemplateMapping>
@@ -64,15 +64,15 @@ open class FkgTemplateMappingDaoImpl : FkgTemplateMappingDao {
                       after: Long?, noUpdateEpoch: Boolean?): PagedData<FkgTemplateMapping> {
     val session = this.sessionFactory.openSession()
     val c = SqlJpaTools.conditionalCriteria(
-            templateName != null && !like, Restrictions.eq("templateName", templateName),
-            templateName != null && like, Restrictions.like("templateName", "%$templateName%"),
-            className != null && !like, Restrictions.eq("ontologyClass", className),
-            className != null && like, Restrictions.like("ontologyClass", "%$className%"),
-            language != null, Restrictions.eq("language", language),
-            approved != null, Restrictions.eq("approved", approved),
-            after != null, Restrictions.gt("updateEpoch", after),
-            noUpdateEpoch != null && noUpdateEpoch, Restrictions.isNull("updateEpoch"),
-            noUpdateEpoch != null && !noUpdateEpoch, Restrictions.isNotNull("updateEpoch")
+        templateName != null && !like, Restrictions.eq("templateName", templateName),
+        templateName != null && like, Restrictions.like("templateName", "%$templateName%"),
+        className != null && !like, Restrictions.eq("ontologyClass", className),
+        className != null && like, Restrictions.like("ontologyClass", "%$className%"),
+        language != null, Restrictions.eq("language", language),
+        approved != null, Restrictions.eq("approved", approved),
+        after != null, Restrictions.gt("updateEpoch", after),
+        noUpdateEpoch != null && noUpdateEpoch, Restrictions.isNull("updateEpoch"),
+        noUpdateEpoch != null && !noUpdateEpoch, Restrictions.isNotNull("updateEpoch")
     )
     val list = SqlJpaTools.page(FkgTemplateMapping::class.java, page, pageSize, session, listOf(Order.desc("tupleCount")), *c)
     session.close()
