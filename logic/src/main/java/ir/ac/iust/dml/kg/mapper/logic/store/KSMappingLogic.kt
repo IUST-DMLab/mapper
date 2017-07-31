@@ -3,6 +3,7 @@ package ir.ac.iust.dml.kg.mapper.logic.store
 import ir.ac.iust.dml.kg.mapper.logic.data.PropertyStats
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PagedData
+import ir.ac.iust.dml.kg.raw.utils.URIs
 import ir.ac.iust.dml.kg.services.client.ApiClient
 import ir.ac.iust.dml.kg.services.client.swagger.V1mappingsApi
 import ir.ac.iust.dml.kg.services.client.swagger.model.PagingListTemplateMapping
@@ -61,10 +62,12 @@ class KSMappingLogic {
       else filtered = filtered.filter { it.template == templateName }
     }
     if (className != null) {
-      val classNameAndPrefix = if (className.startsWith("fkgo:")) className else "fkgo:" + className
+      val classNameAndPrefix =
+          if (className.contains(":")) className
+          else URIs.getFkgOntologyClassPrefixed(className)
       filtered = filtered.filter {
         it.rules.filter {
-          it.predicate == "rdf:type" && compare(classNameLike, it.constant, classNameAndPrefix)
+          it.predicate == URIs.type && compare(classNameLike, it.constant, classNameAndPrefix)
         }.isNotEmpty()
       }
     }
@@ -102,7 +105,9 @@ class KSMappingLogic {
     if (templateName != null)
       filtered = filtered.filter { it.templates.filter { compare(templateNameLike, it, templateName) }.isNotEmpty() }
     if (className != null) {
-      val fixedClassName = if (className.startsWith("fkgo:")) className else "fkgo:" + className
+      val fixedClassName =
+          if (className.contains(":")) className
+          else URIs.getFkgOntologyClassPrefixed(className)
       filtered = filtered.filter { it.classes.filter { compare(classNameLike, it, fixedClassName) }.isNotEmpty() }
     }
     if (predicateName != null)
@@ -127,7 +132,7 @@ class KSMappingLogic {
     val properties = mutableMapOf<String, PropertyStats>()
     allMapping.forEach { template ->
       val classes = mutableSetOf<String>()
-      template.rules.forEach { if (it.predicate == "rdf:type" && it.constant != null) classes.add(it.constant) }
+      template.rules.forEach { if (it.predicate == URIs.type && it.constant != null) classes.add(it.constant) }
 
       template.properties.forEach { pm ->
         val stats = properties.getOrPut(pm.property, { PropertyStats(property = pm.property) })

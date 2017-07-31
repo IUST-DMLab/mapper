@@ -5,6 +5,7 @@ import ir.ac.iust.dml.kg.access.dao.FkgTemplateMappingDao
 import ir.ac.iust.dml.kg.mapper.logic.store.entities.MapRule
 import ir.ac.iust.dml.kg.mapper.logic.store.entities.ValueType
 import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
+import ir.ac.iust.dml.kg.raw.utils.URIs
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -66,8 +67,8 @@ class MigrationManager {
       if (tm.rules!!.isEmpty()) {
         logger.info("no explicit template mapping existed for ${it.templateName} to ${it.ontologyClass}")
         tm.rules!!.add(MapRule(
-            predicate = "rdf:type",
-            constant = "fkgo:" + it.ontologyClass,
+            predicate = URIs.typePrefixed,
+            constant = URIs.getFkgOntologyClassPrefixed(it.ontologyClass!!),
             type = ValueType.Resource
         ))
       }
@@ -78,9 +79,9 @@ class MigrationManager {
       pm.weight = it.tupleCount?.toDouble()
       val rule = MapRule(
           predicate = it.ontologyProperty!!
-              .replace("fkg:", "fkgo:")
-              .replace("dbo:", "fkgo:")
-              .replace("dbp:", "fkgp:"),
+              .replace("fkg:", URIs.fkgOntologyPrefix)
+              .replace("dbo:", URIs.fkgOntologyPrefix)
+              .replace("dbp:", URIs.fkgNotMappedPropertyPrefix),
           type = ValueType.String,
           unit = null,
           constant = null,
@@ -101,8 +102,8 @@ class MigrationManager {
       val templateName = it.templateName!!.toLowerCase().replace('_', ' ').replace('-', ' ')
       val tm = holder.getTemplateMapping(templateName)
       tm.rules!!.add(MapRule(
-          predicate = "rdf:type",
-          constant = "fkgo:" + it.ontologyClass,
+          predicate = URIs.typePrefixed,
+          constant = URIs.getFkgOntologyClassPrefixed(it.ontologyClass!!),
           type = ValueType.Resource
       ))
       tm.weight = it.tupleCount!!.toDouble()

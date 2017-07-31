@@ -47,15 +47,15 @@ class KGTableImporter {
 
     // TODO: mastmal
     val propertyMap = mapOf(
-        "دانشکده" to "fkgo:faculty",
-        "رتبه دانشگاهی" to "fkgo:grade",
-        "website" to "fkgo:website",
-        "تصویر" to "fkgo:image",
-        "پست الکترونیکی" to "fkgo:email",
-        "آدرس" to "fkgo:address",
-        "تلفن" to "fkgo:phone",
-        "فکس" to "fkgo:fax",
-        "گروه" to "fkgo:educationGroup",
+        "دانشکده" to URIs.getFkgOntologyPropertyPrefixed("faculty"),
+        "رتبه دانشگاهی" to URIs.getFkgOntologyPropertyPrefixed("grade"),
+        "website" to URIs.getFkgOntologyPropertyPrefixed("website"),
+        "تصویر" to URIs.getFkgOntologyPropertyPrefixed("image"),
+        "پست الکترونیکی" to URIs.getFkgOntologyPropertyPrefixed("email"),
+        "آدرس" to URIs.getFkgOntologyPropertyPrefixed("address"),
+        "تلفن" to URIs.getFkgOntologyPropertyPrefixed("phone"),
+        "فکس" to URIs.getFkgOntologyPropertyPrefixed("fax"),
+        "گروه" to URIs.getFkgOntologyPropertyPrefixed("educationGroup"),
         "نام" to "foaf:firstName",
         "نام خانوادگی" to "foaf:familyName"
     )

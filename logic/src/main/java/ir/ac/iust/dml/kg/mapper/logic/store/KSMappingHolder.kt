@@ -5,6 +5,7 @@ import ir.ac.iust.dml.kg.mapper.logic.store.entities.PropertyMapping
 import ir.ac.iust.dml.kg.mapper.logic.store.entities.TemplateMapping
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PropertyNormaller
+import ir.ac.iust.dml.kg.raw.utils.URIs
 import ir.ac.iust.dml.kg.services.client.ApiClient
 import ir.ac.iust.dml.kg.services.client.swagger.V1mappingsApi
 import org.apache.log4j.Logger
@@ -54,8 +55,8 @@ class KSMappingHolder {
       tm.weight = it.weight
       tm.template = it.template
       tm.rules = it.rules.map { KSMappingConverter.convert(it) }.toMutableSet()
-      tm.ontologyClass = (it.rules.filter { it.predicate == "rdf:type" }
-          .firstOrNull()?.constant ?: "fkgo:Thing").substringAfterLast(":")
+      tm.ontologyClass = (it.rules.filter { it.predicate == URIs.type }
+          .firstOrNull()?.constant ?: URIs.getFkgOntologyClassPrefixed("Thing")).substringAfterLast(":")
       tm.tree = ontologyLogic.getTree(tm.ontologyClass)?.split("/") ?: listOf(tm.ontologyClass)
       it.properties.forEach { pm ->
         val property = PropertyNormaller.removeDigits(pm.property)

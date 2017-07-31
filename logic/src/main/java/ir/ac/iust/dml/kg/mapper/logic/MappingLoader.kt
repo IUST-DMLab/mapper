@@ -107,7 +107,7 @@ class MappingLoader {
           else {
             val persianMapping = FkgPropertyMapping(language = "fa", templateName = type,
                 ontologyClass = null, templateProperty = faProperty,
-                ontologyProperty = "dbpe:" + enProperty,
+                ontologyProperty = URIs.convertToNotMappedFkgPropertyUri(enProperty),
                 status = MappingStatus.Translated)
             dao.save(persianMapping)
           }
