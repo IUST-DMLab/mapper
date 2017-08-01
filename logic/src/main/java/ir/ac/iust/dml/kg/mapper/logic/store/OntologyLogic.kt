@@ -67,7 +67,6 @@ class OntologyLogic {
           val subject = property.replace(dbpediaMainPrefix, fkgMainPrefix)
           if (index % 1000 == 0) logger.info("writing property $property: $data")
           val source = if (data.wasDerivedFrom == null) property else data.wasDerivedFrom!!
-          store.save(source, subject, URIs.typeOfAllProperties, URIs.type)
           if (data.label != null) store.save(source, subject, data.label!!, URIs.label)
           if (data.comment != null) store.save(source, subject, data.comment!!, URIs.comment)
           if (data.domain != null) {
@@ -85,7 +84,13 @@ class OntologyLogic {
           if (data.wasDerivedFrom != null) store.save(source, subject, data.wasDerivedFrom!!, URIs.wasDerivedFrom)
           if (data.equivalentProperty != null) store.save(source, subject,
               data.equivalentProperty!!.replace(dbpediaMainPrefix, fkgMainPrefix), URIs.equivalentProperty)
-          if (data.type != null) store.save(source, subject, data.type!!, URIs.type)
+
+          if (data.type != null) {
+            val oldTypes = store.read(subject = subject, predicate = URIs.type)
+            oldTypes.forEach { store.delete(it.subject!!, it.predicate!!, it.objekt!!) }
+            store.save(source, subject, data.type!!, URIs.type)
+          }
+          store.save(source, subject, URIs.typeOfAnyProperties, URIs.type)
         }
       }
     } catch (th: Throwable) {
@@ -250,7 +255,7 @@ class OntologyLogic {
   }
 
   fun properties(page: Int, pageSize: Int, query: String?, like: Boolean)
-      = getType(query, URIs.typeOfAllProperties, page, pageSize, like)
+      = getType(query, URIs.typeOfAnyProperties, page, pageSize, like)
 
   fun classData(classUrl: String): OntologyClassData {
     val classData = OntologyClassData(url = classUrl)
@@ -386,7 +391,7 @@ class OntologyLogic {
     oldData.ranges.subtract(data.ranges).forEach { remove(data.url, URIs.propertyRange, it) }
     oldData.equivalentProperties.subtract(data.equivalentProperties).forEach { remove(data.url, URIs.equivalentProperty, it) }
 
-    insertAndVote(data.url, URIs.type, URIs.typeOfAllProperties)
+    insertAndVote(data.url, URIs.type, URIs.typeOfAnyProperties)
     if (data.name != null) insertAndVote(data.url, URIs.name, data.name!!)
     if (data.wasDerivedFrom != null) insertAndVote(data.url, URIs.wasDerivedFrom, data.wasDerivedFrom!!)
     if (data.faLabel != null) insertAndVote(data.url, URIs.label, data.faLabel!!)

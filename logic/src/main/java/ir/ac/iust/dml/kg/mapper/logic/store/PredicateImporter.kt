@@ -53,7 +53,8 @@ class PredicateImporter {
         logger.error("wrong predicate: $pu")
         return@forEach
       }
-      store.convertAndSave(source = pu, subject = pu, property = URIs.type, objeck = URIs.typeOfAllProperties)
+      store.convertAndSave(source = pu, subject = pu, property = URIs.type, objeck = URIs.defaultTypeOfOntologyProperties)
+      store.convertAndSave(source = pu, subject = pu, property = URIs.type, objeck = URIs.typeOfAnyProperties)
 
       val result = store.read(subject = pu, predicate = URIs.name)
       if (result.isEmpty()) {

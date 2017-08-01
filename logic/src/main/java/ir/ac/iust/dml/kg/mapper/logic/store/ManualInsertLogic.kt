@@ -48,7 +48,8 @@ class ManualInsertLogic {
   fun savePredicate(predicateUrl: String, label: String?, variantLabel: String?, permanent: Boolean): Boolean {
     if (!initialized) init()
     val url = if (!predicateUrl.startsWith("http://")) URIs.getFkgOntologyPropertyUri(predicateUrl) else predicateUrl
-    saveTriple(url, URIs.type, URIs.typeOfAllProperties, permanent)
+    saveTriple(url, URIs.type, URIs.typeOfAnyProperties, permanent)
+    saveTriple(url, URIs.type, URIs.defaultTypeOfOntologyProperties, permanent)
     if (label != null) {
       saveTriple(url, URIs.label, label, permanent)
       saveTriple(url, URIs.variantLabel, label, permanent)

@@ -29,7 +29,7 @@ class NotMappedPropertyHandler {
       maxNumberOfTriples++
       val name = property.substringAfterLast("/")
       val propertyUrl = URIs.convertToNotMappedFkgPropertyUri(name)!!
-      store.save(SOURCE_URL, propertyUrl, URIs.typeOfAllNotMappedProperties, URIs.type)
+      store.save(SOURCE_URL, propertyUrl, URIs.typeOfAnyProperties, URIs.type)
       store.save(SOURCE_URL, propertyUrl, name, URIs.label)
       store.save(SOURCE_URL, propertyUrl, name, URIs.variantLabel)
 
