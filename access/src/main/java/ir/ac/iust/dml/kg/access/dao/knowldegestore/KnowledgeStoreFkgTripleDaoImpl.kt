@@ -57,7 +57,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
       t.objekt = t.objekt!!.substring(0, 250)
     }
     val data = TripleData()
-    data.context = "http://fkg.iust.ac.ir/"
+    data.context = URIs.defaultContext
     data.module = t.module ?: "wiki"
     data.urls = Collections.singletonList(t.source)
     data.subject = t.subject

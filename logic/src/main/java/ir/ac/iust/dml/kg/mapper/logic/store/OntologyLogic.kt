@@ -31,24 +31,29 @@ class OntologyLogic {
     expertApi = V1expertsApi(client)
   }
 
-  fun reloadTreeCache() {
-    var page = 0
-    do {
-      val classes = getType(null, URIs.typeOfAllClasses, page++, 100)
-      classes.data.forEach { classUrl ->
-        val name = classUrl.substringAfterLast("/")
-        val parents = mutableListOf<String>()
-        fillParents(classUrl, parents)
-        treeCache[name] = parents.map { it.substringAfterLast("/") }.joinToString("/")
-        val children = mutableListOf<String>()
-        fillChildren(classUrl, children)
-        childrenCache[name] = children.map { it.substringAfterLast("/") }
-      }
-    } while (classes.data.isNotEmpty())
+  fun reloadTreeCache(): Boolean {
+    try {
+      var page = 0
+      do {
+        val classes = getType(null, URIs.typeOfAllClasses, page++, 100)
+        classes.data.forEach { classUrl ->
+          val name = classUrl.substringAfterLast("/")
+          val parents = mutableListOf<String>()
+          fillParents(classUrl, parents)
+          treeCache[name] = parents.map { it.substringAfterLast("/") }.joinToString("/")
+          val children = mutableListOf<String>()
+          fillChildren(classUrl, children)
+          childrenCache[name] = children.map { it.substringAfterLast("/") }
+        }
+      } while (classes.data.isNotEmpty())
+      return true
+    } catch (th: Throwable) {
+      return false
+    }
   }
 
   private fun fillParents(classUrl: String, parents: MutableList<String>) {
-    val pages = tripleApi.search1(null, false, classUrl, false,
+    val pages = tripleApi.search1(URIs.defaultContext, false, classUrl, false,
         URIs.subClassOf, false, null, false, 0, 1)
     if (pages.data.isNotEmpty()) {
       val parentClassUrl = pages.data.first().`object`.value
@@ -58,7 +63,7 @@ class OntologyLogic {
   }
 
   private fun fillChildren(classUrl: String, children: MutableList<String>) {
-    val pages = tripleApi.search1(null, false, null, false,
+    val pages = tripleApi.search1(URIs.defaultContext, false, null, false,
         URIs.subClassOf, false, classUrl, false, 0, 10000)
     children.addAll(pages.data.map { it.subject })
   }
@@ -68,7 +73,7 @@ class OntologyLogic {
   fun getChildren(ontologyClass: String) = childrenCache[ontologyClass]
 
   private fun search(like: Boolean, subject: String?, predicate: String?, `object`: String?, page: Int, pageSize: Int?) =
-      tripleApi.search1(null, like, subject, like, predicate,
+      tripleApi.search1(URIs.defaultContext, like, subject, like, predicate,
           like, `object`, like, page, pageSize)
 
   private fun getType(keyword: String?, type: String, page: Int, pageSize: Int): PagedData<String> {
@@ -100,7 +105,7 @@ class OntologyLogic {
                             objectValue: String,
                             objectType: TypedValueData.TypeEnum = TypedValueData.TypeEnum.RESOURCE): Boolean {
     val tripleData = TripleData()
-    tripleData.context = subject
+    tripleData.context = URIs.defaultContext
     tripleData.subject = subject
     tripleData.predicate = predicate
     tripleData.`object` = TypedValueData()
@@ -188,11 +193,13 @@ class OntologyLogic {
   private fun remove(subject: String?, predicate: String?, `object`: String?) {
     if (subject == null || predicate == null || `object` == null) return
     logger.info("removing $subject, $predicate, $`object`")
-    tripleApi.remove1(subject, predicate, `object`, null)
+    //TODO we must remove next line after first run of mapping on data
+    tripleApi.remove1(subject, predicate, `object`, subject)
+    tripleApi.remove1(subject, predicate, `object`, URIs.defaultContext)
   }
 
-  fun saveClass(data: OntologyClassData): Boolean {
-    if (data.url == null) return false
+  fun saveClass(data: OntologyClassData): OntologyClassData? {
+    if (data.url == null) return null
 
     val oldData = classData(data.url!!)
     if ((oldData.faLabel != null) && (oldData.faLabel != data.faLabel))
@@ -222,7 +229,15 @@ class OntologyLogic {
     data.equivalentClasses.forEach { insertAndVote(data.url, URIs.equivalentClass, it) }
     data.disjointWith.forEach { insertAndVote(data.url, URIs.disjointWith, it) }
     data.properties.forEach { insertAndVote(it.url, URIs.propertyDomain, data.url!!) }
-    return true
+
+    if (data.subClassOf != oldData.subClassOf) {
+      // can i load tree?
+      if (!reloadTreeCache()) {
+        saveClass(oldData)
+        return classData(data.url!!)
+      }
+    }
+    return classData(data.url!!)
   }
 
   fun propertyData(propertyUrl: String): OntologyPropertyData {
@@ -248,8 +263,8 @@ class OntologyLogic {
     return propertyData
   }
 
-  fun saveProperty(data: OntologyPropertyData): Boolean {
-    if (data.url == null) return false
+  fun saveProperty(data: OntologyPropertyData): OntologyPropertyData? {
+    if (data.url == null) return null
 
     val oldData = propertyData(data.url!!)
     if ((oldData.faLabel != null) && (oldData.faLabel != data.faLabel))
@@ -271,7 +286,7 @@ class OntologyLogic {
     data.domains.forEach { insertAndVote(data.url, URIs.propertyDomain, it) }
     data.ranges.forEach { insertAndVote(data.url, URIs.propertyRange, it) }
     data.equivalentProperties.forEach { insertAndVote(it, URIs.equivalentProperty, data.url!!) }
-    return true
+    return propertyData(data.url!!)
   }
 
 }
