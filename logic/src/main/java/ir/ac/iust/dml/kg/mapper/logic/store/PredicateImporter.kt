@@ -1,6 +1,8 @@
 package ir.ac.iust.dml.kg.mapper.logic.store
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
+import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
+import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.URIs
@@ -31,6 +33,7 @@ class PredicateImporter {
       templateMapping.properties!!.values.forEach { propertyMapping ->
         val label = propertyMapping.property!!.toLowerCase().replace('_', ' ')
         propertyMapping.rules.forEach {
+          if (it.predicate == null) return@forEach
           val data = predicateData.getOrPut(it.predicate!!, { PredicateData() })
           data.labels[label] = (data.labels[label] ?: 0.0) + (propertyMapping.weight ?: 0.0)
           data.domains.add(templateMapping.ontologyClass)
@@ -53,16 +56,22 @@ class PredicateImporter {
       }
       store.convertAndSave(source = pu, subject = pu, property = URIs.type, objeck = URIs.typeOfAllProperties)
 
+      val result = store.read(subject = pu, predicate = URIs.name)
+      if (result.isEmpty()) {
+        val name = pu.substring(pu.indexOf("/ontology/") + 10)
+        store.convertAndSave(source = pu, subject = pu, property = URIs.name, objeck = name)
+      }
+
       if (labels.isNotEmpty())
         store.convertAndSave(source = pu, subject = pu, property = URIs.label, objeck = labels[0].first)
       labels.forEach {
         store.convertAndSave(source = pu, subject = pu, property = URIs.variantLabel, objeck = it.first)
         if (resolveAmbiguity) {
-          val result = store.read(predicate = URIs.variantLabel, objekt = it.first)
+          val searched = store.read(predicate = URIs.variantLabel, objekt = it.first)
               .filter { triple -> triple.objekt == it.first && triple.subject != pu }
-          if (result.isNotEmpty()) {
+          if (searched.isNotEmpty()) {
             store.convertAndSave(source = pu, subject = pu, property = URIs.disambiguatedFrom, objeck = it.first)
-            result.forEach {
+            searched.forEach {
               store.convertAndSave(source = it.source ?: it.subject!!,
                   subject = it.subject!!, property = URIs.disambiguatedFrom, objeck = it.objekt!!)
             }
@@ -75,5 +84,7 @@ class PredicateImporter {
             objeck = URIs.getFkgOntologyClassUri(it))
       }
     }
+    (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
+    (store as? VirtuosoFkgTripleDaoImpl)?.close()
   }
 }

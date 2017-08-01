@@ -179,6 +179,7 @@ class OntologyLogic {
       if (it.`object`.lang == "en") classData.enComment = it.`object`.value
     }
 
+    classData.name = objectOfPredicate(classUrl, URIs.name)
     classData.subClassOf = objectOfPredicate(classUrl, URIs.subClassOf)
     classData.equivalentClasses = objectsOfPredicate(classUrl, URIs.equivalentClass)
     classData.disjointWith = objectsOfPredicate(classUrl, URIs.disjointWith)
@@ -212,6 +213,8 @@ class OntologyLogic {
       remove(data.url, URIs.comment, oldData.enComment)
     if ((oldData.subClassOf != null) && (oldData.subClassOf != data.subClassOf))
       remove(data.url, URIs.subClassOf, oldData.subClassOf)
+    if ((oldData.name != null) && (oldData.name != data.name))
+      remove(data.url, URIs.name, oldData.name)
     oldData.faVariantLabels.subtract(data.faVariantLabels).forEach { remove(data.url, URIs.variantLabel, it) }
     oldData.enVariantLabels.subtract(data.enVariantLabels).forEach { remove(data.url, URIs.variantLabel, it) }
     oldData.equivalentClasses.subtract(data.equivalentClasses).forEach { remove(data.url, URIs.equivalentClass, it) }
@@ -224,6 +227,7 @@ class OntologyLogic {
     if (data.faComment != null) insertAndVote(data.url, URIs.comment, data.faComment!!)
     if (data.enComment != null) insertAndVote(data.url, URIs.comment, data.enComment!!)
     if (data.subClassOf != null) insertAndVote(data.url, URIs.subClassOf, data.subClassOf!!)
+    if (data.name != null) insertAndVote(data.url, URIs.name, data.name!!)
     data.faVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it) }
     data.enVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it) }
     data.equivalentClasses.forEach { insertAndVote(data.url, URIs.equivalentClass, it) }
@@ -255,6 +259,7 @@ class OntologyLogic {
       if (it.`object`.lang == "en") propertyData.enVariantLabels.add(it.`object`.value)
     }
 
+    propertyData.name = objectOfPredicate(propertyUrl, URIs.name)
     propertyData.types.addAll(objectsOfPredicate(propertyUrl, URIs.type))
     propertyData.domains.addAll(objectsOfPredicate(propertyUrl, URIs.propertyDomain))
     propertyData.ranges.addAll(objectsOfPredicate(propertyUrl, URIs.propertyRange))
@@ -271,6 +276,8 @@ class OntologyLogic {
       remove(data.url, URIs.label, oldData.faLabel)
     if ((oldData.enLabel != null) && (oldData.enLabel != data.enLabel))
       remove(data.url, URIs.label, oldData.enLabel)
+    if ((oldData.name != null) && (oldData.name != data.name))
+      remove(data.url, URIs.name, oldData.name)
     oldData.faVariantLabels.subtract(data.faVariantLabels).forEach { remove(data.url, URIs.variantLabel, it) }
     oldData.enVariantLabels.subtract(data.enVariantLabels).forEach { remove(data.url, URIs.variantLabel, it) }
     oldData.domains.subtract(data.domains).forEach { remove(data.url, URIs.propertyDomain, it) }
@@ -278,6 +285,7 @@ class OntologyLogic {
     oldData.equivalentProperties.subtract(data.equivalentProperties).forEach { remove(data.url, URIs.equivalentProperty, it) }
 
     insertAndVote(data.url, URIs.type, URIs.typeOfAllProperties)
+    if (data.name != null) insertAndVote(data.url, URIs.name, data.name!!)
     if (data.faLabel != null) insertAndVote(data.url, URIs.label, data.faLabel!!)
     if (data.enLabel != null) insertAndVote(data.url, URIs.label, data.enLabel!!)
     data.faVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it) }
