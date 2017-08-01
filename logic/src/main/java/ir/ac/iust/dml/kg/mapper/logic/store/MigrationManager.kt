@@ -85,9 +85,9 @@ class MigrationManager {
       pm.weight = it.tupleCount?.toDouble()
       val rule = MapRule(
           predicate = it.ontologyProperty!!
-              .replace("fkg:", URIs.fkgOntologyPrefix)
-              .replace("dbo:", URIs.fkgOntologyPrefix)
-              .replace("dbp:", URIs.fkgNotMappedPropertyPrefix),
+              .replace("fkg:", URIs.fkgOntologyPrefix + ":")
+              .replace("dbo:", URIs.fkgOntologyPrefix + ":")
+              .replace("dbp:", URIs.fkgNotMappedPropertyPrefix + ":"),
           type = ValueType.String,
           unit = null,
           constant = null,
