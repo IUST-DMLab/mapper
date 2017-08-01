@@ -70,7 +70,7 @@ class OntologyLogic {
           if (data.label != null) store.save(source, subject, data.label!!, URIs.label)
           if (data.comment != null) store.save(source, subject, data.comment!!, URIs.comment)
           if (data.domain != null) {
-            val oldDomains = store.read(subject = subject, predicate = URIs.propertyDomain, objekt = thing)
+            val oldDomains = store.read(subject = subject, predicate = URIs.propertyDomain)
             oldDomains.forEach { store.delete(it.subject!!, it.predicate!!, it.objekt!!) }
             store.save(source, subject, data.domain!!.replace(dbpediaMainPrefix, fkgMainPrefix), URIs.propertyDomain)
           }
