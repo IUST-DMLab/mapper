@@ -2,6 +2,8 @@ package ir.ac.iust.dml.kg.mapper.logic.store
 
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
+import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
+import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.data.ExportedPropertyData
 import ir.ac.iust.dml.kg.mapper.logic.store.data.OntologyClassData
@@ -57,6 +59,7 @@ class OntologyLogic {
     var index = 0
     val dbpediaMainPrefix = "http://dbpedia.org/"
     val fkgMainPrefix = URIs.prefixedToUri(URIs.fkgMainPrefix + ":")!!
+    val thing = URIs.getFkgOntologyClassUri("Thing")
     try {
       BufferedReader(InputStreamReader(FileInputStream(exportedJson.toFile()), "UTF8")).use { reader ->
         val map: Map<String, ExportedPropertyData> = gson.fromJson(reader, type)
@@ -69,8 +72,9 @@ class OntologyLogic {
           store.save(source, subject, URIs.typeOfAllProperties, URIs.type)
           if (data.label != null) store.save(source, subject, data.label!!, URIs.label)
           if (data.comment != null) store.save(source, subject, data.comment!!, URIs.comment)
-          if (data.domain != null) store.save(source, subject,
-              data.domain!!.replace(dbpediaMainPrefix, fkgMainPrefix), URIs.propertyDomain)
+          if (data.domain != null)
+            store.save(source, subject, data.domain!!.replace(dbpediaMainPrefix, fkgMainPrefix), URIs.propertyDomain)
+          else store.save(source, subject, thing, URIs.propertyDomain)
           if (data.range != null) store.save(source, subject,
               data.range!!.replace(dbpediaMainPrefix, fkgMainPrefix), URIs.propertyRange)
           if (data.wasDerivedFrom != null) store.save(source, subject, data.wasDerivedFrom!!, URIs.wasDerivedFrom)
@@ -82,6 +86,9 @@ class OntologyLogic {
     } catch (th: Throwable) {
       logger.error(th)
     }
+
+    (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
+    (store as? VirtuosoFkgTripleDaoImpl)?.close()
   }
 
   fun findCommonRoot(classes: Collection<String>): String? {
