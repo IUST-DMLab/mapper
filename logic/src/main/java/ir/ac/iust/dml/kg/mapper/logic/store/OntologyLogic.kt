@@ -72,32 +72,33 @@ class OntologyLogic {
 
   fun getChildren(ontologyClass: String) = childrenCache[ontologyClass]
 
-  private fun search(like: Boolean, subject: String?, predicate: String?, `object`: String?, page: Int, pageSize: Int?) =
-      tripleApi.search1(URIs.defaultContext, false, subject, like, predicate,
-          like, `object`, like, page, pageSize)
+  private fun search(subject: String?, predicate: String?, `object`: String?, page: Int, pageSize: Int?,
+                     likeSubject: Boolean = false, likePredicate: Boolean = false, likeObject: Boolean = false) =
+      tripleApi.search1(URIs.defaultContext, false, subject, likeSubject, predicate,
+          likePredicate, `object`, likeObject, page, pageSize)
 
   private fun getType(keyword: String?, type: String, page: Int, pageSize: Int): PagedData<String> {
-    val result = search(false, keyword, URIs.type, type, page, pageSize)
+    val result = search(keyword, URIs.type, type, page, pageSize, likeSubject = true)
     val data = result.data.map { it.subject }.toMutableList()
     return PagedData<String>(data, page, pageSize, result.pageCount, result.totalSize)
   }
 
   private fun subjectsOfPredicate(predicate: String, `object`: String): MutableList<String> {
     val result = mutableListOf<String>()
-    val values = search(false, null, predicate, `object`, 0, 1000)
+    val values = search(null, predicate, `object`, 0, 1000)
     values.data.forEach { result.add(it.subject) }
     return result
   }
 
   private fun objectsOfPredicate(subject: String, predicate: String): MutableList<String> {
     val result = mutableListOf<String>()
-    val values = search(false, subject, predicate, null, 0, 1000)
+    val values = search(subject, predicate, null, 0, 1000)
     values.data.forEach { result.add(it.`object`.value) }
     return result
   }
 
   private fun objectOfPredicate(subject: String, predicate: String): String? {
-    val values = search(false, subject, predicate, null, 0, 1000)
+    val values = search(subject, predicate, null, 0, 1000)
     return values.data.firstOrNull()?.`object`?.value
   }
 
@@ -140,7 +141,7 @@ class OntologyLogic {
   fun fillNode(node: OntologyNode, label: Boolean, depth: Int, maxDepth: Int?) {
     if (label) node.label = getLabel(node.url)
     if (maxDepth != null && depth == maxDepth) return
-    val children = search(false, null, URIs.subClassOf, node.url, 0, null).data
+    val children = search(null, URIs.subClassOf, node.url, 0, null).data
     children.forEach {
       val child = OntologyNode(it.subject)
       fillNode(child, label, depth + 1, maxDepth)
@@ -150,7 +151,7 @@ class OntologyLogic {
 
   fun getLabel(url: String): String? {
     try {
-      return search(false, url, URIs.label, null, 0, 1).data.firstOrNull()?.`object`?.value
+      return search(url, URIs.label, null, 0, 1).data.firstOrNull()?.`object`?.value
     } catch (th: Throwable) {
       return null
     }
@@ -161,19 +162,19 @@ class OntologyLogic {
 
   fun classData(classUrl: String): OntologyClassData {
     val classData = OntologyClassData(url = classUrl)
-    val labels = search(false, classUrl, URIs.label, null, 0, 10)
+    val labels = search(classUrl, URIs.label, null, 0, 10)
     labels.data.forEach {
       if (it.`object`.lang == "fa") classData.faLabel = it.`object`.value
       if (it.`object`.lang == "en") classData.enLabel = it.`object`.value
     }
 
-    val variantLabels = search(false, classUrl, URIs.variantLabel, null, 0, 10)
+    val variantLabels = search(classUrl, URIs.variantLabel, null, 0, 10)
     variantLabels.data.forEach {
       if (it.`object`.lang == "fa") classData.faVariantLabels.add(it.`object`.value)
       if (it.`object`.lang == "en") classData.enVariantLabels.add(it.`object`.value)
     }
 
-    val comments = search(false, classUrl, URIs.comment, null, 0, 10)
+    val comments = search(classUrl, URIs.comment, null, 0, 10)
     comments.data.forEach {
       if (it.`object`.lang == "fa") classData.faComment = it.`object`.value
       if (it.`object`.lang == "en") classData.enComment = it.`object`.value
@@ -247,13 +248,13 @@ class OntologyLogic {
   fun propertyData(propertyUrl: String): OntologyPropertyData {
     val propertyData = OntologyPropertyData(url = propertyUrl)
 
-    val labels = search(false, propertyUrl, URIs.label, null, 0, 10)
+    val labels = search(propertyUrl, URIs.label, null, 0, 10)
     labels.data.forEach {
       if (it.`object`.lang == "fa") propertyData.faLabel = it.`object`.value
       if (it.`object`.lang == "en") propertyData.enLabel = it.`object`.value
     }
 
-    val variantLabels = search(false, propertyUrl, URIs.variantLabel, null, 0, 10)
+    val variantLabels = search(propertyUrl, URIs.variantLabel, null, 0, 10)
     variantLabels.data.forEach {
       if (it.`object`.lang == "fa") propertyData.faVariantLabels.add(it.`object`.value)
       if (it.`object`.lang == "en") propertyData.enVariantLabels.add(it.`object`.value)
