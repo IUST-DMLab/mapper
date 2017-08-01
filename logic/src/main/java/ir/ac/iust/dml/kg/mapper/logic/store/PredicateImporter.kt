@@ -32,8 +32,8 @@ class PredicateImporter {
     holder.all().forEach { templateMapping ->
       templateMapping.properties!!.values.forEach { propertyMapping ->
         val label = propertyMapping.property!!.toLowerCase().replace('_', ' ')
-        propertyMapping.rules.forEach {
-          if (it.predicate == null) return@forEach
+        propertyMappingLoop@ propertyMapping.rules.forEach {
+          if (it.predicate == null) return@propertyMappingLoop
           val data = predicateData.getOrPut(it.predicate!!, { PredicateData() })
           data.labels[label] = (data.labels[label] ?: 0.0) + (propertyMapping.weight ?: 0.0)
           data.domains.add(templateMapping.ontologyClass)

@@ -12,10 +12,15 @@ import org.springframework.web.bind.annotation.*
 @Api(tags = arrayOf("ontology"), description = "سرویس‌های ویرایش آنتولوژی")
 class OntologyRestServices {
   @Autowired lateinit var logic: OntologyLogic
+  val sepratorRegex = Regex("[,\\s]+")
 
   @RequestMapping("reload", method = arrayOf(RequestMethod.GET))
   @ResponseBody
   fun reload() = logic.reloadTreeCache()
+
+  @RequestMapping("findCommonRoot", method = arrayOf(RequestMethod.GET))
+  @ResponseBody
+  fun findCommonRoot(@RequestParam classes: String) = logic.findCommonRoot(classes.split(sepratorRegex))
 
   @RequestMapping("classes", method = arrayOf(RequestMethod.GET))
   @ResponseBody

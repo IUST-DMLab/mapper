@@ -31,6 +31,33 @@ class OntologyLogic {
     expertApi = V1expertsApi(client)
   }
 
+  fun findCommonRoot(classes: List<String>): String? {
+    if (treeCache.isEmpty()) reloadTreeCache()
+    val tress = mutableListOf<List<String>>()
+    classes.forEach {
+      val name = if (it.contains("/")) it.substringAfterLast("/") else it
+      val parents = treeCache[name]?.split("/")
+      if (parents != null && parents.isNotEmpty()) tress.add(parents.asReversed())
+    }
+    if (tress.isEmpty()) return null
+    var index = 0
+    val minSize = tress.map { it.size }.min()!!
+    val result: String
+    while (true) {
+      val one = tress[0][index]
+      if ((tress.filter { it[index] == one }.size < tress.size)) {
+        result = tress[0][index - 1]
+        break
+      }
+      if (index == minSize - 1) {
+        result = tress[0][index]
+        break
+      }
+      index++
+    }
+    return URIs.getFkgOntologyClassUri(result)
+  }
+
   fun reloadTreeCache(): Boolean {
     try {
       var page = 0
@@ -53,7 +80,7 @@ class OntologyLogic {
   }
 
   private fun fillParents(classUrl: String, parents: MutableList<String>) {
-    val pages = tripleApi.search1(URIs.defaultContext, false, classUrl, false,
+    val pages = tripleApi.search1(null, false, classUrl, false,
         URIs.subClassOf, false, null, false, 0, 1)
     if (pages.data.isNotEmpty()) {
       val parentClassUrl = pages.data.first().`object`.value
@@ -63,7 +90,7 @@ class OntologyLogic {
   }
 
   private fun fillChildren(classUrl: String, children: MutableList<String>) {
-    val pages = tripleApi.search1(URIs.defaultContext, false, null, false,
+    val pages = tripleApi.search1(null, false, null, false,
         URIs.subClassOf, false, classUrl, false, 0, 10000)
     children.addAll(pages.data.map { it.subject })
   }
@@ -74,7 +101,7 @@ class OntologyLogic {
 
   private fun search(subject: String?, predicate: String?, `object`: String?, page: Int, pageSize: Int?,
                      likeSubject: Boolean = false, likePredicate: Boolean = false, likeObject: Boolean = false) =
-      tripleApi.search1(URIs.defaultContext, false, subject, likeSubject, predicate,
+      tripleApi.search1(null, false, subject, likeSubject, predicate,
           likePredicate, `object`, likeObject, page, pageSize)
 
   private fun getType(keyword: String?, type: String, page: Int, pageSize: Int, like: Boolean = false): PagedData<String> {
