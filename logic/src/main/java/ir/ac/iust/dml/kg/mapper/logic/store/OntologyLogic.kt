@@ -75,7 +75,11 @@ class OntologyLogic {
             oldDomains.forEach { store.delete(it.subject!!, it.predicate!!, it.objekt!!) }
             store.save(source, subject, data.domain!!.replace(dbpediaMainPrefix, fkgMainPrefix), URIs.propertyDomain)
           }
-          else store.save(source, subject, thing, URIs.propertyDomain)
+          val result = store.read(subject = subject, predicate = URIs.name)
+          if (result.isEmpty()) {
+            val name = subject.substring(subject.indexOf("/ontology/") + 10)
+            store.convertAndSave(source = subject, subject = subject, property = URIs.name, objeck = name)
+          } else store.save(source, subject, thing, URIs.propertyDomain)
           if (data.range != null) store.save(source, subject,
               data.range!!.replace(dbpediaMainPrefix, fkgMainPrefix), URIs.propertyRange)
           if (data.wasDerivedFrom != null) store.save(source, subject, data.wasDerivedFrom!!, URIs.wasDerivedFrom)
