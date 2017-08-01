@@ -77,7 +77,7 @@ class OntologyLogic {
           like, `object`, like, page, pageSize)
 
   private fun getType(keyword: String?, type: String, page: Int, pageSize: Int): PagedData<String> {
-    val result = search(true, keyword, URIs.type, type, page, pageSize)
+    val result = search(false, keyword, URIs.type, type, page, pageSize)
     val data = result.data.map { it.subject }.toMutableList()
     return PagedData<String>(data, page, pageSize, result.pageCount, result.totalSize)
   }
