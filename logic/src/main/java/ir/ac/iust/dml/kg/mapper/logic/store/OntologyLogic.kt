@@ -73,7 +73,7 @@ class OntologyLogic {
   fun getChildren(ontologyClass: String) = childrenCache[ontologyClass]
 
   private fun search(like: Boolean, subject: String?, predicate: String?, `object`: String?, page: Int, pageSize: Int?) =
-      tripleApi.search1(URIs.defaultContext, like, subject, like, predicate,
+      tripleApi.search1(URIs.defaultContext, false, subject, like, predicate,
           like, `object`, like, page, pageSize)
 
   private fun getType(keyword: String?, type: String, page: Int, pageSize: Int): PagedData<String> {
