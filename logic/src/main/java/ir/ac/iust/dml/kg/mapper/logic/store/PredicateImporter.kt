@@ -1,8 +1,6 @@
 package ir.ac.iust.dml.kg.mapper.logic.store
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
-import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
-import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.URIs
@@ -88,9 +86,16 @@ class PredicateImporter {
         commonRoot = URIs.getFkgOntologyClassUri("Thing")
         logger.error("error in calculating root for ${data.domains}")
       }
+      val oldAutoDomains = store.read(subject = pu, predicate = URIs.propertyAutoDomain)
+      oldAutoDomains.forEach { store.delete(it.subject!!, it.predicate!!, it.objekt!!) }
       store.convertAndSave(source = pu, subject = pu, property = URIs.propertyAutoDomain, objeck = commonRoot)
+
+      val oldDomains = store.read(subject = pu, predicate = URIs.propertyDomain)
+      if (oldDomains.isEmpty()) {
+        val thing = URIs.getFkgOntologyClassUri("Thing")
+        store.convertAndSave(source = pu, subject = pu, property = URIs.propertyDomain, objeck = thing)
+      }
     }
-    (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
-    (store as? VirtuosoFkgTripleDaoImpl)?.close()
+    store.flush()
   }
 }

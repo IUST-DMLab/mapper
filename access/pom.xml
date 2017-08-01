@@ -33,7 +33,7 @@
     <dependency>
       <groupId>ir.ac.iust.dml.kg.vituoso</groupId>
       <artifactId>connector</artifactId>
-      <version>0.2.2</version>
+      <version>0.2.3</version>
       <exclusions>
         <exclusion>
           <groupId>xerces</groupId>

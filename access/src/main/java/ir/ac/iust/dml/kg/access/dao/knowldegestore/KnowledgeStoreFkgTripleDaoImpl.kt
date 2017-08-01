@@ -30,7 +30,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
     tripleApi = V1triplesApi(client)
   }
 
-  fun flush() {
+  override fun flush() {
     while (buffer.isNotEmpty()) {
       try {
         logger.info("flushing ...")
@@ -133,6 +133,10 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
         logger.error(th)
       }
     }
+  }
+
+  override fun delete(subject: String, predicate: String, `object`: String) {
+    tripleApi.remove1(subject, predicate, `object`, URIs.defaultContext)
   }
 
   override fun deleteAll() {

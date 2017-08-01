@@ -3,8 +3,6 @@ package ir.ac.iust.dml.kg.mapper.logic
 import ir.ac.iust.dml.kg.access.dao.FkgClassDao
 import ir.ac.iust.dml.kg.access.dao.FkgEntityClassesDao
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
-import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
-import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgOntologyClass
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
@@ -79,8 +77,7 @@ class EntityToClassLogic {
           }
     }
 
-    (dao as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
-    (dao as? VirtuosoFkgTripleDaoImpl)?.close()
+    dao.flush()
 
     logger.info("writing tree ended.")
   }

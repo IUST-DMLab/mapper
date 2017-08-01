@@ -1,7 +1,5 @@
 package ir.ac.iust.dml.kg.mapper.logic.store
 
-import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
-import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
@@ -51,7 +49,6 @@ class NotMappedPropertyHandler {
           "time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
     }
 
-    (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
-    (store as? VirtuosoFkgTripleDaoImpl)?.close()
+    store.flush()
   }
 }

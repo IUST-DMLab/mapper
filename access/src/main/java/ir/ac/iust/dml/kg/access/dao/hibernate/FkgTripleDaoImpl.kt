@@ -25,6 +25,18 @@ open class FkgTripleDaoImpl : FkgTripleDao() {
     session.close()
   }
 
+  override fun flush() {
+    // no need to do anything on close
+  }
+
+  override fun delete(subject: String, predicate: String, `object`: String) {
+    val session = this.sessionFactory.openSession()
+    val q = session.createQuery("delete from FkgTriple " +
+        "where subject='$subject' and predicate='$predicate' and objekt='$`object`'")
+    q.executeUpdate()
+    session.close()
+  }
+
   override fun deleteAll() {
     val session = this.sessionFactory.openSession()
     val q = session.createQuery("delete from FkgTriple")

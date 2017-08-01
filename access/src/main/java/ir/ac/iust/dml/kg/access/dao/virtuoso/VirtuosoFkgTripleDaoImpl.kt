@@ -13,7 +13,7 @@ class VirtuosoFkgTripleDaoImpl : FkgTripleDao() {
 
   override fun save(t: FkgTriple, mapping: FkgPropertyMapping?, approved: Boolean) {
     if (t.objekt == null || t.objekt!!.trim().isEmpty()) {
-      println("short triple here: ${t.source} ${t.predicate} ${t.objekt}")
+      println("short triple here: ${t.subject} ${t.predicate} ${t.objekt}")
       return
     }
     if (t.objekt!!.contains("://") && !t.objekt!!.contains(' '))
@@ -21,8 +21,18 @@ class VirtuosoFkgTripleDaoImpl : FkgTripleDao() {
     else connector.addLiteral(t.subject, t.predicate, t.objekt)
   }
 
-  fun close() {
+  override fun flush() {
     connector.close()
+  }
+
+  override fun delete(subject: String, predicate: String, `object`: String) {
+    if (`object`.trim().isEmpty()) {
+      println("short triple here: $subject $predicate $`object`")
+      return
+    }
+    if (`object`.contains("://") && !`object`.contains(' '))
+      connector.removeResource(subject, predicate, `object`)
+    else connector.removeLiteral(subject, predicate, `object`)
   }
 
   override fun deleteAll() {

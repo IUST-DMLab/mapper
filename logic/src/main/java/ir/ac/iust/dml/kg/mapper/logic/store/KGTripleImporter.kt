@@ -3,8 +3,6 @@ package ir.ac.iust.dml.kg.mapper.logic.store
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
-import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
-import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.mapper.logic.PathUtils
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
@@ -67,8 +65,7 @@ class KGTripleImporter {
       }
     }
 
-    (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
-    (store as? VirtuosoFkgTripleDaoImpl)?.close()
+    store.flush()
   }
 
   fun writeEntitiesWithoutInfoBox(storeType: StoreType = StoreType.none) {
@@ -98,8 +95,7 @@ class KGTripleImporter {
       }
     }
 
-    (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
-    (store as? VirtuosoFkgTripleDaoImpl)?.close()
+    store.flush()
   }
 
   fun writeEntitiesWithInfoBox(storeType: StoreType = StoreType.none) {
@@ -159,8 +155,7 @@ class KGTripleImporter {
       }
     }
 
-    (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
-    (store as? VirtuosoFkgTripleDaoImpl)?.close()
+    store.flush()
   }
 
   fun writeTriples(storeType: StoreType = StoreType.none, insert: Boolean = true) {
@@ -260,10 +255,7 @@ class KGTripleImporter {
       }
     }
 
-    if (insert) {
-      (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
-      (store as? VirtuosoFkgTripleDaoImpl)?.close()
-    }
+    if (insert) store.flush()
 
     logger.info("number of not seen properties ${notSeenProperties.size}")
     logger.info("number of not mapped properties $numberOfMapped")

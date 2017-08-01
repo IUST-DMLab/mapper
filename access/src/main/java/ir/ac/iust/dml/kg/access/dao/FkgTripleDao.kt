@@ -11,7 +11,11 @@ abstract class FkgTripleDao {
 
   private val transformers = Transformers()
 
+  abstract fun flush()
+
   abstract fun save(t: FkgTriple, mapping: FkgPropertyMapping?, approved: Boolean = false)
+
+  abstract fun delete(subject: String, predicate: String, `object`: String)
 
   abstract fun deleteAll()
 

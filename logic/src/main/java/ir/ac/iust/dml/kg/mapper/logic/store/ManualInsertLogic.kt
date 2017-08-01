@@ -1,7 +1,6 @@
 package ir.ac.iust.dml.kg.mapper.logic.store
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
-import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.URIs
@@ -79,7 +78,7 @@ class ManualInsertLogic {
   fun saveAll(source: String, subject: String, objeck: String, property: String) {
     if (!initialized) init()
     kgDao.save(source, subject, objeck, property)
-    (kgDao as KnowledgeStoreFkgTripleDaoImpl).flush()
+    kgDao.flush()
     virtuosoDao.save(source, subject, objeck, property)
   }
 
@@ -89,7 +88,7 @@ class ManualInsertLogic {
     logger.info("save permanent: $permanent")
     virtuosoDao.save(sourceUrl, subjectUrl, objectUrl, predicateUrl)
     kgDao.save(sourceUrl, subjectUrl, objectUrl, predicateUrl)
-    (kgDao as KnowledgeStoreFkgTripleDaoImpl).flush()
+    kgDao.flush()
     return true
   }
 }

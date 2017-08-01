@@ -37,9 +37,17 @@ class FileFkgTripleDaoImpl(val path: Path, val flushSize: Int = 1000) : FkgTripl
     }
   }
 
+  override fun flush() {
+    // nothing to do
+  }
+
   override fun deleteAll() {
     FileUtils.deleteDirectory(path.toFile())
     Files.createDirectories(path)
+  }
+
+  override fun delete(subject: String, predicate: String, `object`: String) {
+    TODO("not implemented")
   }
 
   override fun list(pageSize: Int, page: Int): PagedData<FkgTriple> {

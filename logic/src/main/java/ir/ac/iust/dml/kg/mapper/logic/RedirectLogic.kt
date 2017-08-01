@@ -2,8 +2,6 @@ package ir.ac.iust.dml.kg.mapper.logic
 
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
-import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
-import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
@@ -74,7 +72,6 @@ class RedirectLogic {
       }
     }
 
-    if (store is KnowledgeStoreFkgTripleDaoImpl) store.flush()
-    if (store is VirtuosoFkgTripleDaoImpl) store.close()
+    store.flush()
   }
 }

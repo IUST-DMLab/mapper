@@ -2,8 +2,6 @@ package ir.ac.iust.dml.kg.mapper.logic.store
 
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
-import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
-import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.data.ExportedPropertyData
 import ir.ac.iust.dml.kg.mapper.logic.store.data.OntologyClassData
@@ -72,8 +70,11 @@ class OntologyLogic {
           store.save(source, subject, URIs.typeOfAllProperties, URIs.type)
           if (data.label != null) store.save(source, subject, data.label!!, URIs.label)
           if (data.comment != null) store.save(source, subject, data.comment!!, URIs.comment)
-          if (data.domain != null)
+          if (data.domain != null) {
+            val oldDomains = store.read(subject = subject, predicate = URIs.propertyDomain, objekt = thing)
+            oldDomains.forEach { store.delete(it.subject!!, it.predicate!!, it.objekt!!) }
             store.save(source, subject, data.domain!!.replace(dbpediaMainPrefix, fkgMainPrefix), URIs.propertyDomain)
+          }
           else store.save(source, subject, thing, URIs.propertyDomain)
           if (data.range != null) store.save(source, subject,
               data.range!!.replace(dbpediaMainPrefix, fkgMainPrefix), URIs.propertyRange)
@@ -87,8 +88,7 @@ class OntologyLogic {
       logger.error(th)
     }
 
-    (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
-    (store as? VirtuosoFkgTripleDaoImpl)?.close()
+    store.flush()
   }
 
   fun findCommonRoot(classes: Collection<String>): String? {
