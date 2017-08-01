@@ -26,5 +26,7 @@ data class FkgOntologyClass(
     var note: String? = null,
     @Column(name = "approved")
     var approved: Boolean? = null,
+    @Column(name = "wasDerivedFrom")
+    var wasDerivedFrom: String? = null,
     @Column(name = "comment", length = 5000)
     var comment: String? = null)
