@@ -18,6 +18,7 @@ data class OntologyClassData(
     var faComment: String? = null,
     var enComment: String? = null,
     var subClassOf: String? = null,
+    var wasDerivedFrom: String? = null,
     var equivalentClasses: MutableList<String> = mutableListOf(),
     var disjointWith: MutableList<String> = mutableListOf(),
     var properties: MutableList<OntologyPropertyData> = mutableListOf()

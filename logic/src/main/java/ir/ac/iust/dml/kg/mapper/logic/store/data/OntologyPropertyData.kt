@@ -3,6 +3,7 @@ package ir.ac.iust.dml.kg.mapper.logic.store.data
 data class OntologyPropertyData(
     var url: String? = null,
     var name: String? = null,
+    var wasDerivedFrom: String? = null,
     var faLabel: String? = null,
     var enLabel: String? = null,
     var faVariantLabels: MutableList<String> = mutableListOf(),

@@ -270,6 +270,7 @@ class OntologyLogic {
 
     classData.name = objectOfPredicate(classUrl, URIs.name)
     classData.subClassOf = objectOfPredicate(classUrl, URIs.subClassOf)
+    classData.wasDerivedFrom = objectOfPredicate(classUrl, URIs.wasDerivedFrom)
     classData.equivalentClasses = objectsOfPredicate(classUrl, URIs.equivalentClass)
     classData.disjointWith = objectsOfPredicate(classUrl, URIs.disjointWith)
     val properties = subjectsOfPredicate(URIs.propertyDomain, classUrl)
@@ -302,6 +303,8 @@ class OntologyLogic {
       remove(data.url, URIs.comment, oldData.enComment)
     if ((oldData.subClassOf != null) && (oldData.subClassOf != data.subClassOf))
       remove(data.url, URIs.subClassOf, oldData.subClassOf)
+    if ((oldData.wasDerivedFrom != null) && (oldData.wasDerivedFrom != data.wasDerivedFrom))
+      remove(data.url, URIs.wasDerivedFrom, oldData.wasDerivedFrom)
     if ((oldData.name != null) && (oldData.name != data.name))
       remove(data.url, URIs.name, oldData.name)
     oldData.faVariantLabels.subtract(data.faVariantLabels).forEach { remove(data.url, URIs.variantLabel, it) }
@@ -316,6 +319,7 @@ class OntologyLogic {
     if (data.faComment != null) insertAndVote(data.url, URIs.comment, data.faComment!!)
     if (data.enComment != null) insertAndVote(data.url, URIs.comment, data.enComment!!)
     if (data.subClassOf != null) insertAndVote(data.url, URIs.subClassOf, data.subClassOf!!)
+    if (data.wasDerivedFrom != null) insertAndVote(data.url, URIs.wasDerivedFrom, data.wasDerivedFrom!!)
     if (data.name != null) insertAndVote(data.url, URIs.name, data.name!!)
     data.faVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it) }
     data.enVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it) }
@@ -349,6 +353,7 @@ class OntologyLogic {
     }
 
     propertyData.name = objectOfPredicate(propertyUrl, URIs.name)
+    propertyData.wasDerivedFrom = objectOfPredicate(propertyUrl, URIs.wasDerivedFrom)
     propertyData.types.addAll(objectsOfPredicate(propertyUrl, URIs.type))
     propertyData.domains.addAll(objectsOfPredicate(propertyUrl, URIs.propertyDomain))
     propertyData.autoDomains.addAll(objectsOfPredicate(propertyUrl, URIs.propertyAutoDomain))
@@ -369,6 +374,8 @@ class OntologyLogic {
       remove(data.url, URIs.label, oldData.enLabel)
     if ((oldData.name != null) && (oldData.name != data.name))
       remove(data.url, URIs.name, oldData.name)
+    if ((oldData.wasDerivedFrom != null) && (oldData.wasDerivedFrom != data.wasDerivedFrom))
+      remove(data.url, URIs.wasDerivedFrom, oldData.wasDerivedFrom)
     oldData.faVariantLabels.subtract(data.faVariantLabels).forEach { remove(data.url, URIs.variantLabel, it) }
     oldData.enVariantLabels.subtract(data.enVariantLabels).forEach { remove(data.url, URIs.variantLabel, it) }
     oldData.domains.subtract(data.domains).forEach { remove(data.url, URIs.propertyDomain, it) }
@@ -377,6 +384,7 @@ class OntologyLogic {
 
     insertAndVote(data.url, URIs.type, URIs.typeOfAllProperties)
     if (data.name != null) insertAndVote(data.url, URIs.name, data.name!!)
+    if (data.wasDerivedFrom != null) insertAndVote(data.url, URIs.wasDerivedFrom, data.wasDerivedFrom!!)
     if (data.faLabel != null) insertAndVote(data.url, URIs.label, data.faLabel!!)
     if (data.enLabel != null) insertAndVote(data.url, URIs.label, data.enLabel!!)
     data.faVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it) }

@@ -43,5 +43,6 @@ internal object KSMappingConverter {
   internal fun convert(it: ir.ac.iust.dml.kg.services.client.swagger.model.MapRule)
       = MapRule(predicate = it.predicate,
       transform = it.transform, constant = it.constant, unit = it.unit,
-      type = ValueType.valueOf(it.type.name.toLowerCase().capitalize()))
+      type = ValueType.valueOf((it.type ?: ir.ac.iust.dml.kg.services.client.swagger.model.MapRule.TypeEnum.STRING)
+          .name.toLowerCase().capitalize()))
 }
