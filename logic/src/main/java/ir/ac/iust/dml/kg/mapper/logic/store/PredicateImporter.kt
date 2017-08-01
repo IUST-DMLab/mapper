@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service
 class PredicateImporter {
 
   @Autowired private lateinit var holder: KSMappingHolder
+  @Autowired private lateinit var ontologyLogic: OntologyLogic
   @Autowired private lateinit var storeProvider: StoreProvider
   private val logger = Logger.getLogger(this.javaClass)!!
 
@@ -32,8 +33,8 @@ class PredicateImporter {
     holder.all().forEach { templateMapping ->
       templateMapping.properties!!.values.forEach { propertyMapping ->
         val label = propertyMapping.property!!.toLowerCase().replace('_', ' ')
-        propertyMappingLoop@ propertyMapping.rules.forEach {
-          if (it.predicate == null) return@propertyMappingLoop
+        propertyMapping.rules.forEach {
+          if (it.predicate == null) return@forEach
           val data = predicateData.getOrPut(it.predicate!!, { PredicateData() })
           data.labels[label] = (data.labels[label] ?: 0.0) + (propertyMapping.weight ?: 0.0)
           data.domains.add(templateMapping.ontologyClass)
@@ -79,10 +80,15 @@ class PredicateImporter {
         }
       }
 
-      data.domains.forEach {
-        store.convertAndSave(source = pu, subject = pu, property = URIs.propertyDomain,
-            objeck = URIs.getFkgOntologyClassUri(it))
+      var commonRoot: String
+      try {
+        commonRoot = ontologyLogic.findCommonRoot(data.domains)!!
+        logger.info("calculating root for ${data.domains} is $commonRoot")
+      } catch (th: Throwable) {
+        commonRoot = URIs.getFkgOntologyClassUri("Thing")
+        logger.error("error in calculating root for ${data.domains}")
       }
+      store.convertAndSave(source = pu, subject = pu, property = URIs.propertyAutoDomain, objeck = commonRoot)
     }
     (store as? KnowledgeStoreFkgTripleDaoImpl)?.flush()
     (store as? VirtuosoFkgTripleDaoImpl)?.close()

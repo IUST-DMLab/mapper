@@ -1,12 +1,5 @@
 package ir.ac.iust.dml.kg.mapper.logic.store.data
 
-/**
- * rdf:type
- * rdfs:domain
- * rdfs:label
- * rdfs:range
- * owl:equivalentProperty
- */
 data class OntologyPropertyData(
     var url: String? = null,
     var name: String? = null,
@@ -16,6 +9,8 @@ data class OntologyPropertyData(
     var enVariantLabels: MutableList<String> = mutableListOf(),
     var types: MutableList<String> = mutableListOf(),
     var domains: MutableList<String> = mutableListOf(),
+    var autoDomains: MutableList<String> = mutableListOf(),
     var ranges: MutableList<String> = mutableListOf(),
+    var autoRanges: MutableList<String> = mutableListOf(),
     var equivalentProperties: MutableList<String> = mutableListOf()
 )

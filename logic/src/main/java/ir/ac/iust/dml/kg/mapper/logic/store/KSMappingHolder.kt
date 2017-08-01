@@ -54,7 +54,7 @@ class KSMappingHolder {
       tm.weight = it.weight
       tm.template = it.template
       tm.rules = it.rules.map { KSMappingConverter.convert(it) }.toMutableSet()
-      tm.ontologyClass = (it.rules.filter { it.predicate == URIs.type }
+      tm.ontologyClass = (it.rules.filter { it.predicate == URIs.typePrefixed }
           .firstOrNull()?.constant ?: URIs.getFkgOntologyClassPrefixed("Thing")).substringAfterLast(":")
       tm.tree = ontologyLogic.getTree(tm.ontologyClass)?.split("/") ?: listOf(tm.ontologyClass)
       it.properties.forEach { pm ->

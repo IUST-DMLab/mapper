@@ -1,7 +1,13 @@
 package ir.ac.iust.dml.kg.mapper.logic.store
 
+import com.google.common.reflect.TypeToken
+import com.google.gson.Gson
+import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
+import ir.ac.iust.dml.kg.mapper.logic.data.ExportedPropertyData
 import ir.ac.iust.dml.kg.mapper.logic.store.data.OntologyClassData
 import ir.ac.iust.dml.kg.mapper.logic.store.data.OntologyPropertyData
+import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
+import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
 import ir.ac.iust.dml.kg.raw.utils.PagedData
@@ -12,7 +18,12 @@ import ir.ac.iust.dml.kg.services.client.swagger.V1triplesApi
 import ir.ac.iust.dml.kg.services.client.swagger.model.TripleData
 import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValueData
 import org.apache.log4j.Logger
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.io.BufferedReader
+import java.io.FileInputStream
+import java.io.InputStreamReader
+import java.nio.file.Files
 
 @Service
 class OntologyLogic {
@@ -22,6 +33,7 @@ class OntologyLogic {
   val expertApi: V1expertsApi
   private val treeCache = mutableMapOf<String, String>()
   private val childrenCache = mutableMapOf<String, List<String>>()
+  @Autowired lateinit var storeProvider: StoreProvider
 
   init {
     val client = ApiClient()
@@ -31,7 +43,48 @@ class OntologyLogic {
     expertApi = V1expertsApi(client)
   }
 
-  fun findCommonRoot(classes: List<String>): String? {
+  fun importFromDBpedia(storeType: StoreType = StoreType.knowledgeStore) {
+
+    val exportedJson = ConfigReader.getPath("dbpedia.properties.export", "~/.pkg/data/ontology_property.json")
+    if (!Files.exists(exportedJson.parent)) Files.createDirectories(exportedJson.parent)
+    if (!Files.exists(exportedJson)) {
+      throw Exception("There is no file ${exportedJson.toAbsolutePath()} existed.")
+    }
+    val store = storeProvider.getStore(storeType)
+    val gson = Gson()
+    val maxWrites = TestUtils.getMaxTuples()
+    val type = object : TypeToken<Map<String, ExportedPropertyData>>() {}.type
+    var index = 0
+    val dbpediaMainPrefix = "http://dbpedia.org/"
+    val fkgMainPrefix = URIs.prefixedToUri(URIs.fkgMainPrefix + ":")!!
+    try {
+      BufferedReader(InputStreamReader(FileInputStream(exportedJson.toFile()), "UTF8")).use { reader ->
+        val map: Map<String, ExportedPropertyData> = gson.fromJson(reader, type)
+        map.forEach { property, data ->
+          if (index >= maxWrites) return@forEach
+          index++
+          val subject = property.replace(dbpediaMainPrefix, fkgMainPrefix)
+          if (index % 1000 == 0) logger.info("writing property $property: $data")
+          val source = if (data.wasDerivedFrom == null) property else data.wasDerivedFrom!!
+          store.save(source, subject, URIs.typeOfAllProperties, URIs.type)
+          if (data.label != null) store.save(source, subject, data.label!!, URIs.label)
+          if (data.comment != null) store.save(source, subject, data.comment!!, URIs.comment)
+          if (data.domain != null) store.save(source, subject,
+              data.domain!!.replace(dbpediaMainPrefix, fkgMainPrefix), URIs.propertyDomain)
+          if (data.range != null) store.save(source, subject,
+              data.range!!.replace(dbpediaMainPrefix, fkgMainPrefix), URIs.propertyRange)
+          if (data.wasDerivedFrom != null) store.save(source, subject, data.wasDerivedFrom!!, URIs.wasDerivedFrom)
+          if (data.equivalentProperty != null) store.save(source, subject,
+              data.equivalentProperty!!.replace(dbpediaMainPrefix, fkgMainPrefix), URIs.equivalentProperty)
+          if (data.type != null) store.save(source, subject, data.type!!, URIs.type)
+        }
+      }
+    } catch (th: Throwable) {
+      logger.error(th)
+    }
+  }
+
+  fun findCommonRoot(classes: Collection<String>): String? {
     if (treeCache.isEmpty()) reloadTreeCache()
     val tress = mutableListOf<List<String>>()
     classes.forEach {
@@ -65,7 +118,7 @@ class OntologyLogic {
         val classes = getType(null, URIs.typeOfAllClasses, page++, 100)
         classes.data.forEach { classUrl ->
           val name = classUrl.substringAfterLast("/")
-          val parents = mutableListOf<String>()
+          val parents = mutableListOf(name)
           fillParents(classUrl, parents)
           treeCache[name] = parents.map { it.substringAfterLast("/") }.joinToString("/")
           val children = mutableListOf<String>()
@@ -291,7 +344,9 @@ class OntologyLogic {
     propertyData.name = objectOfPredicate(propertyUrl, URIs.name)
     propertyData.types.addAll(objectsOfPredicate(propertyUrl, URIs.type))
     propertyData.domains.addAll(objectsOfPredicate(propertyUrl, URIs.propertyDomain))
+    propertyData.autoDomains.addAll(objectsOfPredicate(propertyUrl, URIs.propertyAutoDomain))
     propertyData.ranges.addAll(objectsOfPredicate(propertyUrl, URIs.propertyRange))
+    propertyData.autoRanges.addAll(objectsOfPredicate(propertyUrl, URIs.propertyAutoRange))
     propertyData.equivalentProperties.addAll(objectsOfPredicate(propertyUrl, URIs.equivalentProperty))
 
     return propertyData

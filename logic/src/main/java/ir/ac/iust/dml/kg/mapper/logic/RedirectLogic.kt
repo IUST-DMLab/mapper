@@ -2,7 +2,6 @@ package ir.ac.iust.dml.kg.mapper.logic
 
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
-import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
@@ -24,7 +23,7 @@ import java.nio.file.Files
 class RedirectLogic {
 
   val logger = Logger.getLogger(this.javaClass)!!
-  @Autowired private lateinit var tripleDao: FkgTripleDao
+  @Autowired lateinit var storeProvider: StoreProvider
 
   class Ambiguity {
     var title: String? = null
@@ -39,11 +38,7 @@ class RedirectLogic {
       throw Exception("There is no file ${redirectsFolder.toAbsolutePath()} existed.")
     }
 
-    val store = when (storeType) {
-      StoreType.mysql -> tripleDao
-      StoreType.virtuoso -> VirtuosoFkgTripleDaoImpl()
-      else -> KnowledgeStoreFkgTripleDaoImpl()
-    }
+    val store = storeProvider.getStore(storeType)
 
     val gson = Gson()
     val type = object : TypeToken<Map<String, String>>() {}.type

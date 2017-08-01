@@ -44,6 +44,8 @@ public class MappingHelperRestServices {
   private NotMappedPropertyHandler notMappedPropertyHandler;
   @Autowired
   private RawTripleImporter rawTripleImporter;
+  @Autowired
+  private OntologyLogic ontologyLogic;
 
   @RequestMapping("/migrate")
   public String migrate() throws Exception {
@@ -147,6 +149,13 @@ public class MappingHelperRestServices {
   public Boolean predicates(@RequestParam(defaultValue = "none") StoreType type,
                             @RequestParam(defaultValue = "true") boolean resolveAmbiguity) {
     predicateImporter.writePredicates(type, resolveAmbiguity);
+    return true;
+  }
+
+  @RequestMapping("/dbpediaPredicates")
+  @ResponseBody
+  public Boolean dbpediaPredicates(@RequestParam(defaultValue = "none") StoreType type) {
+    ontologyLogic.importFromDBpedia(type);
     return true;
   }
 
