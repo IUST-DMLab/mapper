@@ -77,8 +77,8 @@ class OntologyLogic {
       tripleApi.search1(URIs.defaultContext, false, subject, likeSubject, predicate,
           likePredicate, `object`, likeObject, page, pageSize)
 
-  private fun getType(keyword: String?, type: String, page: Int, pageSize: Int): PagedData<String> {
-    val result = search(keyword, URIs.type, type, page, pageSize, likeSubject = true)
+  private fun getType(keyword: String?, type: String, page: Int, pageSize: Int, like: Boolean = false): PagedData<String> {
+    val result = search(keyword, URIs.type, type, page, pageSize, likeSubject = like)
     val data = result.data.map { it.subject }.toMutableList()
     return PagedData<String>(data, page, pageSize, result.pageCount, result.totalSize)
   }
@@ -127,7 +127,8 @@ class OntologyLogic {
     return true
   }
 
-  fun classes(page: Int, pageSize: Int, keyword: String?) = getType(keyword, URIs.typeOfAllClasses, page, pageSize)
+  fun classes(page: Int, pageSize: Int, query: String?, like: Boolean)
+      = getType(query, URIs.typeOfAllClasses, page, pageSize, like)
 
   data class OntologyNode(var url: String, var label: String? = null,
                           var children: MutableList<OntologyNode> = mutableListOf<OntologyNode>())
@@ -157,8 +158,8 @@ class OntologyLogic {
     }
   }
 
-  fun properties(page: Int, pageSize: Int, keyword: String?)
-      = getType(keyword, URIs.typeOfAllProperties, page, pageSize)
+  fun properties(page: Int, pageSize: Int, query: String?, like: Boolean)
+      = getType(query, URIs.typeOfAllProperties, page, pageSize, like)
 
   fun classData(classUrl: String): OntologyClassData {
     val classData = OntologyClassData(url = classUrl)
