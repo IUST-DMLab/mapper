@@ -21,5 +21,7 @@ data class OntologyClassData(
     var wasDerivedFrom: String? = null,
     var equivalentClasses: MutableList<String> = mutableListOf(),
     var disjointWith: MutableList<String> = mutableListOf(),
-    var properties: MutableList<OntologyPropertyData> = mutableListOf()
+    var properties: MutableList<OntologyPropertyData> = mutableListOf(),
+    var next: String? = null,
+    var previous: String? = null
 )

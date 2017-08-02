@@ -33,6 +33,7 @@ class OntologyLogic {
   val expertApi: V1expertsApi
   private val treeCache = mutableMapOf<String, String>()
   private val childrenCache = mutableMapOf<String, List<String>>()
+  private val traversedTree = mutableListOf<String>()
   @Autowired lateinit var storeProvider: StoreProvider
 
   init {
@@ -142,10 +143,17 @@ class OntologyLogic {
           childrenCache[name] = children.map { it.substringAfterLast("/") }
         }
       } while (classes.data.isNotEmpty())
+      traversedTree.clear()
+      traverseCache("Thing", traversedTree)
       return true
     } catch (th: Throwable) {
       return false
     }
+  }
+
+  private fun traverseCache(current: String, list: MutableList<String>) {
+    list.add(URIs.getFkgOntologyClassUri(current))
+    childrenCache[current]?.forEach { traverseCache(it, list) }
   }
 
   private fun fillParents(classUrl: String, parents: MutableList<String>) {
@@ -161,7 +169,7 @@ class OntologyLogic {
   private fun fillChildren(classUrl: String, children: MutableList<String>) {
     val pages = tripleApi.search1(null, false, null, false,
         URIs.subClassOf, false, classUrl, false, 0, 10000)
-    children.addAll(pages.data.map { it.subject })
+    children.addAll(pages.data.map { it.subject }.sortedBy { it })
   }
 
   fun getTree(ontologyClass: String) = treeCache[ontologyClass]
@@ -229,26 +237,28 @@ class OntologyLogic {
   data class OntologyNode(var url: String, var label: String? = null,
                           var children: MutableList<OntologyNode> = mutableListOf<OntologyNode>())
 
-  fun classTree(rootUrl: String?, maxDepth: Int? = null, label: Boolean = false): OntologyNode {
+  fun classTree(rootUrl: String?, maxDepth: Int? = null, labelLanguage: String? = null): OntologyNode {
     val root = OntologyNode(rootUrl ?: URIs.getFkgOntologyClassUri("Thing"))
-    fillNode(root, label, 0, maxDepth ?: 100)
+    fillNode(root, labelLanguage, 0, maxDepth ?: 100)
     return root
   }
 
-  fun fillNode(node: OntologyNode, label: Boolean, depth: Int, maxDepth: Int?) {
-    if (label) node.label = getLabel(node.url)
+  fun fillNode(node: OntologyNode, labelLanguage: String?, depth: Int, maxDepth: Int?) {
+    if (labelLanguage != null) node.label = getLabel(node.url, labelLanguage)
     if (maxDepth != null && depth == maxDepth) return
     val children = search(null, URIs.subClassOf, node.url, 0, null).data
     children.forEach {
       val child = OntologyNode(it.subject)
-      fillNode(child, label, depth + 1, maxDepth)
+      fillNode(child, labelLanguage, depth + 1, maxDepth)
       node.children.add(child)
     }
   }
 
-  fun getLabel(url: String): String? {
+  fun getLabel(url: String, language: String? = null): String? {
     try {
-      return search(url, URIs.label, null, 0, 1).data.firstOrNull()?.`object`?.value
+      return search(url, URIs.label, null, 0, 0).data.filter {
+        language == null || it.`object`?.lang == language
+      }.firstOrNull()?.`object`?.value
     } catch (th: Throwable) {
       return null
     }
@@ -287,6 +297,10 @@ class OntologyLogic {
       classData.properties.add(propertyData(it))
     }
 
+    if (traversedTree.isEmpty()) reloadTreeCache()
+    val index = traversedTree.indexOf(classUrl)
+    classData.next = if (index > -1 && index < traversedTree.size - 2) traversedTree[index + 1] else null
+    classData.previous = if (index > 0) traversedTree[index - 1] else null
     return classData
   }
 
