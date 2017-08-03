@@ -45,7 +45,12 @@ class EntityViewer {
     tripleApi = V1triplesApi(client)
   }
 
-  data class EntityPropertyValue(val value: String, var url: String? = null) {
+  data class EntityPropertyValue(val value: String, var url: String? = null) : Comparator<Any> {
+    override fun compare(o1: Any?, o2: Any?): Int {
+      if (o1 is EntityPropertyValue && o2 is EntityPropertyValue) o1.value.compareTo(o2.value)
+      return 0
+    }
+
     override fun hashCode() = value.hashCode()
     override fun equals(other: Any?) = value == (other as EntityPropertyValue).value
   }
