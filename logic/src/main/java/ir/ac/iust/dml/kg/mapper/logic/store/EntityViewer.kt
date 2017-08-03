@@ -24,6 +24,8 @@ class EntityViewer {
       Regex(URIs.abstract.replace(".", "\\.")),
       Regex(URIs.label.replace(".", "\\.")),
       Regex(URIs.prefixedToUri("foaf:homepage")!!.replace(".", "\\.")),
+      Regex(URIs.prefixedToUri("fkgo:predecessor")!!.replace(".", "\\.")),
+      Regex(URIs.prefixedToUri("fkgo:successor")!!.replace(".", "\\.")),
       Regex(URIs.getFkgOntologyPropertyUri("source").replace(".", "\\.")),
       Regex(URIs.getFkgOntologyPropertyUri("data").replace(".", "\\.")),
       Regex(URIs.getFkgOntologyPropertyUri("fontSize").replace(".", "\\.")),
