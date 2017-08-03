@@ -234,7 +234,7 @@ class OntologyLogic {
   fun classes(page: Int, pageSize: Int, query: String?, like: Boolean)
       = getType(query, URIs.typeOfAllClasses, page, pageSize, like)
 
-  data class OntologyNode(var url: String, var label: String? = null,
+  data class OntologyNode(var url: String, var label: String? = null, var name: String? = null,
                           var children: MutableList<OntologyNode> = mutableListOf<OntologyNode>())
 
   fun classTree(rootUrl: String?, maxDepth: Int? = null, labelLanguage: String? = null): OntologyNode {
@@ -244,11 +244,13 @@ class OntologyLogic {
   }
 
   fun fillNode(node: OntologyNode, labelLanguage: String?, depth: Int, maxDepth: Int?) {
+    if (treeCache.isEmpty()) reloadTreeCache()
     if (labelLanguage != null) node.label = getLabel(node.url, labelLanguage)
+    node.name = node.url.substring(node.url.indexOf("/ontology/") + 10)
     if (maxDepth != null && depth == maxDepth) return
-    val children = search(null, URIs.subClassOf, node.url, 0, null).data
+    val children = childrenCache[node.name!!] ?: listOf()
     children.forEach {
-      val child = OntologyNode(it.subject)
+      val child = OntologyNode(URIs.getFkgOntologyClassUri(it))
       fillNode(child, labelLanguage, depth + 1, maxDepth)
       node.children.add(child)
     }
@@ -260,6 +262,14 @@ class OntologyLogic {
       return search(url, URIs.label, null, 0, 0).data.filter {
         language == null || it.`object`?.lang == language
       }.firstOrNull()?.`object`?.value
+    } catch (th: Throwable) {
+      return null
+    }
+  }
+
+  fun getName(url: String): String? {
+    try {
+      return search(url, URIs.name, null, 0, 0).data.firstOrNull()?.`object`?.value
     } catch (th: Throwable) {
       return null
     }
