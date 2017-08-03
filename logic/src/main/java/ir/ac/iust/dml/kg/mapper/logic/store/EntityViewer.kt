@@ -7,6 +7,7 @@ import ir.ac.iust.dml.kg.services.client.ApiClient
 import ir.ac.iust.dml.kg.services.client.swagger.V1triplesApi
 import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValue
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class EntityViewer {
@@ -51,7 +52,7 @@ class EntityViewer {
 
   data class EntityData(var label: String? = null, var type: String? = null,
                         var abstract: String? = null, var image: String? = null,
-                        var properties: MutableMap<String, MutableSet<EntityPropertyValue>> = mutableMapOf())
+                        var properties: SortedMap<String, SortedSet<EntityPropertyValue>> = sortedMapOf())
 
   private fun search(subject: String? = null, predicate: String? = null, `object`: String? = null, one: Boolean)
       = tripleApi.search1(null, null, subject, false, predicate,
@@ -86,7 +87,7 @@ class EntityViewer {
     }.forEach {
       val propertyLabel = propertyLabelCache.getOrPut(it.predicate, { getLabel(it.predicate) })
       if (propertyLabel != null) {
-        val values = result.properties.getOrPut(propertyLabel, { mutableSetOf() })
+        val values = result.properties.getOrPut(propertyLabel, { sortedSetOf() })
         if (it.`object`.type == TypedValue.TypeEnum.RESOURCE) {
           val l = getLabel(it.`object`.value)
           values.add(EntityPropertyValue(l ?: it.`object`.value.substringAfterLast("/"), it.`object`.value))
