@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*
 class EntityRestServices {
   @Autowired lateinit var logic: EntityViewer
 
-  @RequestMapping("searchProperty", method = arrayOf(RequestMethod.GET))
+  @RequestMapping("getEntityData", method = arrayOf(RequestMethod.GET))
   @ResponseBody
   fun getEntityData(@RequestParam url: String) = logic.getEntityData(url)
 
