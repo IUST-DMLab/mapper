@@ -49,7 +49,7 @@ class EntityViewer {
     tripleApi = V1triplesApi(client)
   }
 
-  data class EntityPropertyValue(val value: String, var url: String? = null) : Comparable<EntityPropertyValue> {
+  data class EntityPropertyValue(val value: String, var url: String? = null, var image: Boolean = false) : Comparable<EntityPropertyValue> {
     override fun compareTo(other: EntityPropertyValue) = this.value.compareTo(other.value)
     override fun hashCode() = value.hashCode()
     override fun equals(other: Any?) = value == (other as EntityPropertyValue).value
@@ -96,9 +96,10 @@ class EntityViewer {
         val values = result.properties.getOrPut(propertyLabel, { sortedSetOf() })
         if (it.`object`.type == TypedValue.TypeEnum.RESOURCE) {
           val l = getLabel(it.`object`.value)
-          values.add(EntityPropertyValue(l ?: it.`object`.value.substringAfterLast("/"), it.`object`.value))
+          values.add(EntityPropertyValue(l ?: it.`object`.value.substringAfterLast("/"),
+              it.`object`.value, it.`object`.value.contains("upload.wikimedia.org")))
         } else {
-          if (!LanguageChecker.isEnglish(it.`object`.value))
+          if (!LanguageChecker.multiLanguages(it.`object`.value))
             values.add(EntityPropertyValue(it.`object`.value))
         }
       }
