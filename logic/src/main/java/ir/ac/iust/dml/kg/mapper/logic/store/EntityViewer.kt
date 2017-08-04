@@ -55,7 +55,7 @@ class EntityViewer {
     override fun equals(other: Any?) = value == (other as EntityPropertyValue).value
   }
 
-  data class EntityData(var label: String? = null, var type: String? = null,
+  data class EntityData(var label: String? = null, var type: String? = null, var wikiLink: String? = null,
                         var abstract: String? = null, var image: String? = null,
                         var properties: SortedMap<String, SortedSet<EntityPropertyValue>> = sortedMapOf())
 
@@ -76,7 +76,8 @@ class EntityViewer {
 
   fun getEntityData(url: String): EntityData {
     val result = EntityData()
-    val entityDefaultName = url.substringAfterLast("/")
+    val entityDefaultName = url.substringAfterLast("/").replace('_', ' ')
+    result.wikiLink = "https://fa.wikipedia.org/wiki/" + entityDefaultName.replace(' ', '_')
     var searched = search(url, URIs.label, null, true)
     result.label = if (searched.data.isEmpty()) entityDefaultName else searched.data[0].`object`.value
     searched = search(url, URIs.instanceOf, null, true)
@@ -96,9 +97,13 @@ class EntityViewer {
         if (it.`object`.type == TypedValue.TypeEnum.RESOURCE) {
           val l = getLabel(it.`object`.value)
           values.add(EntityPropertyValue(l ?: it.`object`.value.substringAfterLast("/"), it.`object`.value))
-        } else values.add(EntityPropertyValue(it.`object`.value))
+        } else {
+          if (!LanguageChecker.isEnglish(it.`object`.value))
+            values.add(EntityPropertyValue(it.`object`.value))
+        }
       }
     }
+    result.properties = result.properties.filter { it.value.isNotEmpty() }.toSortedMap()
     return result
   }
 }
