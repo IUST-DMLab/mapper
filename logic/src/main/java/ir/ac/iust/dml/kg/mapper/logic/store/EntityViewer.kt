@@ -96,7 +96,7 @@ class EntityViewer {
         val values = result.properties.getOrPut(propertyLabel, { sortedSetOf() })
         if (it.`object`.type == TypedValue.TypeEnum.RESOURCE) {
           val l = getLabel(it.`object`.value)
-          values.add(EntityPropertyValue(l ?: it.`object`.value.substringAfterLast("/"),
+          values.add(EntityPropertyValue(l ?: it.`object`.value.substringAfterLast("/").replace('_', ' '),
               it.`object`.value, it.`object`.value.contains("upload.wikimedia.org")))
         } else {
           if (!LanguageChecker.multiLanguages(it.`object`.value))
