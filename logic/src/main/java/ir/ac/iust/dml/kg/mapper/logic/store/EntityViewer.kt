@@ -30,6 +30,7 @@ class EntityViewer {
       Regex(URIs.getFkgOntologyPropertyUri("source").replace(".", "\\.")),
       Regex(URIs.getFkgOntologyPropertyUri("data").replace(".", "\\.")),
       Regex(URIs.getFkgOntologyPropertyUri("fontSize").replace(".", "\\.")),
+      Regex(URIs.getFkgOntologyPropertyUri("imageSize").replace(".", "\\.")),
       Regex(URIs.getFkgOntologyPropertyUri("nameData").replace(".", "\\.")),
       Regex(URIs.getFkgOntologyPropertyUri("quotation").replace(".", "\\.")),
       Regex(URIs.getFkgOntologyPropertyUri("quote").replace(".", "\\.")),
