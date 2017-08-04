@@ -84,6 +84,7 @@ class EntityViewer {
     result.type = getLabel(if (searched.data.isEmpty()) THING else searched.data[0].`object`.value)
     searched = search(url, URIs.abstract, null, true)
     result.abstract = searched.data.firstOrNull()?.`object`?.value
+    if (result.abstract?.length ?: 0 > 250) result.abstract = result.abstract + " ..."
     searched = search(url, URIs.picture, null, true)
     result.image = searched.data.firstOrNull()?.`object`?.value
     searched = search(url, null, null, false)
