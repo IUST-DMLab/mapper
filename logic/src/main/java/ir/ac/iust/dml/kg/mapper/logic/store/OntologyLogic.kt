@@ -87,9 +87,10 @@ class OntologyLogic {
               data.equivalentProperty!!.replace(dbpediaMainPrefix, fkgMainPrefix), URIs.equivalentProperty)
 
           if (data.type != null) {
+            val typeUrl = URIs.prefixedToUri(data.type)!!
             val oldTypes = store.read(subject = subject, predicate = URIs.type)
             oldTypes.forEach { store.delete(it.subject!!, it.predicate!!, it.objekt!!) }
-            store.save(source, subject, data.type!!, URIs.type)
+            store.save(source, subject, typeUrl, URIs.type)
           }
           store.save(source, subject, URIs.typeOfAnyProperties, URIs.type)
         }
