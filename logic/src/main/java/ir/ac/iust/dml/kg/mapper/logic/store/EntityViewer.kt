@@ -16,7 +16,7 @@ class EntityViewer {
   val propertyLabelCache = mutableMapOf<String, String?>()
   val filteredPredicates = listOf(
       Regex(URIs.prefixedToUri(URIs.fkgNotMappedPropertyPrefix + ":")!!.replace(".", "\\.") + "[\\d\\w]*"),
-      Regex(URIs.prefixedToUri(URIs.fkgOntologyPrefix + ":")!!.replace(".", "\\.") + ".*[yY]ear.*"),
+      Regex(URIs.fkgOntologyPrefixUrl.replace(".", "\\.") + ".*[yY]ear.*"),
       Regex(URIs.getFkgOntologyPropertyUri("wiki").replace(".", "\\.") + ".*"),
       Regex(URIs.getFkgOntologyPropertyUri("ویکی").replace(".", "\\.") + ".*"),
       Regex(URIs.picture.replace(".", "\\.")),

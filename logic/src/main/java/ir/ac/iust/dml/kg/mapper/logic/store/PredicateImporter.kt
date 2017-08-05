@@ -58,7 +58,7 @@ class PredicateImporter {
 
       val result = store.read(subject = pu, predicate = URIs.name)
       if (result.isEmpty()) {
-        val name = pu.substring(pu.indexOf("/ontology/") + 10)
+        val name = URIs.getFkgOntologyNameFromUri(pu)
         store.convertAndSave(source = pu, subject = pu, property = URIs.name, objeck = name)
       }
 
@@ -79,7 +79,9 @@ class PredicateImporter {
         }
       }
 
-      store.convertAndSave(source = pu, subject = pu, property = URIs.wasDerivedFrom, objeck = pu)
+      val searched = store.read(subject = pu, predicate = URIs.wasDerivedFrom)
+      if (searched.isEmpty())
+        store.convertAndSave(source = pu, subject = pu, property = URIs.wasDerivedFrom, objeck = pu)
 
       var commonRoot: String
       try {
