@@ -1,9 +1,6 @@
 package ir.ac.iust.dml.kg.mapper.runner.web.rest;
 
-import ir.ac.iust.dml.kg.mapper.logic.MappingLoader;
-import ir.ac.iust.dml.kg.mapper.logic.PropertyMappingLogic;
-import ir.ac.iust.dml.kg.mapper.logic.RedirectLogic;
-import ir.ac.iust.dml.kg.mapper.logic.StatsLogic;
+import ir.ac.iust.dml.kg.mapper.logic.*;
 import ir.ac.iust.dml.kg.mapper.logic.export.ExportData;
 import ir.ac.iust.dml.kg.mapper.logic.export.TemplateToOntologyExporter;
 import ir.ac.iust.dml.kg.mapper.logic.store.*;
@@ -46,6 +43,8 @@ public class MappingHelperRestServices {
   private RawTripleImporter rawTripleImporter;
   @Autowired
   private OntologyLogic ontologyLogic;
+  @Autowired
+  private EntityToClassLogic entityToClassLogic;
 
   @RequestMapping("/migrate")
   public String migrate() throws Exception {
@@ -156,6 +155,13 @@ public class MappingHelperRestServices {
   @ResponseBody
   public Boolean dbpediaPredicates(@RequestParam(defaultValue = "none") StoreType type) {
     ontologyLogic.importFromDBpedia(type);
+    return true;
+  }
+
+  @RequestMapping("/writeTree")
+  @ResponseBody
+  public Boolean writeTree(@NotNull StoreType type) {
+    entityToClassLogic.writeTree(type);
     return true;
   }
 
