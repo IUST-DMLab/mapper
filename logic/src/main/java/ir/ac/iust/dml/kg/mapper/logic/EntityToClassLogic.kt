@@ -62,8 +62,12 @@ class EntityToClassLogic {
           predicate = URIs.type, objekt = URIs.typeOfAllClasses), null)
       val name = subjectUrl.substring(subjectUrl.indexOf("/ontology/") + 10)
       dao.save(FkgTriple(subject = subjectUrl, predicate = URIs.name, objekt = name), null)
-      if (it.wasDerivedFrom != null)
+      if (it.wasDerivedFrom != null) {
+        dao.read(subject = subjectUrl, predicate = URIs.wasDerivedFrom).forEach {
+          dao.delete(it.subject!!, it.predicate!!, it.objekt!!)
+        }
         dao.save(FkgTriple(subject = subjectUrl, predicate = URIs.wasDerivedFrom, objekt = it.wasDerivedFrom!!), null)
+      }
       if (it.comment != null && it.comment!!.isNotBlank())
         dao.save(FkgTriple(subject = subjectUrl,
             predicate = URIs.comment, objekt = it.comment), null)
