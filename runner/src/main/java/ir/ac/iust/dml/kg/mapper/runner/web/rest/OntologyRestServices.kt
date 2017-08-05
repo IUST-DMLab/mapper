@@ -46,8 +46,9 @@ class OntologyRestServices {
   fun properties(@RequestParam(required = false, defaultValue = "0") page: Int?,
                  @RequestParam(required = false, defaultValue = "20") pageSize: Int?,
                  @RequestParam(required = false) keyword: String?,
+                 @RequestParam(required = false) type: String?,
                  @RequestParam(required = false, defaultValue = "false") like: Boolean) =
-      logic.properties(page!!, pageSize!!, keyword, like)
+      logic.properties(page!!, pageSize!!, keyword, type, like)
 
   @RequestMapping("propertyData", method = arrayOf(RequestMethod.GET))
   @ResponseBody

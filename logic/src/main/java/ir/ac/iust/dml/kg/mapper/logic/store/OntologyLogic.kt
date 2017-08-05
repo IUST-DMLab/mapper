@@ -275,8 +275,13 @@ class OntologyLogic {
     }
   }
 
-  fun properties(page: Int, pageSize: Int, query: String?, like: Boolean)
-      = getType(query, URIs.typeOfAnyProperties, page, pageSize, like)
+  fun properties(page: Int, pageSize: Int, query: String?, type: String?, like: Boolean): PagedData<String> {
+    var t = URIs.typeOfAnyProperties
+    if (type != null) t = if (!type.contains("://"))
+      (if (type.contains(":")) URIs.prefixedToUri(type)!! else URIs.prefixedToUri("owl:" + type)!!)
+    else type
+    return getType(query, t, page, pageSize, like)
+  }
 
   fun classData(classUrl: String): OntologyClassData {
     val classData = OntologyClassData(url = classUrl)
