@@ -4,7 +4,7 @@ import org.hibernate.annotations.Index
 import javax.persistence.*
 
 @Entity
-@Table(name = "ontology_classes_translation")
+@Table(name = "fkg_ontology_classes")
 data class FkgOntologyClass(
     @Id
     @Column(name = "id")

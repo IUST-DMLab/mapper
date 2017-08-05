@@ -79,6 +79,10 @@ class PredicateImporter {
         }
       }
 
+      val searched = store.read(subject = pu, predicate = URIs.wasDerivedFrom)
+      if (searched.isEmpty())
+        store.convertAndSave(source = pu, subject = pu, property = URIs.wasDerivedFrom, objeck = pu)
+
       var commonRoot: String
       try {
         commonRoot = ontologyLogic.findCommonRoot(data.domains)!!
