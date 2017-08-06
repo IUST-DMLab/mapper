@@ -49,19 +49,19 @@ class RedirectLogic {
       try {
         BufferedReader(InputStreamReader(FileInputStream(it.toFile()), "UTF8")).use { reader ->
           val map: Map<String, String> = gson.fromJson(reader, type)
-          map.forEach { t, u ->
+          map.forEach { redirect, mainResource ->
             i++
             if (i < maxNumberOfRedirects) {
-              if (i % 1000 == 0) logger.info("writing redirect $i: $t to $u")
+              if (i % 1000 == 0) logger.info("writing redirect $i: $redirect to $mainResource")
               store.save(FkgTriple(
-                  subject = URIs.getFkgResourceUri(u),
+                  subject = URIs.getFkgResourceUri(mainResource),
                   predicate = URIs.redirect,
-                  objekt = "http://fa.wikipedia.org/wiki/" + t.replace(' ', '_')
+                  objekt = "http://fa.wikipedia.org/wiki/" + redirect.replace(' ', '_')
               ), null, true)
               store.save(FkgTriple(
-                  subject = URIs.getFkgResourceUri(u),
+                  subject = URIs.getFkgResourceUri(mainResource),
                   predicate = URIs.variantLabel,
-                  objekt = t.replace('_', ' ')
+                  objekt = redirect.replace('_', ' ')
               ), null, true)
             }
           }

@@ -8,6 +8,7 @@ import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.URIs
+import ir.ac.iust.nlp.jhazm.Stemmer
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -19,6 +20,7 @@ class RawTripleImporter {
   @Autowired private lateinit var storeProvider: StoreProvider
   @Autowired private lateinit var entityInfoLogic: EntityInfoLogic
   @Autowired private lateinit var notMappedPropertyHandler: NotMappedPropertyHandler
+  private var propertyMap = mutableMapOf<String, MutableSet<String>>()
 
   fun writeTriples(storeType: StoreType = StoreType.none) {
     val path = PathUtils.getPath("raw.folder.input", "~/raw/triples")
@@ -32,6 +34,17 @@ class RawTripleImporter {
     entityInfoLogic.reload()
     holder.writeToKS()
     holder.loadFromKS()
+    if (propertyMap.isEmpty()) {
+      propertyMap = mutableMapOf()
+      holder.all().forEach { map ->
+        map.properties?.forEach { property, propertyMapping ->
+          propertyMapping.rules.forEach { rule ->
+            if (rule.predicate != null)
+              propertyMap.getOrPut(property, { mutableSetOf() }).add(URIs.prefixedToUri(rule.predicate!!)!!)
+          }
+        }
+      }
+    }
 
     result.forEachIndexed { index, p ->
       ir.ac.iust.dml.kg.raw.triple.RawTripleImporter(p).use { reader ->
@@ -47,22 +60,27 @@ class RawTripleImporter {
             val objekt = if (entityInfoLogic.resources.containsKey(triple.`object`))
               URIs.getFkgResourceUri(triple.`object`) else triple.`object`
             val predicate: String
+            val stemmedPredicate = Stemmer.i().stem(triple.predicate)
             if (triple.isNeedsMapping) {
-              val subjectInfoBoxes = entityInfoLogic.resources[subject]
-              val defaultProperty = URIs.convertToNotMappedFkgPropertyUri(triple.predicate)!!
+              val subjectInfoBoxes = entityInfoLogic.resources[subject.substringAfterLast("/")]
+              val defaultProperty = URIs.convertToNotMappedFkgPropertyUri(stemmedPredicate)!!
               predicate =
                   if (subjectInfoBoxes == null) defaultProperty
                   else {
                     var m = mutableSetOf<MapRule>()
                     subjectInfoBoxes.forEach {
-                      val pm = holder.examinePropertyMapping(it, defaultProperty)
+                      val pm = holder.examinePropertyMapping(it, triple.predicate)
                       if (pm != null && pm.rules.isNotEmpty()) {
                         m = pm.rules
                         return@forEach
                       }
                     }
-                    if (m.isNotEmpty()) m.iterator().next().predicate!!
-                    else defaultProperty
+                    if (m.isNotEmpty()) URIs.prefixedToUri(m.iterator().next().predicate!!)!!
+                    else {
+                      val ped = propertyMap[stemmedPredicate]
+                      if (ped != null && ped.isNotEmpty()) ped.first()
+                      else defaultProperty
+                    }
                   }
               if (predicate == defaultProperty) notMappedPropertyHandler.addToNotMapped(triple.predicate)
             } else predicate = triple.predicate
@@ -76,5 +94,6 @@ class RawTripleImporter {
       }
     }
     store.flush()
+    notMappedPropertyHandler.writeNotMappedProperties(storeType, true)
   }
 }
