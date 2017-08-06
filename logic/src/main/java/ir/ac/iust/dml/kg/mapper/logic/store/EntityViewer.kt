@@ -31,6 +31,7 @@ class EntityViewer {
       Regex(URIs.getFkgOntologyPropertyUri("data").replace(".", "\\.")),
       Regex(URIs.getFkgOntologyPropertyUri("fontSize").replace(".", "\\.")),
       Regex(URIs.getFkgOntologyPropertyUri("imageSize").replace(".", "\\.")),
+      Regex(URIs.getFkgOntologyPropertyUri("depictionDescription").replace(".", "\\.")),
       Regex(URIs.getFkgOntologyPropertyUri("nameData").replace(".", "\\.")),
       Regex(URIs.getFkgOntologyPropertyUri("quotation").replace(".", "\\.")),
       Regex(URIs.getFkgOntologyPropertyUri("quote").replace(".", "\\.")),
@@ -83,6 +84,7 @@ class EntityViewer {
     result.label = if (searched.data.isEmpty()) entityDefaultName else searched.data[0].`object`.value
     searched = search(url, URIs.instanceOf, null, true)
     result.type = getLabel(if (searched.data.isEmpty()) THING else searched.data[0].`object`.value)
+    if (result.type == THING) result.type = null
     searched = search(url, URIs.abstract, null, true)
     result.abstract = searched.data.firstOrNull()?.`object`?.value
     if (result.abstract?.length ?: 0 > 250) result.abstract = result.abstract + " ..."
