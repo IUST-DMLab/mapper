@@ -85,7 +85,7 @@ class EntityViewer {
     searched = search(url, URIs.instanceOf, null, true)
     var type = if (searched.data.isEmpty()) THING else searched.data[0].`object`.value
     if (type == THING) type = null
-    result.type = getLabel(type)
+    result.type = if (type == null) null else getLabel(type)
     searched = search(url, URIs.abstract, null, true)
     result.abstract = searched.data.firstOrNull()?.`object`?.value
     if (result.abstract?.length ?: 0 > 250) result.abstract = result.abstract + " ..."
