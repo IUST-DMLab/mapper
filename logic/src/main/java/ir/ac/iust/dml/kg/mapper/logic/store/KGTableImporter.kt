@@ -82,7 +82,8 @@ class KGTableImporter {
                 else URIs.convertToNotMappedFkgPropertyUri(triple.predicate!!)!!
 
             subjects.add(subject)
-            store.save(triple.source!!, subject, triple.objekt!!, "table", predicate, null, null, extractionTime, version)
+            store.save(triple.source!!, subject, triple.objekt!!, triple.module!!, predicate, null, null,
+                extractionTime, triple.version)
           } catch (e: Throwable) {
             logger.error(triple.toString(), e)
           }
@@ -92,7 +93,7 @@ class KGTableImporter {
 
     subjects.forEach { subject ->
       val label = subject.substringAfterLast("/").replace("_", " ")
-      store.save(subject, subject, label, "table", URIs.label, null, null, extractionTime, version)
+      store.save(subject, subject, label, "mapper_auto_labeling", URIs.label, null, null, extractionTime, version)
     }
 
     entityTree.forEach { entity, tress ->
