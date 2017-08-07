@@ -72,6 +72,8 @@ class RawTripleImporter {
       }
     }
 
+    var newSubjects = mutableListOf<String>()
+
     result.forEachIndexed { index, p ->
       ir.ac.iust.dml.kg.raw.triple.RawTripleImporter(p).use { reader ->
         while (reader.hasNext()) {
@@ -110,6 +112,7 @@ class RawTripleImporter {
             if (subject == null) {
               subject = URIs.getFkgResourceUri(subjectLabel)
               logger.info("new subject detected: $subject")
+              newSubjects.add(subject)
               entityClassImporter.addResourceAsThing(subject, store)
             }
 
@@ -154,5 +157,6 @@ class RawTripleImporter {
     }
     store.flush()
     notMappedPropertyHandler.writeNotMappedProperties(storeType, true)
+    logger.info("new subjects has been added: ${newSubjects.joinToString("\n")}")
   }
 }
