@@ -24,6 +24,7 @@ class RawTripleImporter {
   @Autowired private lateinit var ontologyLogic: OntologyLogic
   @Autowired private lateinit var entityInfoLogic: EntityInfoLogic
   @Autowired private lateinit var notMappedPropertyHandler: NotMappedPropertyHandler
+  @Autowired private lateinit var entityClassImporter: EntityClassImporter
   private var propertyToPredicates = mutableMapOf<String, MutableSet<String>>()
   private var predicatesOfClass = mutableMapOf<String, MutableSet<String>>()
   val tripleApi: V1triplesApi
@@ -105,7 +106,12 @@ class RawTripleImporter {
               (it.ontologyClass != null) && (predicatesOfClass[it.ontologyClass!!] ?: mutableSetOf())
                   .contains(triple.predicate)
             }.firstOrNull()?.subject
-            if (subject == null) subject = subjectsData.first().subject
+            if (subject == null) subject = subjectsData.firstOrNull()?.subject
+            if (subject == null) {
+              subject = URIs.getFkgResourceUri(subjectLabel)
+              logger.info("new subject detected: $subject")
+              entityClassImporter.addResourceAsThing(subject, store)
+            }
 
             val objekt = if (entityInfoLogic.resources.containsKey(triple.`object`))
               URIs.getFkgResourceUri(triple.`object`) else triple.`object`
