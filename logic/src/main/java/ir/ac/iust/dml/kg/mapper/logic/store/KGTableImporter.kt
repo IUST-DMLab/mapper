@@ -41,6 +41,7 @@ class KGTableImporter {
     val entityTree = mutableMapOf<String, MutableSet<String>>()
 
     val result = PathWalker.getPath(path, Regex(".*\\.json"))
+    val subjects = mutableListOf<String>()
 
     // TODO: mastmal
     val propertyMap = mapOf(
@@ -78,12 +79,18 @@ class KGTableImporter {
                 if (propertyMap.containsKey(triple.predicate)) URIs.prefixedToUri(propertyMap[triple.predicate!!])!!
                 else URIs.convertToNotMappedFkgPropertyUri(triple.predicate!!)!!
 
+            subjects.add(subject)
             store.save(triple.source!!, subject, triple.objekt!!, "table", predicate, null, null, extractionTime, version)
           } catch (e: Throwable) {
             logger.error(triple.toString(), e)
           }
         }
       }
+    }
+
+    subjects.forEach { subject ->
+      val label = subject.substringAfterLast("/").replace("_", " ")
+      store.save(subject, subject, label, "table", URIs.label, null, null, extractionTime, version)
     }
 
     entityTree.forEach { entity, tress ->
