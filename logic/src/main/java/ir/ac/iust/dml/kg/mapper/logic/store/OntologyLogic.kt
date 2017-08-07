@@ -32,6 +32,8 @@ class OntologyLogic {
   val tripleApi: V1triplesApi
   val expertApi: V1expertsApi
   private val treeCache = mutableMapOf<String, String>()
+  // TODO remove tree cache and use tree paretns
+  private val treeParents = mutableMapOf<String, List<String>>()
   private val childrenCache = mutableMapOf<String, List<String>>()
   private val traversedTree = mutableListOf<String>()
   @Autowired lateinit var storeProvider: StoreProvider
@@ -136,9 +138,10 @@ class OntologyLogic {
         val classes = getType(null, URIs.typeOfAllClasses, page++, 100)
         classes.data.forEach { classUrl ->
           val name = classUrl.substringAfterLast("/")
-          val parents = mutableListOf(name)
+          val parents = mutableListOf(classUrl)
           fillParents(classUrl, parents)
           treeCache[name] = parents.map { it.substringAfterLast("/") }.joinToString("/")
+          treeParents[name] = parents
           val children = mutableListOf<String>()
           fillChildren(classUrl, children)
           childrenCache[name] = children.map { it.substringAfterLast("/") }
@@ -174,6 +177,8 @@ class OntologyLogic {
   }
 
   fun getTree(ontologyClass: String) = treeCache[ontologyClass]
+
+  fun getClassParents(ontologyClass: String) = treeParents[ontologyClass]
 
   fun getChildren(ontologyClass: String) = childrenCache[ontologyClass]
 
