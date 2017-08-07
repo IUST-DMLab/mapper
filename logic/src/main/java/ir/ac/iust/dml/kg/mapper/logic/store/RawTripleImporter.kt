@@ -110,7 +110,10 @@ class RawTripleImporter {
                   .contains(triple.predicate)
             }.firstOrNull()?.subject
             if (subject == null) subject = subjectsData.firstOrNull()?.subject
-            if (subject == null) subject = URIs.getFkgResourceUri(subjectLabel)
+            if (subject == null) {
+              subject = URIs.getFkgResourceUri(subjectLabel)
+              newSubjects.add(subject)
+            }
 
             val objekt = if (entityInfoLogic.resources.containsKey(triple.`object`))
               URIs.getFkgResourceUri(triple.`object`) else triple.`object`
@@ -154,7 +157,6 @@ class RawTripleImporter {
 
     newSubjects.forEach { subject ->
       logger.info("new subject detected: $subject")
-      newSubjects.add(subject)
       entityClassImporter.addResourceAsThing(subject, store, Module.mapper_raw_entity_adder.name)
     }
 
