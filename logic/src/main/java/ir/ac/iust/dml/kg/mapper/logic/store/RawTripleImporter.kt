@@ -73,7 +73,7 @@ class RawTripleImporter {
       }
     }
 
-    var newSubjects = mutableListOf<String>()
+    val newSubjects = mutableSetOf<String>()
 
     result.forEachIndexed { index, p ->
       ir.ac.iust.dml.kg.raw.triple.RawTripleImporter(p).use { reader ->
@@ -110,12 +110,7 @@ class RawTripleImporter {
                   .contains(triple.predicate)
             }.firstOrNull()?.subject
             if (subject == null) subject = subjectsData.firstOrNull()?.subject
-            if (subject == null) {
-              subject = URIs.getFkgResourceUri(subjectLabel)
-              logger.info("new subject detected: $subject")
-              newSubjects.add(subject)
-              entityClassImporter.addResourceAsThing(subject, store, Module.mapper_raw_entity_adder.name)
-            }
+            if (subject == null) subject = URIs.getFkgResourceUri(subjectLabel)
 
             val objekt = if (entityInfoLogic.resources.containsKey(triple.`object`))
               URIs.getFkgResourceUri(triple.`object`) else triple.`object`
@@ -156,6 +151,13 @@ class RawTripleImporter {
         }
       }
     }
+
+    newSubjects.forEach { subject ->
+      logger.info("new subject detected: $subject")
+      newSubjects.add(subject)
+      entityClassImporter.addResourceAsThing(subject, store, Module.mapper_raw_entity_adder.name)
+    }
+
     store.flush()
     notMappedPropertyHandler.writeNotMappedProperties(storeType, true)
     logger.info("new subjects has been added: ${newSubjects.joinToString("\n")}")
