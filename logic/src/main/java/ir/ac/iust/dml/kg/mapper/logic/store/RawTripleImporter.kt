@@ -120,7 +120,7 @@ class RawTripleImporter {
             val predicate: String
             val stemmedPredicate = Stemmer.i().stem(triple.predicate)
             if (triple.isNeedsMapping) {
-              val subjectInfoBoxes = entityInfoLogic.resources[subject.substringAfterLast("/")]
+              val subjectInfoBoxes = entityInfoLogic.resources[subject.substringAfterLast("/").replace('_', ' ')]
               val defaultProperty = URIs.convertToNotMappedFkgPropertyUri(triple.predicate)!!
               predicate =
                   if (subjectInfoBoxes == null) defaultProperty
