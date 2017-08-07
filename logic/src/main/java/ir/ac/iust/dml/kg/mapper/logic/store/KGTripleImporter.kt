@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
+import ir.ac.iust.dml.kg.mapper.logic.Module
 import ir.ac.iust.dml.kg.mapper.logic.PathUtils
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.data.InfoBoxAndCount
@@ -88,7 +89,7 @@ class KGTripleImporter {
           revisionIdMap.keys.forEach { entity ->
             entityIndex++
             if (entityIndex > maxNumberOfEntities) return@forEachIndexed
-            entityClassImporter.addResourceAsThing(entity, store)
+            entityClassImporter.addResourceAsThing(entity, store, Module.wiki.name)
           }
           logger.warn("$index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
         }
@@ -147,7 +148,7 @@ class KGTripleImporter {
           it.tree = tree.split("/")
           tress.add(it)
         }
-        entityClassImporter.writeEntityTrees(entity, tress, store)
+        entityClassImporter.writeEntityTrees(entity, tress, store, Module.wiki.name)
       } catch (th: Throwable) {
         println("entity: >>>> $entity")
         logger.error(th)

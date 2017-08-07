@@ -24,10 +24,10 @@ abstract class FkgTripleDao {
   abstract fun read(subject: String? = null, predicate: String? = null, objekt: String? = null,
                     status: MappingStatus? = null): MutableList<FkgTriple>
 
-  fun convertAndSave(source: String, subject: String, objeck: String, property: String) {
+  fun convertAndSave(source: String, subject: String, objeck: String, property: String, module: String? = null) {
     this.save(FkgTriple(source = source, subject = subject,
         predicate = URIs.convertToNotMappedFkgPropertyUri(property),
-        objekt = URIs.prefixedToUri(objeck)), null)
+        objekt = URIs.prefixedToUri(objeck), module = module), null)
   }
 
   fun save(source: String, subject: String, objeck: String, property: String) {

@@ -1,5 +1,6 @@
 package ir.ac.iust.dml.kg.mapper.logic.store
 
+import ir.ac.iust.dml.kg.mapper.logic.Module
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.data.InfoBoxAndCount
 import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
@@ -93,13 +94,13 @@ class KGTableImporter {
 
     subjects.forEach { subject ->
       val label = subject.substringAfterLast("/").replace("_", " ")
-      store.save(subject, subject, label, "mapper_auto_labeling", URIs.label, null, null, extractionTime, version)
+      store.save(subject, subject, label, Module.mapper_auto_labeling.name, URIs.label, null, null, extractionTime, version)
     }
 
     entityTree.forEach { entity, tress ->
       entityClassImporter.writeEntityTrees(entity,
           tress.map { InfoBoxAndCount(infoBox = "donCare", propertyCount = 1, tree = it.split("/")) }.toMutableSet(),
-          store)
+          store, Module.web_table_extractor.name)
     }
 
     store.flush()

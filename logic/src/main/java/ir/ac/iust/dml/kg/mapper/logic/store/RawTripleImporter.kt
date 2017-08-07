@@ -1,6 +1,7 @@
 package ir.ac.iust.dml.kg.mapper.logic.store
 
 import ir.ac.iust.dml.kg.mapper.logic.EntityInfoLogic
+import ir.ac.iust.dml.kg.mapper.logic.Module
 import ir.ac.iust.dml.kg.mapper.logic.PathUtils
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.store.entities.MapRule
@@ -113,7 +114,7 @@ class RawTripleImporter {
               subject = URIs.getFkgResourceUri(subjectLabel)
               logger.info("new subject detected: $subject")
               newSubjects.add(subject)
-              entityClassImporter.addResourceAsThing(subject, store)
+              entityClassImporter.addResourceAsThing(subject, store, Module.mapper_raw_entity_adder.name)
             }
 
             val objekt = if (entityInfoLogic.resources.containsKey(triple.`object`))
