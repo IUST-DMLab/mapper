@@ -60,6 +60,9 @@ class KGTableImporter {
     ontologyLogic.reloadTreeCache()
 
     var tripleNumber = 0
+    val extractionTime = System.currentTimeMillis()
+    val version = System.currentTimeMillis().toString()
+
     result.forEachIndexed { index, p ->
       TableJsonFileReader(p).use { reader ->
         while (reader.hasNext() && tripleNumber++ < maxNumberOfTriples) {
@@ -75,7 +78,7 @@ class KGTableImporter {
                 if (propertyMap.containsKey(triple.predicate)) URIs.prefixedToUri(propertyMap[triple.predicate!!])!!
                 else URIs.convertToNotMappedFkgPropertyUri(triple.predicate!!)!!
 
-            store.save(triple.source!!, subject, triple.objekt!!, predicate)
+            store.save(triple.source!!, subject, triple.objekt!!, "table", predicate, null, null, extractionTime, version)
           } catch (e: Throwable) {
             logger.error(triple.toString(), e)
           }
