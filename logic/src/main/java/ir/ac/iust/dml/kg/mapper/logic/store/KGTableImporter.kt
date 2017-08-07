@@ -45,6 +45,8 @@ class KGTableImporter {
 
     // TODO: mastmal
     val propertyMap = mapOf(
+        "picture" to URIs.getFkgOntologyPropertyPrefixed("picture"),
+        "تصویر" to URIs.getFkgOntologyPropertyPrefixed("picture"),
         "دانشکده" to URIs.getFkgOntologyPropertyPrefixed("faculty"),
         "رتبه دانشگاهی" to URIs.getFkgOntologyPropertyPrefixed("grade"),
         "website" to URIs.getFkgOntologyPropertyPrefixed("website"),
