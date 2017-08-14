@@ -76,40 +76,44 @@ class EntityViewer {
       = search(subject, predicate, null, false).data.filter { filter(it.`object`.value) }
       .firstOrNull()?.`object`?.value
 
-  fun getEntityData(url: String): EntityData {
+  fun getEntityData(url: String, properties: Boolean = true): EntityData {
     val result = EntityData()
     val entityDefaultName = url.substringAfterLast("/").replace('_', ' ')
     result.wikiLink = "https://fa.wikipedia.org/wiki/" + entityDefaultName.replace(' ', '_')
     var searched = search(url, URIs.label, null, true)
     result.label = if (searched.data.isEmpty()) entityDefaultName else searched.data[0].`object`.value
-    searched = search(url, URIs.instanceOf, null, true)
-    var type = if (searched.data.isEmpty()) THING else searched.data[0].`object`.value
-    if (type == THING) type = null
-    result.type = if (type == null) null else getLabel(type)
     searched = search(url, URIs.abstract, null, true)
     result.abstract = searched.data.firstOrNull()?.`object`?.value
     if (result.abstract?.length ?: 0 > 250) result.abstract = result.abstract + " ..."
     searched = search(url, URIs.picture, null, true)
     result.image = searched.data.firstOrNull()?.`object`?.value
-    searched = search(url, null, null, false)
-    searched.data.filter { triple ->
-      filteredPredicates.none { it.matches(triple.predicate) }
-          && triple.`object`.value != "no"
-    }.forEach {
-      val propertyLabel = propertyLabelCache.getOrPut(it.predicate, { getLabel(it.predicate) })
-      if (propertyLabel != null) {
-        val values = result.properties.getOrPut(propertyLabel, { sortedSetOf() })
-        if (it.`object`.type == TypedValue.TypeEnum.RESOURCE) {
-          val l = getLabel(it.`object`.value)
-          values.add(EntityPropertyValue(l ?: it.`object`.value.substringAfterLast("/").replace('_', ' '),
-              it.`object`.value, it.`object`.value.contains("upload.wikimedia.org")))
-        } else {
-          if (!LanguageChecker.multiLanguages(it.`object`.value))
-            values.add(EntityPropertyValue(it.`object`.value))
+    if (properties) {
+      searched = search(url, URIs.instanceOf, null, true)
+      var type = if (searched.data.isEmpty()) THING else searched.data[0].`object`.value
+      if (type == THING) type = null
+      result.type = if (type == null) null else getLabel(type)
+      searched = search(url, null, null, false)
+      searched.data.filter { triple ->
+        filteredPredicates.none { it.matches(triple.predicate) }
+            && triple.`object`.value != "no"
+      }.forEach {
+        val propertyLabel = propertyLabelCache.getOrPut(it.predicate, { getLabel(it.predicate) })
+        if (propertyLabel != null) {
+          val values = result.properties.getOrPut(propertyLabel, { sortedSetOf() })
+          if (it.`object`.type == TypedValue.TypeEnum.RESOURCE) {
+            val l = getLabel(it.`object`.value)
+            values.add(EntityPropertyValue(l ?: it.`object`.value.substringAfterLast("/").replace('_', ' '),
+                it.`object`.value, it.`object`.value.contains("upload.wikimedia.org")))
+          } else {
+            if (!LanguageChecker.multiLanguages(it.`object`.value))
+              values.add(EntityPropertyValue(it.`object`.value))
+          }
         }
       }
+      result.properties = result.properties.filter { it.value.isNotEmpty() }.toSortedMap()
     }
-    result.properties = result.properties.filter { it.value.isNotEmpty() }.toSortedMap()
     return result
   }
+
+  fun getEntities(entities: MutableList<String>) = entities.map { getEntityData(it, false) }
 }

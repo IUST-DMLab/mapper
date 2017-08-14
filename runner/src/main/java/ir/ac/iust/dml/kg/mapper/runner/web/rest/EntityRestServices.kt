@@ -11,8 +11,15 @@ import org.springframework.web.bind.annotation.*
 class EntityRestServices {
   @Autowired lateinit var logic: EntityViewer
 
+  data class EntityURLs(var entities: MutableList<String> = mutableListOf())
+
   @RequestMapping("getEntityData", method = arrayOf(RequestMethod.GET))
   @ResponseBody
-  fun getEntityData(@RequestParam url: String) = logic.getEntityData(url)
+  fun getEntityData(@RequestParam url: String,
+                    @RequestParam(required = false, defaultValue = "true") properties: Boolean)
+      = logic.getEntityData(url, properties)
 
+  @RequestMapping("getEntities", method = arrayOf(RequestMethod.POST))
+  @ResponseBody
+  fun getEntityData(@RequestBody urls: EntityURLs) = logic.getEntities(urls.entities)
 }
