@@ -1,13 +1,13 @@
 package ir.ac.iust.dml.kg.mapper.logic.store
 
 import ir.ac.iust.dml.kg.mapper.logic.EntityInfoLogic
-import ir.ac.iust.dml.kg.mapper.logic.Module
 import ir.ac.iust.dml.kg.mapper.logic.PathUtils
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.store.entities.MapRule
 import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
+import ir.ac.iust.dml.kg.raw.utils.Module
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.URIs
 import ir.ac.iust.dml.kg.services.client.ApiClient
