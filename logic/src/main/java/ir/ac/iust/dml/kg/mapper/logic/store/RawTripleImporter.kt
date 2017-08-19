@@ -157,7 +157,7 @@ class RawTripleImporter {
 
     newSubjects.forEach { subject ->
       logger.info("new subject detected: $subject")
-      entityClassImporter.addResourceAsThing(subject, store, Module.mapper_raw_entity_adder.name)
+      entityClassImporter.addResourceAsThing(subject, store, Module.raw_mapper_entity_adder.name)
     }
 
     store.flush()
