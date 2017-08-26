@@ -2,6 +2,7 @@ package ir.ac.iust.dml.kg.mapper.runner.web.rest
 
 import io.swagger.annotations.Api
 import ir.ac.iust.dml.kg.mapper.logic.store.KSMappingLogic
+import ir.ac.iust.dml.kg.mapper.logic.store.TransformService
 import ir.ac.iust.dml.kg.services.client.swagger.model.TemplateData
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -11,6 +12,15 @@ import org.springframework.web.bind.annotation.*
 @Api(tags = arrayOf("mapping"), description = "سرویس‌های ویرایش نگاشت")
 class MappingRestServices {
   @Autowired lateinit var logic: KSMappingLogic
+  @Autowired lateinit var transformService: TransformService
+
+  @RequestMapping("transforms", method = arrayOf(RequestMethod.GET))
+  @ResponseBody
+  fun transforms() = transformService.getTransforms()
+
+  @RequestMapping("transformNames", method = arrayOf(RequestMethod.GET))
+  @ResponseBody
+  fun transformNames() = transformService.getTransformNames()
 
   @RequestMapping("insert", method = arrayOf(RequestMethod.POST))
   @ResponseBody

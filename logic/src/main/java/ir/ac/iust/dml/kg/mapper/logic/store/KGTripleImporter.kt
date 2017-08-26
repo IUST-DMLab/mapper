@@ -10,7 +10,10 @@ import ir.ac.iust.dml.kg.mapper.logic.data.InfoBoxAndCount
 import ir.ac.iust.dml.kg.mapper.logic.store.entities.MapRule
 import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
-import ir.ac.iust.dml.kg.raw.utils.*
+import ir.ac.iust.dml.kg.raw.utils.Module
+import ir.ac.iust.dml.kg.raw.utils.PathWalker
+import ir.ac.iust.dml.kg.raw.utils.PropertyNormaller
+import ir.ac.iust.dml.kg.raw.utils.URIs
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,7 +31,7 @@ class KGTripleImporter {
   @Autowired private lateinit var storeProvider: StoreProvider
   @Autowired private lateinit var entityClassImporter: EntityClassImporter
   @Autowired private lateinit var notMappedPropertyHandler: NotMappedPropertyHandler
-  private val transformers = Transformers()
+  private val transformers = TransformService()
 
   private val invalidPropertyRegex = Regex("\\d+")
 
@@ -263,7 +266,7 @@ class KGTripleImporter {
   private fun FkgTripleDao.saveTriple(source: String, subject: String, objeck: String, rule: MapRule) {
     if (rule.predicate == null) return
     val value = if (rule.transform != null) {
-      Transformers::class.java.getMethod(rule.transform, String::class.java).invoke(transformers, objeck)
+      TransformService::class.java.getMethod(rule.transform, String::class.java).invoke(transformers, objeck)
     } else if (rule.constant != null) rule.constant
     else objeck
     this.save(FkgTriple(source = source, subject = subject,
