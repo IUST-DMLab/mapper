@@ -1,6 +1,7 @@
 package ir.ac.iust.dml.kg.mapper.runner.web.rest
 
 import io.swagger.annotations.Api
+import ir.ac.iust.dml.kg.mapper.logic.store.DataTypeService
 import ir.ac.iust.dml.kg.mapper.logic.store.KSMappingLogic
 import ir.ac.iust.dml.kg.mapper.logic.store.TransformService
 import ir.ac.iust.dml.kg.services.client.swagger.model.TemplateData
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*
 class MappingRestServices {
   @Autowired lateinit var logic: KSMappingLogic
   @Autowired lateinit var transformService: TransformService
+  @Autowired lateinit var dataTypeService: DataTypeService
 
   @RequestMapping("transforms", method = arrayOf(RequestMethod.GET))
   @ResponseBody
@@ -21,6 +23,13 @@ class MappingRestServices {
   @RequestMapping("transformNames", method = arrayOf(RequestMethod.GET))
   @ResponseBody
   fun transformNames() = transformService.getTransformNames()
+
+  @RequestMapping("dataTypes", method = arrayOf(RequestMethod.GET))
+  @ResponseBody
+  fun dataTypes(@RequestParam(defaultValue = "0") page: Int,
+                @RequestParam(defaultValue = "20") pageSize: Int,
+                @RequestParam(required = false) keyword: String?) =
+      dataTypeService.getDataTypes(page, pageSize, keyword)
 
   @RequestMapping("insert", method = arrayOf(RequestMethod.POST))
   @ResponseBody

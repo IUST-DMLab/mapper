@@ -2,6 +2,7 @@ package ir.ac.iust.dml.kg.mapper.logic.store
 
 import ir.ac.iust.dml.kg.mapper.logic.data.PropertyStats
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
+import ir.ac.iust.dml.kg.raw.utils.PageUtils
 import ir.ac.iust.dml.kg.raw.utils.PagedData
 import ir.ac.iust.dml.kg.raw.utils.URIs
 import ir.ac.iust.dml.kg.services.client.ApiClient
@@ -118,7 +119,7 @@ class KSMappingLogic {
       filtered = filtered.filter { it.nullInTemplates.isNotEmpty() == oneNull }
     if (approved != null)
       filtered = filtered.filter { (it.approvedInTemplates.size == it.templates.size) == approved }
-    return asPages(page, pageSize, filtered)
+    return PageUtils.asPages(page, pageSize, filtered)
   }
 
   private fun rebuildIndexes() {
@@ -170,19 +171,6 @@ class KSMappingLogic {
     pages.totalSize = list.size.toLong()
     pages.pageCount = (pages.totalSize / pages.pageSize) + (if (pages.totalSize % pages.pageSize == 0L) 0 else 1)
     return pages
-  }
-
-  private fun <T> asPages(page: Int, pageSize: Int, list: List<T>): PagedData<T> {
-    val startIndex = page * pageSize
-    val data =
-        if (list.size < startIndex) mutableListOf<T>()
-        else {
-          val endIndex = startIndex + pageSize
-          list.subList(startIndex, if (list.size < endIndex) list.size else endIndex).toMutableList()
-        }
-    val totalSize = list.size.toLong()
-    val pageCount = (totalSize / pageSize) + (if (totalSize % pageSize == 0L) 0 else 1)
-    return PagedData(data, page, pageSize, pageCount, totalSize)
   }
 
   private fun compare(like: Boolean, first: String?, second: String)
