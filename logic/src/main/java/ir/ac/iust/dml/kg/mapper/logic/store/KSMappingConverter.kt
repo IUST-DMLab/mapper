@@ -1,9 +1,9 @@
 package ir.ac.iust.dml.kg.mapper.logic.store
 
+import ir.ac.iust.dml.kg.knowledge.core.ValueType
 import ir.ac.iust.dml.kg.mapper.logic.store.entities.MapRule
 import ir.ac.iust.dml.kg.mapper.logic.store.entities.PropertyMapping
 import ir.ac.iust.dml.kg.mapper.logic.store.entities.TemplateMapping
-import ir.ac.iust.dml.kg.mapper.logic.store.entities.ValueType
 import ir.ac.iust.dml.kg.services.client.swagger.model.MapRuleData
 import ir.ac.iust.dml.kg.services.client.swagger.model.PropertyData
 import ir.ac.iust.dml.kg.services.client.swagger.model.TemplateData

@@ -4,6 +4,7 @@ import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
+import ir.ac.iust.dml.kg.knowledge.core.ValueType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
 import ir.ac.iust.dml.kg.raw.utils.PagedData
@@ -76,7 +77,10 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
     objectData.type =
         if (URIs.isHttpUriFast(t.objekt))
           TypedValueData.TypeEnum.RESOURCE
-        else TypedValueData.TypeEnum.STRING
+        else {
+          if (t.valueType != null) convert(t.valueType!!)
+          else TypedValueData.TypeEnum.STRING
+        }
 
     objectData.value = t.objekt
     objectData.lang =
@@ -99,6 +103,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
       )
     }
 
+    if (t.dataType != null) data.parameters["unit"] = t.dataType
     if (t.version != null) data.parameters["version"] = t.version
     if (t.extractionTime != null) data.parameters["extractionTime"] = t.extractionTime.toString()
     if (t.rawText != null) data.parameters["rawText"] = t.rawText
@@ -133,6 +138,18 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
         logger.error(th)
       }
     }
+  }
+
+  private fun convert(valueType: ValueType) = when (valueType) {
+    ValueType.String -> TypedValueData.TypeEnum.STRING
+    ValueType.Integer -> TypedValueData.TypeEnum.INTEGER
+    ValueType.Double -> TypedValueData.TypeEnum.DOUBLE
+    ValueType.Resource -> TypedValueData.TypeEnum.RESOURCE
+    ValueType.Boolean -> TypedValueData.TypeEnum.BOOLEAN
+    ValueType.Byte -> TypedValueData.TypeEnum.BYTE
+    ValueType.Float -> TypedValueData.TypeEnum.FLOAT
+    ValueType.Long -> TypedValueData.TypeEnum.LONG
+    ValueType.Short -> TypedValueData.TypeEnum.SHORT
   }
 
   override fun delete(subject: String, predicate: String, `object`: String) {

@@ -1,5 +1,6 @@
 package ir.ac.iust.dml.kg.mapper.logic.store
 
+import ir.ac.iust.dml.kg.knowledge.core.TypedValue
 import ir.ac.iust.dml.kg.knowledge.core.transforms.TransformScanner
 import ir.ac.iust.dml.kg.knowledge.core.transforms.Transformer
 import org.springframework.stereotype.Service
@@ -27,5 +28,10 @@ class TransformService {
       result.add(TransformAndDescription(transformName, annotation.description))
     }
     return result
+  }
+
+  fun transform(transformer: String, value: String, lang: String): TypedValue {
+    val t = scanner.getTransformer(transformer)
+    return t.transform(value, lang, null, null)
   }
 }

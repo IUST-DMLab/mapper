@@ -1,6 +1,7 @@
 package ir.ac.iust.dml.kg.access.entities
 
 import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
+import ir.ac.iust.dml.kg.knowledge.core.ValueType
 import org.hibernate.annotations.Index
 import javax.persistence.*
 
@@ -46,5 +47,9 @@ class FkgTriple(
     @Column(name = "accuracy")
     var accuracy: Double? = null,
     @Column(name = "language")
-    var language: String? = null
+    var language: String? = null,
+    @Column(name = "valueType")
+    var valueType: ValueType? = null,
+    @Column(name = "dataType")
+    var dataType: String? = null
 )

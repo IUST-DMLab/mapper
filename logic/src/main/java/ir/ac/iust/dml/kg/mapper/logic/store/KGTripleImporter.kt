@@ -4,16 +4,14 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
+import ir.ac.iust.dml.kg.knowledge.core.ValueType
 import ir.ac.iust.dml.kg.mapper.logic.PathUtils
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.data.InfoBoxAndCount
 import ir.ac.iust.dml.kg.mapper.logic.store.entities.MapRule
 import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
-import ir.ac.iust.dml.kg.raw.utils.Module
-import ir.ac.iust.dml.kg.raw.utils.PathWalker
-import ir.ac.iust.dml.kg.raw.utils.PropertyNormaller
-import ir.ac.iust.dml.kg.raw.utils.URIs
+import ir.ac.iust.dml.kg.raw.utils.*
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -264,14 +262,18 @@ class KGTripleImporter {
   }
 
   private fun FkgTripleDao.saveTriple(source: String, subject: String, objeck: String, rule: MapRule) {
+    var type: ValueType? = null
     if (rule.predicate == null) return
     val value = if (rule.transform != null) {
-      TransformService::class.java.getMethod(rule.transform, String::class.java).invoke(transformers, objeck)
+      val value = transformers.transform(rule.transform!!, objeck, LanguageChecker.detectLanguage(objeck)!!)
+      type = value.type
+      value.value!!
     } else if (rule.constant != null) rule.constant
     else objeck
     this.save(FkgTriple(source = source, subject = subject,
         predicate = URIs.prefixedToUri(rule.predicate),
-        objekt = URIs.prefixedToUri(value.toString())), null)
+        objekt = URIs.prefixedToUri(value.toString()),
+        valueType = type, dataType = rule.unit), null)
   }
 
 }

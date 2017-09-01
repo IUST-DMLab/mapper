@@ -1,5 +1,7 @@
 package ir.ac.iust.dml.kg.mapper.logic.store.entities
 
+import ir.ac.iust.dml.kg.knowledge.core.ValueType
+
 data class MapRule(
     var predicate: String? = null,
     var constant: String? = null,

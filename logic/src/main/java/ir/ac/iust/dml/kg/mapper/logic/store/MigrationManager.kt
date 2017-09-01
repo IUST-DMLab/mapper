@@ -2,10 +2,10 @@ package ir.ac.iust.dml.kg.mapper.logic.store
 
 import ir.ac.iust.dml.kg.access.dao.FkgPropertyMappingDao
 import ir.ac.iust.dml.kg.access.dao.FkgTemplateMappingDao
+import ir.ac.iust.dml.kg.knowledge.core.ValueType
 import ir.ac.iust.dml.kg.mapper.logic.EntityToClassLogic
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.store.entities.MapRule
-import ir.ac.iust.dml.kg.mapper.logic.store.entities.ValueType
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
 import ir.ac.iust.dml.kg.raw.utils.URIs
