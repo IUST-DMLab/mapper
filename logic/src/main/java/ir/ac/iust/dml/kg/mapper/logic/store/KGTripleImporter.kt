@@ -165,8 +165,6 @@ class KGTripleImporter {
     val store = storeProvider.getStore(storeType, path)
     val maxNumberOfTriples = TestUtils.getMaxTuples()
 
-    if (insert) store.deleteAll()
-
     val notSeenProperties = mutableMapOf<String, Int>()
     var numberOfMapped = 0
     var numberOfMappedInTree = 0

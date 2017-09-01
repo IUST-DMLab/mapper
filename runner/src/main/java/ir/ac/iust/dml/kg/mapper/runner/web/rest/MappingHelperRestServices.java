@@ -113,6 +113,12 @@ public class MappingHelperRestServices {
     return "Imported!";
   }
 
+  @RequestMapping("/oldTables")
+  public String oldTables(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
+    kgTableImporter.writeTriplesOldFormat(type);
+    return "Imported!";
+  }
+
   @RequestMapping("/redirects")
   public String redirects() throws Exception {
     redirectLogic.write(StoreType.knowledgeStore);

@@ -32,6 +32,7 @@ class Commander {
         "withoutInfoBox" -> services.withoutInfoBox(StoreType.valueOf(arg!!)) // write wikipedia entities without info boxes
         "withInfoBox" -> services.withInfoBox(StoreType.valueOf(arg!!)) // write wikipedia entities with info boxes
         "tables" -> services.tables(StoreType.valueOf(arg!!)) // write custom table as triples
+        "oldTables" -> services.oldTables(StoreType.valueOf(arg!!)) //deprecated
         "redirects" -> services.redirects() // writes all wikipedia redirects
         "ambiguities" -> services.ambiguities() // writes all wikipedia ambiguities
         "predicates" -> services.predicates(StoreType.valueOf(arg!!), true) // writes all predicates
