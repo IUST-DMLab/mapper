@@ -28,7 +28,7 @@
     <dependency>
       <groupId>ir.ac.iust.dml.kg.raw</groupId>
       <artifactId>nlp-utils</artifactId>
-      <version>0.2.0</version>
+      <version>0.2.1</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
