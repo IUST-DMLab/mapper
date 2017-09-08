@@ -148,10 +148,8 @@ class RawTripleImporter {
                   }
               if (predicate == defaultProperty) notMappedPropertyHandler.addToNotMapped(triple.predicate)
             } else predicate = triple.predicate
-            store.save(source = triple.sourceUrl, subject = subject,
-                objeck = objekt, property = predicate, version = VERSION,
-                extractionTime = triple.extractionTime, module = triple.module, rawText = triple.rawText,
-                accuracy = triple.accuracy)
+            store.save(triple.sourceUrl, subject, predicate, objekt, triple.module!!, VERSION,
+                triple.rawText, triple.accuracy, triple.extractionTime)
           } catch (th: Throwable) {
             th.printStackTrace()
           }

@@ -1,6 +1,5 @@
 package ir.ac.iust.dml.kg.access.entities
 
-import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.knowledge.core.ValueType
 import org.hibernate.annotations.Index
 import javax.persistence.*
@@ -25,10 +24,6 @@ class FkgTriple(
     var predicate: String? = null,
     @Column(name = "object")
     var objekt: String? = null,
-    @Index(name = "t_status")
-    @Enumerated
-    @Column(name = "status")
-    var status: MappingStatus? = null,
     @Index(name = "t_module")
     @Column(name = "module")
     var module: String? = null,

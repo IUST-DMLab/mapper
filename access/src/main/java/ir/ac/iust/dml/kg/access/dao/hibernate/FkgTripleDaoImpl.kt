@@ -1,9 +1,7 @@
 package ir.ac.iust.dml.kg.access.dao.hibernate
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
-import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
-import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.access.utils.SqlJpaTools
 import ir.ac.iust.dml.kg.raw.utils.PagedData
 import org.hibernate.SessionFactory
@@ -19,11 +17,9 @@ open class FkgTripleDaoImpl : FkgTripleDao() {
   @Autowired
   lateinit var sessionFactory: SessionFactory
 
-  override fun save(t: FkgTriple, module: String, version: Int, mapping: FkgPropertyMapping?, approved: Boolean) {
+  override fun save(t: FkgTriple) {
     val session = this.sessionFactory.openSession()
     val tx = session.beginTransaction()
-    t.version = version
-    t.module = module
     session.saveOrUpdate(t)
     tx.commit()
     session.close()
@@ -57,14 +53,12 @@ open class FkgTripleDaoImpl : FkgTripleDao() {
   }
 
   @Suppress("UNCHECKED_CAST")
-  override fun read(subject: String?, predicate: String?, objekt: String?,
-                    status: MappingStatus?): MutableList<FkgTriple> {
+  override fun read(subject: String?, predicate: String?, objekt: String?): MutableList<FkgTriple> {
     val session = this.sessionFactory.openSession()
     val criteria = session.createCriteria(FkgTriple::class.java)
     if (subject != null) criteria.add(Restrictions.eq("subject", subject))
     if (predicate != null) criteria.add(Restrictions.eq("predicate", predicate))
     if (objekt != null) criteria.add(Restrictions.eq("objekt", objekt))
-    if (status != null) criteria.add(Restrictions.eq("status", status))
     val triple = criteria.list() as MutableList<FkgTriple>
     session.close()
     return triple

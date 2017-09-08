@@ -2,9 +2,7 @@ package ir.ac.iust.dml.kg.access.dao.file
 
 import com.google.gson.GsonBuilder
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
-import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
-import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.raw.utils.PagedData
 import org.apache.commons.io.FileUtils
 import java.io.BufferedWriter
@@ -25,7 +23,7 @@ class FileFkgTripleDaoImpl(val path: Path, val flushSize: Int = 1000) : FkgTripl
   var notFlushedTriples = mutableListOf<FkgTriple>()
   var gson = GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create()
 
-  override fun save(t: FkgTriple, module: String, version: Int, mapping: FkgPropertyMapping?, approved: Boolean) {
+  override fun save(t: FkgTriple) {
     synchronized(notFlushedTriples) {
       notFlushedTriples.add(t)
       if (notFlushedTriples.size > flushSize) {
@@ -56,7 +54,7 @@ class FileFkgTripleDaoImpl(val path: Path, val flushSize: Int = 1000) : FkgTripl
     throw UnsupportedOperationException("not implemented")
   }
 
-  override fun read(subject: String?, predicate: String?, objekt: String?, status: MappingStatus?): MutableList<FkgTriple> {
+  override fun read(subject: String?, predicate: String?, objekt: String?): MutableList<FkgTriple> {
     throw UnsupportedOperationException("not implemented")
   }
 

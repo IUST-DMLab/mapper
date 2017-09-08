@@ -5,7 +5,6 @@ import com.google.gson.Gson
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
-import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.mapper.logic.data.StoreType
 import ir.ac.iust.dml.kg.mapper.logic.utils.TestUtils
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
@@ -54,13 +53,15 @@ class AmbiguityLogic {
               i++
               if (i < maxNumberOfDisambiguation) {
                 if (i % 1000 == 0) logger.info("writing disambiguation $i: $a to $f")
-                store.save(FkgTriple(
-                    subject = URIs.getFkgResourceUri(f),
-                    predicate = URIs.disambiguatedFrom,
-                    objekt = if (a.title!!.contains("(ابهام زدایی)"))
+                store.save(
+                    URIs.getFkgResourceUri(f),
+                    URIs.disambiguatedFrom,
+                    if (a.title!!.contains("(ابهام زدایی)"))
                       a.title!!.substringBefore("(ابهام زدایی)")
-                    else a.title
-                ), Module.wiki.name, version, null, true)
+                    else a.title!!,
+                    Module.wiki.name,
+                    version
+                )
               }
             }
           }

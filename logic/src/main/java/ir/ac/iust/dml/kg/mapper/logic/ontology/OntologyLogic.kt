@@ -83,8 +83,7 @@ class OntologyLogic {
           val result = store.read(subject = subject, predicate = URIs.name)
           if (result.isEmpty()) {
             val name = subject.substring(subject.indexOf("/ontology/") + 10)
-            store.convertAndSave(source = subject, subject = subject, property = URIs.name, objeck = name,
-                module = Module.expert.name, version = VERSION)
+            store.convertAndSave(subject, subject, URIs.name, name, Module.expert.name, VERSION)
           }
           if (data.range != null) save(store, source, subject,
               data.range!!.replace(dbpediaMainPrefix, fkgMainPrefix), URIs.propertyRange)

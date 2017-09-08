@@ -1,9 +1,7 @@
 package ir.ac.iust.dml.kg.access.dao.knowldegestore
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
-import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
-import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.knowledge.core.ValueType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
@@ -50,7 +48,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
     return !m.find()
   }
 
-  override fun save(t: FkgTriple, module: String, version: Int, mapping: FkgPropertyMapping?, approved: Boolean) {
+  override fun save(t: FkgTriple) {
     if (t.objekt == null || t.objekt!!.trim().isEmpty()) {
       logger.error("short triple here: ${t.source} ${t.predicate} ${t.objekt}")
       return
@@ -61,8 +59,8 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
     }
     val data = TripleData()
     data.context = URIs.defaultContext
-    data.module = module
-    data.version = version
+    data.module = t.module
+    data.version = t.version
     data.urls = Collections.singletonList(t.source)
     data.subject = t.subject
     data.predicate = if (!t.predicate!!.contains("://")) URIs.prefixedToUri(t.predicate) else t.predicate
@@ -91,29 +89,9 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
         else t.language!!
     data.`object` = objectData
 
-    if (mapping != null) {
-      data.precession = if (mapping.language == "en") 1.0 else mapping.status?.getPrecession()
-      data.parameters = mapOf(
-          "templateName" to mapping.templateName.toString(),
-          "templateProperty" to mapping.templateProperty.toString(),
-          "templatePropertyLanguage" to mapping.templatePropertyLanguage.toString(),
-          "ontologyClass" to mapping.ontologyClass.toString(),
-          "ontologyProperty" to mapping.ontologyProperty.toString(),
-          "language" to mapping.language.toString(),
-          "status" to mapping.status.toString(),
-          "tupleCount" to mapping.tupleCount.toString(),
-          "approved" to mapping.approved.toString()
-      )
-    }
-
     if (t.dataType != null) data.parameters["unit"] = t.dataType
     if (t.extractionTime != null) data.parameters["extractionTime"] = t.extractionTime.toString()
     if (t.rawText != null) data.parameters["rawText"] = t.rawText
-
-
-    if (approved) {
-      // TODO: approve and write to knowledge store`
-    }
 
     // TODO:
     if ((!isValidUri(data.subject))) {
@@ -166,7 +144,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
     return PagedData(mutableListOf(), 0, 0, 0, 0)
   }
 
-  override fun read(subject: String?, predicate: String?, objekt: String?, status: MappingStatus?): MutableList<FkgTriple> {
+  override fun read(subject: String?, predicate: String?, objekt: String?): MutableList<FkgTriple> {
     val list = mutableListOf<FkgTriple>()
     val result = tripleApi.search1(null, false, subject, false, predicate,
         false, objekt, false, null, null)

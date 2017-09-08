@@ -65,8 +65,8 @@ class TableTripleImporter {
             }
             val predicate = URIs.prefixedToUri(triple.predicate!!)!!
             subjects.add(subject)
-            store.save(triple.source!!, subject, triple.objekt!!, triple.module!!, predicate, null, null,
-                extractionTime, version)
+            store.save(triple.source!!, subject, predicate, triple.objekt!!, triple.module!!, version,
+                null, null, extractionTime)
           } catch (e: Throwable) {
             logger.error(triple.toString(), e)
           }
@@ -76,8 +76,8 @@ class TableTripleImporter {
 
     subjects.forEach { subject ->
       val label = subject.substringAfterLast("/").replace("_", " ")
-      store.save(subject, subject, label, Module.mapper_auto_labeling.name, URIs.label, null, null,
-          extractionTime, version)
+      store.save(subject, subject, URIs.label, label, Module.mapper_auto_labeling.name, version,
+          null, null, extractionTime)
     }
 
     entityTree.forEach { entity, tress ->

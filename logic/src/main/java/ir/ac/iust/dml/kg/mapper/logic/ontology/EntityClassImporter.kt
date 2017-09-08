@@ -19,20 +19,20 @@ class EntityClassImporter {
     val subject = URIs.getFkgResourceUri(entity)
 
     val fullLabel = entity.substringAfterLast('/').replace('_', ' ').trim()
-    store.convertAndSave(WIKI_DUMP_URL, subject, fullLabel, URIs.variantLabel, module, version)
+    store.convertAndSave(WIKI_DUMP_URL, subject, URIs.variantLabel, fullLabel, module, version)
     if (fullLabel.contains("(")) {
       val label = fullLabel.substringBefore("(").trim()
-      store.convertAndSave(WIKI_DUMP_URL, subject, label, URIs.label, module, version)
-      store.convertAndSave(WIKI_DUMP_URL, subject, label, URIs.variantLabel, module, version)
-    } else store.convertAndSave(WIKI_DUMP_URL, subject, fullLabel, URIs.label, module, version)
+      store.convertAndSave(WIKI_DUMP_URL, subject, URIs.label, label, module, version)
+      store.convertAndSave(WIKI_DUMP_URL, subject, URIs.variantLabel, label, module, version)
+    } else store.convertAndSave(WIKI_DUMP_URL, subject, URIs.label, fullLabel, module, version)
 
-    store.convertAndSave(WIKI_DUMP_URL, subject, URIs.typeOfAllResources, URIs.type, module, version)
+    store.convertAndSave(WIKI_DUMP_URL, subject, URIs.type, URIs.typeOfAllResources, module, version)
 
-    store.convertAndSave(WIKI_DUMP_URL, subject, URIs.getFkgOntologyClassPrefixed(instanceOf),
-        URIs.instanceOf, module, version)
+    store.convertAndSave(WIKI_DUMP_URL, subject, URIs.instanceOf,
+        URIs.getFkgOntologyClassPrefixed(instanceOf), module, version)
     classes.forEach {
-      store.convertAndSave(WIKI_DUMP_URL, subject, URIs.getFkgOntologyClassPrefixed(it),
-          URIs.type, module, version)
+      store.convertAndSave(WIKI_DUMP_URL, subject, URIs.type, URIs.getFkgOntologyClassPrefixed(it),
+          module, version)
     }
   }
 

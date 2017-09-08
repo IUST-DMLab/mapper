@@ -1,9 +1,7 @@
 package ir.ac.iust.dml.kg.access.dao.virtuoso
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
-import ir.ac.iust.dml.kg.access.entities.FkgPropertyMapping
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
-import ir.ac.iust.dml.kg.access.entities.enumerations.MappingStatus
 import ir.ac.iust.dml.kg.raw.utils.PagedData
 import ir.ac.iust.dml.kg.virtuoso.connector.VirtuosoConnector
 
@@ -13,7 +11,7 @@ class VirtuosoFkgTripleDaoImpl : FkgTripleDao() {
 
   val connector = VirtuosoConnector("http://fkg.iust.ac.ir/")
 
-  override fun save(t: FkgTriple, module: String, version: Int, mapping: FkgPropertyMapping?, approved: Boolean) {
+  override fun save(t: FkgTriple) {
     if (t.objekt == null || t.objekt!!.trim().isEmpty()) {
       println("short triple here: ${t.subject} ${t.predicate} ${t.objekt}")
       return
@@ -46,7 +44,7 @@ class VirtuosoFkgTripleDaoImpl : FkgTripleDao() {
     return PagedData(mutableListOf(), 0, 0, 0, 0)
   }
 
-  override fun read(subject: String?, predicate: String?, objekt: String?, status: MappingStatus?): MutableList<FkgTriple> {
+  override fun read(subject: String?, predicate: String?, objekt: String?): MutableList<FkgTriple> {
     // TODO not implemented
     return mutableListOf()
   }

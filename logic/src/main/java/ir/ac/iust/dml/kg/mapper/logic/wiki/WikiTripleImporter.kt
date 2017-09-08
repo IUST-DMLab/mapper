@@ -60,9 +60,9 @@ class WikiTripleImporter {
             entityIndex++
             if (entityIndex > maxNumberOfEntities) return@forEach
             val subject = URIs.getFkgResourceUri(entity)
-            store.save(source = "http://fa.wikipedia.org/wiki/" + entity.replace(' ', '_'),
-                subject = subject, objeck = abstract, property = ABSTRACT_PREDICATE,
-                module = Module.wiki.name, version = version)
+            store.save(
+                "http://fa.wikipedia.org/wiki/" + entity.replace(' ', '_'),
+                subject, ABSTRACT_PREDICATE, abstract, Module.wiki.name, version)
           }
           logger.warn("$index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
         }
@@ -219,8 +219,7 @@ class WikiTripleImporter {
 
             templateMapping.rules!!.forEach {
               numberOfMapped++
-              if (insert) store.saveTriple(source = triple.source!!, subject = subject, objeck = objekt,
-                  rule = it, version = version)
+              if (insert) store.saveTriple(triple.source!!, subject, objekt, it, version)
             }
 
             val propertyMapping = templateMapping.properties!![PropertyNormaller.removeDigits(property)]
@@ -235,19 +234,17 @@ class WikiTripleImporter {
               val key = templateMapping.ontologyClass + "~" + property
               if (classMaps.containsKey(key)) {
                 numberOfMappedInTree++
-                if (insert) store.saveTriple(source = triple.source!!, subject = subject,
-                    objeck = objekt, rule = classMaps[key]!!, version = version)
+                if (insert) store.saveTriple(triple.source!!, subject, objekt, classMaps[key]!!, version)
               } else {
                 numberOfNotMapped++
                 notMappedPropertyHandler.addToNotMapped(property)
-                if (insert) store.convertAndSave(source = triple.source!!, subject = subject,
-                    objeck = objekt, property = property, version = version, module = Module.wiki.name)
+                if (insert) store.convertAndSave(triple.source!!, subject,
+                    property, objekt, Module.wiki.name, version)
               }
             } else {
               numberOfMapped++
               propertyMapping.rules.forEach {
-                if (insert) store.saveTriple(source = triple.source!!, subject = subject,
-                    objeck = objekt, rule = it, version = version)
+                if (insert) store.saveTriple(triple.source!!, subject, objekt, it, version)
               }
             }
           } catch (th: Throwable) {
@@ -266,19 +263,20 @@ class WikiTripleImporter {
     logger.info("number of mapped is $numberOfMapped")
   }
 
-  private fun FkgTripleDao.saveTriple(source: String, subject: String, objeck: String, version: Int, rule: MapRule) {
+  private fun FkgTripleDao.saveTriple(source: String, subject: String, `object`: String, rule: MapRule, version: Int) {
     var type: ValueType? = null
     if (rule.predicate == null) return
     val value = if (rule.transform != null) {
-      val value = transformers.transform(rule.transform!!, objeck, LanguageChecker.detectLanguage(objeck)!!)
+      val value = transformers.transform(rule.transform!!, `object`, LanguageChecker.detectLanguage(`object`)!!)
       type = value.type
       value.value!!
     } else if (rule.constant != null) rule.constant
-    else objeck
+    else `object`
     this.save(FkgTriple(source = source, subject = subject,
         predicate = URIs.prefixedToUri(rule.predicate),
         objekt = URIs.prefixedToUri(value.toString()),
-        valueType = type, dataType = rule.unit), Module.wiki.name, version, null)
+        valueType = type, dataType = rule.unit,
+        module = Module.wiki.name, version = version))
   }
 
 }

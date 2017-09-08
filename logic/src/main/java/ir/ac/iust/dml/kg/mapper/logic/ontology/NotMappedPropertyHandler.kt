@@ -29,21 +29,18 @@ class NotMappedPropertyHandler {
       maxNumberOfTriples++
       val name = property.substringAfterLast("/")
       val propertyUrl = URIs.convertToNotMappedFkgPropertyUri(name)!!
-      store.save(SOURCE_URL, propertyUrl, URIs.typeOfAnyProperties, URIs.type, module, version)
-      store.save(SOURCE_URL, propertyUrl, name, URIs.label, module, version)
-      store.save(SOURCE_URL, propertyUrl, name, URIs.variantLabel, module, version)
+      store.save(SOURCE_URL, propertyUrl, URIs.type, URIs.typeOfAnyProperties, module, version)
+      store.save(SOURCE_URL, propertyUrl, URIs.label, name, module, version)
+      store.save(SOURCE_URL, propertyUrl, URIs.variantLabel, name, module, version)
 
       if (resolveAmbiguity) {
         val result = store.read(predicate = URIs.variantLabel, objekt = name)
             .filter { triple -> triple.objekt == name && triple.subject != propertyUrl }
         if (result.isNotEmpty()) {
-          store.convertAndSave(source = propertyUrl, subject = propertyUrl,
-              property = URIs.disambiguatedFrom, objeck = name, module = module,
-              version = version)
+          store.convertAndSave(propertyUrl, propertyUrl, URIs.disambiguatedFrom, name, module, version)
           result.forEach {
-            store.convertAndSave(source = it.source ?: it.subject!!,
-                subject = it.subject!!, property = URIs.disambiguatedFrom, objeck = it.objekt!!,
-                module = module, version = version)
+            store.convertAndSave(it.source ?: it.subject!!,
+                it.subject!!, URIs.disambiguatedFrom, it.objekt!!, module, version)
           }
         }
       }

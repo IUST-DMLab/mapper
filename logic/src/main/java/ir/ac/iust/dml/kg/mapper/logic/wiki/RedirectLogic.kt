@@ -2,7 +2,6 @@ package ir.ac.iust.dml.kg.mapper.logic.wiki
 
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
-import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.mapper.logic.data.StoreType
 import ir.ac.iust.dml.kg.mapper.logic.utils.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.utils.TestUtils
@@ -55,16 +54,20 @@ class RedirectLogic {
             i++
             if (i < maxNumberOfRedirects) {
               if (i % 1000 == 0) logger.info("writing redirect $i: $redirect to $mainResource")
-              store.save(FkgTriple(
-                  subject = URIs.getFkgResourceUri(mainResource),
-                  predicate = URIs.redirect,
-                  objekt = "http://fa.wikipedia.org/wiki/" + redirect.replace(' ', '_')
-              ), Module.wiki.name, version, null, true)
-              store.save(FkgTriple(
-                  subject = URIs.getFkgResourceUri(mainResource),
-                  predicate = URIs.variantLabel,
-                  objekt = redirect.replace('_', ' ')
-              ), Module.wiki.name, version, null, true)
+              store.save(
+                  URIs.getFkgResourceUri(mainResource),
+                  URIs.redirect,
+                  "http://fa.wikipedia.org/wiki/" + redirect.replace(' ', '_'),
+                  Module.wiki.name,
+                  version
+              )
+              store.save(
+                  URIs.getFkgResourceUri(mainResource),
+                  URIs.variantLabel,
+                  redirect.replace('_', ' '),
+                  Module.wiki.name,
+                  version
+              )
             }
           }
         }

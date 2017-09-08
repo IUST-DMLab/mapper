@@ -26,7 +26,7 @@ class PredicateImporter {
   }
 
   private fun save(store: FkgTripleDao, source: String, subject: String, property: String, objekt: String) {
-    store.convertAndSave(source, subject, objekt, property, Module.expert.name, VERSION)
+    store.convertAndSave(source, subject, property, objekt, Module.expert.name, VERSION)
   }
 
   fun writePredicates(store: FkgTripleDao, resolveAmbiguity: Boolean) {

@@ -81,17 +81,17 @@ class ManualInsertLogic {
 
   fun saveAll(source: String, subject: String, objeck: String, property: String) {
     if (!initialized) init()
-    kgDao.save(source, subject, objeck, property, Module.manual.name, version)
+    kgDao.save(source, subject, property, objeck, Module.manual.name, version)
     kgDao.flush()
-    virtuosoDao.save(source, subject, objeck, property, Module.manual.name, version)
+    virtuosoDao.save(source, subject, property, objeck, Module.manual.name, version)
   }
 
   fun saveTriple(subjectUrl: String, predicateUrl: String, objectUrl: String, permanent: Boolean): Boolean {
     if (!initialized) init()
     val sourceUrl = URIs.getFkgManualUri(subjectUrl.substringAfterLast('/'))
     logger.info("save permanent: $permanent")
-    virtuosoDao.save(sourceUrl, subjectUrl, objectUrl, predicateUrl, Module.manual.name, version)
-    kgDao.save(sourceUrl, subjectUrl, objectUrl, predicateUrl, Module.manual.name, version)
+    virtuosoDao.save(sourceUrl, subjectUrl, predicateUrl, objectUrl, Module.manual.name, version)
+    kgDao.save(sourceUrl, subjectUrl, predicateUrl, objectUrl, Module.manual.name, version)
     kgDao.flush()
     return true
   }
