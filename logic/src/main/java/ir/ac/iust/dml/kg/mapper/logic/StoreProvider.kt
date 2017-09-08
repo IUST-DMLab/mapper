@@ -4,7 +4,7 @@ import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.dao.file.FileFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
-import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
+import ir.ac.iust.dml.kg.mapper.logic.data.StoreType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.nio.file.Path

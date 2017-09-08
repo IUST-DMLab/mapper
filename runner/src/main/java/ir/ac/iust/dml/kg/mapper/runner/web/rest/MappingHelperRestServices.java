@@ -2,10 +2,9 @@ package ir.ac.iust.dml.kg.mapper.runner.web.rest;
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao;
 import ir.ac.iust.dml.kg.mapper.logic.*;
-import ir.ac.iust.dml.kg.mapper.logic.export.ExportData;
-import ir.ac.iust.dml.kg.mapper.logic.export.TemplateToOntologyExporter;
-import ir.ac.iust.dml.kg.mapper.logic.store.*;
-import ir.ac.iust.dml.kg.mapper.logic.type.StoreType;
+import ir.ac.iust.dml.kg.mapper.logic.data.StoreType;
+import ir.ac.iust.dml.kg.mapper.logic.utils.export.ExportData;
+import ir.ac.iust.dml.kg.mapper.logic.utils.export.TemplateToOntologyExporter;
 import ir.ac.iust.dml.kg.raw.utils.Module;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,9 +1,7 @@
 package ir.ac.iust.dml.kg.mapper.logic
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleStatisticsDao
-import ir.ac.iust.dml.kg.access.dao.memory.StatisticalEventDaoImpl
 import ir.ac.iust.dml.kg.access.entities.enumerations.TripleStatisticsType
-import ir.ac.iust.dml.kg.mapper.logic.dump.StatisticsLogReader
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.PropertyNormaller

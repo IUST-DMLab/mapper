@@ -20,9 +20,9 @@ class PropertyMappingLogic {
 
   val logger = Logger.getLogger(this.javaClass)!!
   @Autowired lateinit var dao: FkgPropertyMappingDao
-  @Autowired lateinit var wikiPropertyTranslationDao: WikipediaPropertyTranslationDao
-  @Autowired lateinit var templateDao: FkgTemplateMappingDao
-  @Autowired lateinit var statsDao: FkgTripleStatisticsDao
+  @Autowired private lateinit var wikiPropertyTranslationDao: WikipediaPropertyTranslationDao
+  @Autowired private lateinit var templateDao: FkgTemplateMappingDao
+  @Autowired private lateinit var statsDao: FkgTripleStatisticsDao
 
   @PostConstruct
   fun fillUpdateEpoch() {

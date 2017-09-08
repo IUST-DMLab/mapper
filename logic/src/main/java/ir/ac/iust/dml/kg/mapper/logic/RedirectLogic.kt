@@ -3,8 +3,8 @@ package ir.ac.iust.dml.kg.mapper.logic
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
-import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
-import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
+import ir.ac.iust.dml.kg.mapper.logic.data.StoreType
+import ir.ac.iust.dml.kg.mapper.logic.utils.TestUtils
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.Module
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
