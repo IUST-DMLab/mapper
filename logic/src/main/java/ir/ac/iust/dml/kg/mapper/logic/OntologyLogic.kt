@@ -26,14 +26,14 @@ import java.nio.file.Files
 class OntologyLogic {
 
   private val logger = Logger.getLogger(this.javaClass)!!
-  val tripleApi: V1triplesApi
-  val expertApi: V1expertsApi
+  private val tripleApi: V1triplesApi
+  private val expertApi: V1expertsApi
   private val treeCache = mutableMapOf<String, String>()
   // TODO remove tree cache and use tree paretns
   private val treeParents = mutableMapOf<String, List<String>>()
   private val childrenCache = mutableMapOf<String, List<String>>()
   private val traversedTree = mutableListOf<String>()
-  @Autowired lateinit var storeProvider: StoreProvider
+  @Autowired private lateinit var storeProvider: StoreProvider
   private val VERSION = 1
 
   init {

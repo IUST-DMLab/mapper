@@ -3,8 +3,6 @@ package ir.ac.iust.dml.kg.mapper.runner.web.rest;
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao;
 import ir.ac.iust.dml.kg.mapper.logic.*;
 import ir.ac.iust.dml.kg.mapper.logic.data.StoreType;
-import ir.ac.iust.dml.kg.mapper.logic.utils.export.ExportData;
-import ir.ac.iust.dml.kg.mapper.logic.utils.export.TemplateToOntologyExporter;
 import ir.ac.iust.dml.kg.raw.utils.Module;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/helper")
 public class MappingHelperRestServices {
-  @Autowired
-  private MappingLoader helperLoader;
-  @Autowired
-  private StatsLogic statsLogic;
-  @Autowired
-  private TemplateToOntologyExporter templateToOntologyExporter;
-  @Autowired
-  private PropertyMappingLogic propertyMappingLogic;
   @Autowired
   private RedirectLogic redirectLogic;
   @Autowired
@@ -49,29 +39,6 @@ public class MappingHelperRestServices {
   public String ksMapLoad() throws Exception {
     ksMappingHolder.loadFromKS();
     return "Loaded!";
-  }
-
-  @RequestMapping("/load")
-  public String load() throws Exception {
-    helperLoader.writeDbpediaEnglishMapping();
-    return "Loaded!";
-  }
-
-  @RequestMapping("/createStatsFile")
-  public String createStatsFile() throws Exception {
-    statsLogic.createStatsFile();
-    return "Stats created!";
-  }
-
-  @RequestMapping("/writeStats")
-  public String writeStats() throws Exception {
-    statsLogic.writeStats();
-    return "Stats created!";
-  }
-
-  @RequestMapping("/generateMapping")
-  public String generateMapping() {
-    return String.valueOf(propertyMappingLogic.generateMapping());
   }
 
   @RequestMapping("/withoutInfoBox")
@@ -120,24 +87,6 @@ public class MappingHelperRestServices {
   public String ambiguities(@RequestParam int version) throws Exception {
     ambiguityLogic.write(version, StoreType.knowledgeStore);
     return "Imported!";
-  }
-
-  @RequestMapping("/generate")
-  public String generate() throws Exception {
-    helperLoader.generatePersian();
-    return "Generated!";
-  }
-
-  @RequestMapping("/generateByCount")
-  public String generateByCount() throws Exception {
-    helperLoader.generateByCount();
-    return "Generated!";
-  }
-
-  @RequestMapping("/export")
-  @ResponseBody
-  public ExportData exportXml(@RequestParam(required = false) String language) throws Exception {
-    return templateToOntologyExporter.export(language);
   }
 
   @RequestMapping("/predicates")

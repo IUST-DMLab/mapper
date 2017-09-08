@@ -22,10 +22,6 @@ class Commander {
     try {
       when (command) {
         "ksMapLoad" -> services.ksMapLoad() // just for tests. can be removed.
-        "load" -> services.load() // deprecated
-        "createStatsFile" -> services.createStatsFile() // deprecated
-        "writeStats" -> services.writeStats() // deprecated
-        "generateMapping" -> services.generateMapping() // deprecated
         "triples" -> services.triples(arg1!!.toInt(), StoreType.valueOf(arg2!!)) //writes wikipedia triples
         "abstracts" -> services.abstracts(arg1!!.toInt(), StoreType.valueOf(arg2!!)) // writes wikipedia abstracts
         "withoutInfoBox" -> services.withoutInfoBox(arg1!!.toInt(), StoreType.valueOf(arg2!!)) // write wikipedia entities without info boxes
