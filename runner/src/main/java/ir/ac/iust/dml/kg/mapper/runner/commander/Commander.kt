@@ -13,7 +13,7 @@ class Commander {
   lateinit var services: MappingHelperRestServices
   private val logger = Logger.getLogger(this.javaClass)!!
 
-  fun processArgs(command: String, arg: String? = null) {
+  fun processArgs(command: String, arg1: String?, arg2: String?) {
     logger.info("====================================")
     logger.info("====================================")
     logger.info("running command $command at ${Date()}")
@@ -22,28 +22,25 @@ class Commander {
     try {
       when (command) {
         "ksMapLoad" -> services.ksMapLoad() // just for tests. can be removed.
-        "migrate" -> services.migrate() // migrates data from mysql to knowledge store
         "load" -> services.load() // deprecated
         "createStatsFile" -> services.createStatsFile() // deprecated
         "writeStats" -> services.writeStats() // deprecated
         "generateMapping" -> services.generateMapping() // deprecated
-        "triples" -> services.triples(StoreType.valueOf(arg!!)) //writes wikipedia triples
-        "abstracts" -> services.abstracts(StoreType.valueOf(arg!!)) // writes wikipedia abstracts
-        "withoutInfoBox" -> services.withoutInfoBox(StoreType.valueOf(arg!!)) // write wikipedia entities without info boxes
-        "withInfoBox" -> services.withInfoBox(StoreType.valueOf(arg!!)) // write wikipedia entities with info boxes
-        "tables" -> services.tables(StoreType.valueOf(arg!!)) // write custom table as triples
-        "oldTables" -> services.oldTables(StoreType.valueOf(arg!!)) //deprecated
-        "redirects" -> services.redirects() // writes all wikipedia redirects
-        "ambiguities" -> services.ambiguities() // writes all wikipedia ambiguities
-        "predicates" -> services.predicates(StoreType.valueOf(arg!!), true) // writes all predicates
-        "dbpediaPredicates" -> services.dbpediaPredicates(StoreType.valueOf(arg!!)) // writes all predicates from dbpedia export
-        "writeTree" -> services.writeTree(StoreType.valueOf(arg!!)) // writes all predicates from dbpedia export
-        "predicatesFast" -> services.predicates(StoreType.valueOf(arg!!), false) // writes all predicates without ambiguation resolving
-        "properties" -> services.properties(StoreType.valueOf(arg!!), true) // writes all not mapped properties
-        "propertiesFast" -> services.properties(StoreType.valueOf(arg!!), false) // writes all not mapped properties without ambiguation resolving
-        "raw" -> services.raw(StoreType.valueOf(arg!!)) // writes all predicates
-        "dumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(arg!!), false) // all needed tasks in one place
-        "completeDumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(arg!!), true) // all needed tasks in one place
+        "triples" -> services.triples(arg1!!.toInt(), StoreType.valueOf(arg2!!)) //writes wikipedia triples
+        "abstracts" -> services.abstracts(arg1!!.toInt(), StoreType.valueOf(arg2!!)) // writes wikipedia abstracts
+        "withoutInfoBox" -> services.withoutInfoBox(arg1!!.toInt(), StoreType.valueOf(arg2!!)) // write wikipedia entities without info boxes
+        "withInfoBox" -> services.withInfoBox(arg1!!.toInt(), StoreType.valueOf(arg2!!)) // write wikipedia entities with info boxes
+        "tables" -> services.tables(StoreType.valueOf(arg1!!)) // write custom table as triples
+        "redirects" -> services.redirects(arg1!!.toInt()) // writes all wikipedia redirects
+        "ambiguities" -> services.ambiguities(arg1!!.toInt()) // writes all wikipedia ambiguities
+        "predicates" -> services.predicates(StoreType.valueOf(arg1!!), true) // writes all predicates
+        "dbpediaPredicates" -> services.dbpediaPredicates(StoreType.valueOf(arg1!!)) // writes all predicates from dbpedia export
+        "predicatesFast" -> services.predicates(StoreType.valueOf(arg1!!), false) // writes all predicates without ambiguation resolving
+        "properties" -> services.properties(arg1!!.toInt(), StoreType.valueOf(arg2!!), true) // writes all not mapped properties
+        "propertiesFast" -> services.properties(arg1!!.toInt(), StoreType.valueOf(arg2!!), false) // writes all not mapped properties without ambiguation resolving
+        "raw" -> services.raw(StoreType.valueOf(arg1!!)) // writes all predicates
+        "dumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(arg1!!), false) // all needed tasks in one place
+        "completeDumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(arg1!!), true) // all needed tasks in one place
       }
     } catch (th: Throwable) {
       th.printStackTrace()

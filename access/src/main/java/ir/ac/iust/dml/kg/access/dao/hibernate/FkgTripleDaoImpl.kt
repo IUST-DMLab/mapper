@@ -14,12 +14,16 @@ import org.springframework.stereotype.Repository
 @Repository
 open class FkgTripleDaoImpl : FkgTripleDao() {
 
+  override fun newVersion(module: String) = 1
+
   @Autowired
   lateinit var sessionFactory: SessionFactory
 
-  override fun save(t: FkgTriple, mapping: FkgPropertyMapping?, approved: Boolean) {
+  override fun save(t: FkgTriple, module: String, version: Int, mapping: FkgPropertyMapping?, approved: Boolean) {
     val session = this.sessionFactory.openSession()
     val tx = session.beginTransaction()
+    t.version = version
+    t.module = module
     session.saveOrUpdate(t)
     tx.commit()
     session.close()

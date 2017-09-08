@@ -10,6 +10,7 @@ import ir.ac.iust.dml.kg.mapper.logic.RedirectLogic
 import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
+import ir.ac.iust.dml.kg.raw.utils.Module
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.URIs
 import org.apache.log4j.Logger
@@ -26,7 +27,7 @@ class AmbiguityLogic {
   val logger = Logger.getLogger(this.javaClass)!!
   @Autowired private lateinit var tripleDao: FkgTripleDao
 
-  fun write(storeType: StoreType = StoreType.knowledgeStore) {
+  fun write(version: Int, storeType: StoreType = StoreType.knowledgeStore) {
 
     val disambiguationFolder = ConfigReader.getPath("wiki.folder.disambiguations", "~/.pkg/data/disambiguations")
     if (!Files.exists(disambiguationFolder.parent)) Files.createDirectories(disambiguationFolder.parent)
@@ -60,7 +61,7 @@ class AmbiguityLogic {
                     objekt = if (a.title!!.contains("(ابهام زدایی)"))
                       a.title!!.substringBefore("(ابهام زدایی)")
                     else a.title
-                ), null, true)
+                ), Module.wiki.name, version, null, true)
               }
             }
           }

@@ -9,9 +9,11 @@ import ir.ac.iust.dml.kg.virtuoso.connector.VirtuosoConnector
 
 class VirtuosoFkgTripleDaoImpl : FkgTripleDao() {
 
+  override fun newVersion(module: String) = 1
+
   val connector = VirtuosoConnector("http://fkg.iust.ac.ir/")
 
-  override fun save(t: FkgTriple, mapping: FkgPropertyMapping?, approved: Boolean) {
+  override fun save(t: FkgTriple, module: String, version: Int, mapping: FkgPropertyMapping?, approved: Boolean) {
     if (t.objekt == null || t.objekt!!.trim().isEmpty()) {
       println("short triple here: ${t.subject} ${t.predicate} ${t.objekt}")
       return

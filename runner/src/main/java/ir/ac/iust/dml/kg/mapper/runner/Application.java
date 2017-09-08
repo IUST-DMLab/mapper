@@ -39,7 +39,8 @@ public class Application {
     ConfigurableApplicationContext context = app.run(args);
     if (args.length > 0) {
       Commander commander = context.getBeansOfType(Commander.class).values().iterator().next();
-      commander.processArgs(args[0], args.length > 1 ? args[1] : null);
+      commander.processArgs(args[0], args.length > 1 ? args[1] : null,
+          args.length > 2 ? args[2] : null);
     }
   }
 

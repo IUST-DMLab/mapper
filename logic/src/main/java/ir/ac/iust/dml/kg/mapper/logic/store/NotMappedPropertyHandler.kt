@@ -21,7 +21,7 @@ class NotMappedPropertyHandler {
     notMappedProperties.add(property)
   }
 
-  fun writeNotMappedProperties(storeType: StoreType = StoreType.none, resolveAmbiguity: Boolean) {
+  fun writeNotMappedProperties(module: String, version: Int, storeType: StoreType = StoreType.none, resolveAmbiguity: Boolean) {
     val store = storeProvider.getStore(storeType)
     var maxNumberOfTriples = TestUtils.getMaxTuples()
     val startTime = System.currentTimeMillis()
@@ -29,19 +29,21 @@ class NotMappedPropertyHandler {
       maxNumberOfTriples++
       val name = property.substringAfterLast("/")
       val propertyUrl = URIs.convertToNotMappedFkgPropertyUri(name)!!
-      store.save(SOURCE_URL, propertyUrl, URIs.typeOfAnyProperties, URIs.type)
-      store.save(SOURCE_URL, propertyUrl, name, URIs.label)
-      store.save(SOURCE_URL, propertyUrl, name, URIs.variantLabel)
+      store.save(SOURCE_URL, propertyUrl, URIs.typeOfAnyProperties, URIs.type, module, version)
+      store.save(SOURCE_URL, propertyUrl, name, URIs.label, module, version)
+      store.save(SOURCE_URL, propertyUrl, name, URIs.variantLabel, module, version)
 
       if (resolveAmbiguity) {
         val result = store.read(predicate = URIs.variantLabel, objekt = name)
             .filter { triple -> triple.objekt == name && triple.subject != propertyUrl }
         if (result.isNotEmpty()) {
           store.convertAndSave(source = propertyUrl, subject = propertyUrl,
-              property = URIs.disambiguatedFrom, objeck = name)
+              property = URIs.disambiguatedFrom, objeck = name, module = module,
+              version = version)
           result.forEach {
             store.convertAndSave(source = it.source ?: it.subject!!,
-                subject = it.subject!!, property = URIs.disambiguatedFrom, objeck = it.objekt!!)
+                subject = it.subject!!, property = URIs.disambiguatedFrom, objeck = it.objekt!!,
+                module = module, version = version)
           }
         }
       }

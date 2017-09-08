@@ -3,6 +3,7 @@ package ir.ac.iust.dml.kg.mapper.logic.store
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
+import ir.ac.iust.dml.kg.raw.utils.Module
 import ir.ac.iust.dml.kg.raw.utils.URIs
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,6 +17,7 @@ class ManualInsertLogic {
   private var initialized = false
   private lateinit var virtuosoDao: FkgTripleDao
   private lateinit var kgDao: FkgTripleDao
+  private val version = 1
 
   fun init() {
     initialized = true
@@ -78,17 +80,17 @@ class ManualInsertLogic {
 
   fun saveAll(source: String, subject: String, objeck: String, property: String) {
     if (!initialized) init()
-    kgDao.save(source, subject, objeck, property)
+    kgDao.save(source, subject, objeck, property, Module.manual.name, version)
     kgDao.flush()
-    virtuosoDao.save(source, subject, objeck, property)
+    virtuosoDao.save(source, subject, objeck, property, Module.manual.name, version)
   }
 
   fun saveTriple(subjectUrl: String, predicateUrl: String, objectUrl: String, permanent: Boolean): Boolean {
     if (!initialized) init()
     val sourceUrl = URIs.getFkgManualUri(subjectUrl.substringAfterLast('/'))
     logger.info("save permanent: $permanent")
-    virtuosoDao.save(sourceUrl, subjectUrl, objectUrl, predicateUrl)
-    kgDao.save(sourceUrl, subjectUrl, objectUrl, predicateUrl)
+    virtuosoDao.save(sourceUrl, subjectUrl, objectUrl, predicateUrl, Module.manual.name, version)
+    kgDao.save(sourceUrl, subjectUrl, objectUrl, predicateUrl, Module.manual.name, version)
     kgDao.flush()
     return true
   }

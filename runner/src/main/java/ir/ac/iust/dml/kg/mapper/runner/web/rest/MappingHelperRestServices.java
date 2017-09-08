@@ -1,10 +1,12 @@
 package ir.ac.iust.dml.kg.mapper.runner.web.rest;
 
+import ir.ac.iust.dml.kg.access.dao.FkgTripleDao;
 import ir.ac.iust.dml.kg.mapper.logic.*;
 import ir.ac.iust.dml.kg.mapper.logic.export.ExportData;
 import ir.ac.iust.dml.kg.mapper.logic.export.TemplateToOntologyExporter;
 import ir.ac.iust.dml.kg.mapper.logic.store.*;
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType;
+import ir.ac.iust.dml.kg.raw.utils.Module;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,8 +30,6 @@ public class MappingHelperRestServices {
   @Autowired
   private AmbiguityLogic ambiguityLogic;
   @Autowired
-  private MigrationManager migrationManager;
-  @Autowired
   private KSMappingHolder ksMappingHolder;
   @Autowired
   private KGTripleImporter kgTripleImporter;
@@ -44,14 +44,7 @@ public class MappingHelperRestServices {
   @Autowired
   private OntologyLogic ontologyLogic;
   @Autowired
-  private EntityToClassLogic entityToClassLogic;
-
-  @RequestMapping("/migrate")
-  public String migrate() throws Exception {
-    migrationManager.migrate();
-    migrationManager.save();
-    return "Migrated!";
-  }
+  private StoreProvider storeProvider;
 
   @RequestMapping("/ksMapLoad")
   public String ksMapLoad() throws Exception {
@@ -83,27 +76,32 @@ public class MappingHelperRestServices {
   }
 
   @RequestMapping("/withoutInfoBox")
-  public String withoutInfoBox(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
-    kgTripleImporter.writeEntitiesWithoutInfoBox(type);
+  public String withoutInfoBox(@RequestParam int version,
+                               @RequestParam(defaultValue = "none") StoreType type) throws Exception {
+    kgTripleImporter.writeEntitiesWithoutInfoBox(version, type);
     return "Imported!";
   }
 
   @RequestMapping("/withInfoBox")
-  public String withInfoBox(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
-    kgTripleImporter.writeEntitiesWithInfoBox(type);
+  public String withInfoBox(@RequestParam int version,
+                            @RequestParam(defaultValue = "none") StoreType type) throws Exception {
+    kgTripleImporter.writeEntitiesWithInfoBox(version, type);
     return "Imported!";
   }
 
   @RequestMapping("/abstracts")
-  public String abstracts(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
-    kgTripleImporter.writeAbstracts(type);
+  public String abstracts(@RequestParam int version,
+                          @RequestParam(defaultValue = "none") StoreType type) throws Exception {
+    kgTripleImporter.writeAbstracts(version, type);
     return "Imported!";
   }
 
   @RequestMapping("/triples")
-  public String triples(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
-    kgTripleImporter.writeTriples(type, true);
-    notMappedPropertyHandler.writeNotMappedProperties(type, true);
+  public String triples(@RequestParam int version,
+                        @RequestParam(defaultValue = "none") StoreType type) throws Exception {
+    kgTripleImporter.writeTriples(version, type, true);
+    notMappedPropertyHandler.writeNotMappedProperties(Module.wiki.name(), version,
+        type, true);
     return "Imported!";
   }
 
@@ -113,21 +111,15 @@ public class MappingHelperRestServices {
     return "Imported!";
   }
 
-  @RequestMapping("/oldTables")
-  public String oldTables(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
-    kgTableImporter.writeTriplesOldFormat(type);
-    return "Imported!";
-  }
-
   @RequestMapping("/redirects")
-  public String redirects() throws Exception {
-    redirectLogic.write(StoreType.knowledgeStore);
+  public String redirects(@RequestParam int version) throws Exception {
+    redirectLogic.write(version, StoreType.knowledgeStore);
     return "Imported!";
   }
 
   @RequestMapping("/ambiguities")
-  public String ambiguities() throws Exception {
-    ambiguityLogic.write(StoreType.knowledgeStore);
+  public String ambiguities(@RequestParam int version) throws Exception {
+    ambiguityLogic.write(version, StoreType.knowledgeStore);
     return "Imported!";
   }
 
@@ -164,42 +156,35 @@ public class MappingHelperRestServices {
     return true;
   }
 
-  @RequestMapping("/writeTree")
-  @ResponseBody
-  public Boolean writeTree(@NotNull StoreType type) {
-    entityToClassLogic.writeTree(type);
-    return true;
-  }
-
   @RequestMapping("/properties")
   @ResponseBody
-  public Boolean properties(@RequestParam(defaultValue = "none") StoreType type,
+  public Boolean properties(@RequestParam int version,
+                            @RequestParam(defaultValue = "none") StoreType type,
                             @RequestParam(defaultValue = "true") boolean resolveAmbiguity) {
-    kgTripleImporter.writeTriples(type, false);
-    notMappedPropertyHandler.writeNotMappedProperties(type, resolveAmbiguity);
+    kgTripleImporter.writeTriples(version, type, false);
+    notMappedPropertyHandler.writeNotMappedProperties(Module.wiki.name(), version, type, resolveAmbiguity);
     return true;
   }
 
   @RequestMapping("/completeDumpUpdate")
   public void completeDumpUpdate(@RequestParam(defaultValue = "none") StoreType type,
-                                 @RequestParam(defaultValue = "false") boolean entitiesWithoutInfoBox) throws Exception {
-    migrationManager.migrate();
-    migrationManager.save();
-    if (entitiesWithoutInfoBox) kgTripleImporter.writeEntitiesWithoutInfoBox(type);
-    kgTripleImporter.writeEntitiesWithInfoBox(type);
-    kgTripleImporter.writeTriples(type, true);
-    kgTableImporter.writeTriples(type);
-    rawTripleImporter.writeTriples(type);
-    notMappedPropertyHandler.writeNotMappedProperties(type, true);
-    kgTripleImporter.writeAbstracts(type);
-    redirectLogic.write(type);
-    ambiguityLogic.write(type);
+                                 @RequestParam(defaultValue = "false") boolean entitiesWithoutInfoBox)
+      throws Exception {
+    final FkgTripleDao store = storeProvider.getStore(type, null);
+    int version = store.newVersion(Module.wiki.name());
+    if (entitiesWithoutInfoBox) kgTripleImporter.writeEntitiesWithoutInfoBox(version, type);
+    kgTripleImporter.writeEntitiesWithInfoBox(version, type);
+    kgTripleImporter.writeTriples(version, type, true);
+    notMappedPropertyHandler.writeNotMappedProperties(Module.wiki.name(), version, type, true);
+    kgTripleImporter.writeAbstracts(version, type);
+    redirectLogic.write(version, type);
+    ambiguityLogic.write(version, type);
     predicateImporter.writePredicates(type, true);
   }
 
   public boolean raw(@NotNull StoreType type) {
     rawTripleImporter.writeTriples(type);
-    notMappedPropertyHandler.writeNotMappedProperties(type, true);
+    notMappedPropertyHandler.writeNotMappedProperties("raw", 1, type, true);
     return true;
   }
 }

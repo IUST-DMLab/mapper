@@ -37,8 +37,8 @@ class FkgTriple(
     @Column(name = "module")
     var module: String? = null,
     @Index(name = "t_version")
-    @Column(name = "version")
-    var version: String? = null,
+    @Column(name = "version_number")
+    var version: Int? = null,
     @Index(name = "t_extraction_time")
     @Column(name = "extraction_time")
     var extractionTime: Long? = null,

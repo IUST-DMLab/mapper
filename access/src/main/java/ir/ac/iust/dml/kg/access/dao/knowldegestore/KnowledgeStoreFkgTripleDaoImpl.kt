@@ -42,13 +42,15 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
     }
   }
 
+  override fun newVersion(module: String) = tripleApi.newVersion1(module)
+
   private val p = Pattern.compile("[\\\\|`\"<>{}^\\[\\]]", Pattern.CASE_INSENSITIVE);
   private fun isValidUri(uri: String): Boolean {
     val m = p.matcher(uri)
     return !m.find()
   }
 
-  override fun save(t: FkgTriple, mapping: FkgPropertyMapping?, approved: Boolean) {
+  override fun save(t: FkgTriple, module: String, version: Int, mapping: FkgPropertyMapping?, approved: Boolean) {
     if (t.objekt == null || t.objekt!!.trim().isEmpty()) {
       logger.error("short triple here: ${t.source} ${t.predicate} ${t.objekt}")
       return
@@ -59,7 +61,8 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
     }
     val data = TripleData()
     data.context = URIs.defaultContext
-    data.module = t.module ?: "wiki"
+    data.module = module
+    data.version = version
     data.urls = Collections.singletonList(t.source)
     data.subject = t.subject
     data.predicate = if (!t.predicate!!.contains("://")) URIs.prefixedToUri(t.predicate) else t.predicate
@@ -104,7 +107,6 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
     }
 
     if (t.dataType != null) data.parameters["unit"] = t.dataType
-    if (t.version != null) data.parameters["version"] = t.version
     if (t.extractionTime != null) data.parameters["extractionTime"] = t.extractionTime.toString()
     if (t.rawText != null) data.parameters["rawText"] = t.rawText
 

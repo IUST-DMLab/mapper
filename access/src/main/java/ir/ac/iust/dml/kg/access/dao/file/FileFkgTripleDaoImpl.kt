@@ -15,6 +15,8 @@ import java.nio.file.Path
 
 class FileFkgTripleDaoImpl(val path: Path, val flushSize: Int = 1000) : FkgTripleDao() {
 
+  override fun newVersion(module: String) = 1
+
   init {
     if (!Files.exists(path)) Files.createDirectories(path)
   }
@@ -23,7 +25,7 @@ class FileFkgTripleDaoImpl(val path: Path, val flushSize: Int = 1000) : FkgTripl
   var notFlushedTriples = mutableListOf<FkgTriple>()
   var gson = GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create()
 
-  override fun save(t: FkgTriple, mapping: FkgPropertyMapping?, approved: Boolean) {
+  override fun save(t: FkgTriple, module: String, version: Int, mapping: FkgPropertyMapping?, approved: Boolean) {
     synchronized(notFlushedTriples) {
       notFlushedTriples.add(t)
       if (notFlushedTriples.size > flushSize) {

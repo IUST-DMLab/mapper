@@ -31,79 +31,6 @@ class KGTableImporter {
     return path
   }
 
-  fun writeTriplesOldFormat(storeType: StoreType = StoreType.none) {
-    val path = getTriplesPath()
-
-    val store = storeProvider.getStore(storeType, path)
-    val maxNumberOfTriples = TestUtils.getMaxTuples()
-
-    val entityTree = mutableMapOf<String, MutableSet<String>>()
-
-    val result = PathWalker.getPath(path, Regex(".*\\.json"))
-    val subjects = mutableListOf<String>()
-
-    // TODO: mastmal
-    val propertyMap = mapOf(
-        "picture" to URIs.getFkgOntologyPropertyPrefixed("picture"),
-        "تصویر" to URIs.getFkgOntologyPropertyPrefixed("picture"),
-        "دانشکده" to URIs.getFkgOntologyPropertyPrefixed("faculty"),
-        "رتبه دانشگاهی" to URIs.getFkgOntologyPropertyPrefixed("grade"),
-        "website" to URIs.getFkgOntologyPropertyPrefixed("website"),
-        "تصویر" to URIs.getFkgOntologyPropertyPrefixed("image"),
-        "پست الکترونیکی" to URIs.getFkgOntologyPropertyPrefixed("email"),
-        "آدرس" to URIs.getFkgOntologyPropertyPrefixed("address"),
-        "تلفن" to URIs.getFkgOntologyPropertyPrefixed("phone"),
-        "فکس" to URIs.getFkgOntologyPropertyPrefixed("fax"),
-        "گروه" to URIs.getFkgOntologyPropertyPrefixed("educationGroup"),
-        "نام" to "foaf:firstName",
-        "نام خانوادگی" to "foaf:familyName"
-    )
-
-    ontologyLogic.reloadTreeCache()
-
-    var tripleNumber = 0
-    val extractionTime = System.currentTimeMillis()
-    val version = System.currentTimeMillis().toString()
-
-    result.forEachIndexed { index, p ->
-      TableJsonFileReader(p).use { reader ->
-        while (reader.hasNext() && tripleNumber++ < maxNumberOfTriples) {
-          val triple = reader.next()
-          try {
-            if (triple.subject == null || triple.objekt == null) continue
-            val subject = URIs.getFkgResourceUri(triple.subject!!)
-            val ontologyClass = triple.ontologyClass!!
-
-            val newClassTree = ontologyLogic.getTree(ontologyClass)!!
-            entityTree.getOrPut(subject, { mutableSetOf() }).add(newClassTree)
-            val predicate =
-                if (propertyMap.containsKey(triple.predicate)) URIs.prefixedToUri(propertyMap[triple.predicate!!])!!
-                else URIs.convertToNotMappedFkgPropertyUri(triple.predicate!!)!!
-
-            subjects.add(subject)
-            store.save(triple.source!!, subject, triple.objekt!!, triple.module!!, predicate, null, null,
-                extractionTime, triple.version)
-          } catch (e: Throwable) {
-            logger.error(triple.toString(), e)
-          }
-        }
-      }
-    }
-
-    subjects.forEach { subject ->
-      val label = subject.substringAfterLast("/").replace("_", " ")
-      store.save(subject, subject, label, Module.mapper_auto_labeling.name, URIs.label, null, null, extractionTime, version)
-    }
-
-    entityTree.forEach { entity, tress ->
-      entityClassImporter.writeEntityTrees(entity,
-          tress.map { InfoBoxAndCount(infoBox = "donCare", propertyCount = 1, tree = it.split("/")) }.toMutableSet(),
-          store, Module.web_table_extractor.name)
-    }
-
-    store.flush()
-  }
-
   fun writeTriples(storeType: StoreType = StoreType.none) {
     val path = getTriplesPath()
 
@@ -119,7 +46,7 @@ class KGTableImporter {
 
     var tripleNumber = 0
     val extractionTime = System.currentTimeMillis()
-    val version = System.currentTimeMillis().toString()
+    val version = 1
 
     result.forEachIndexed { index, p ->
       TableJsonFileReader(p).use { reader ->
@@ -137,7 +64,7 @@ class KGTableImporter {
             val predicate = URIs.prefixedToUri(triple.predicate!!)!!
             subjects.add(subject)
             store.save(triple.source!!, subject, triple.objekt!!, triple.module!!, predicate, null, null,
-                extractionTime, triple.version)
+                extractionTime, version)
           } catch (e: Throwable) {
             logger.error(triple.toString(), e)
           }
@@ -154,7 +81,7 @@ class KGTableImporter {
     entityTree.forEach { entity, tress ->
       entityClassImporter.writeEntityTrees(entity,
           tress.map { InfoBoxAndCount(infoBox = "donCare", propertyCount = 1, tree = it.split("/")) }.toMutableSet(),
-          store, Module.web_table_extractor.name)
+          store, Module.web_table_extractor.name, version)
     }
 
     store.flush()

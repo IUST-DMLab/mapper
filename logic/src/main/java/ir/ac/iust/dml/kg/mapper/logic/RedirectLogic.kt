@@ -6,6 +6,7 @@ import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
+import ir.ac.iust.dml.kg.raw.utils.Module
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.URIs
 import org.apache.log4j.Logger
@@ -29,7 +30,7 @@ class RedirectLogic {
   }
 
   @Throws(Exception::class)
-  fun write(storeType: StoreType = StoreType.knowledgeStore) {
+  fun write(version: Int, storeType: StoreType = StoreType.knowledgeStore) {
     val redirectsFolder = ConfigReader.getPath("wiki.folder.redirects", "~/.pkg/data/redirects")
     if (!Files.exists(redirectsFolder.parent)) Files.createDirectories(redirectsFolder.parent)
     if (!Files.exists(redirectsFolder)) {
@@ -57,12 +58,12 @@ class RedirectLogic {
                   subject = URIs.getFkgResourceUri(mainResource),
                   predicate = URIs.redirect,
                   objekt = "http://fa.wikipedia.org/wiki/" + redirect.replace(' ', '_')
-              ), null, true)
+              ), Module.wiki.name, version, null, true)
               store.save(FkgTriple(
                   subject = URIs.getFkgResourceUri(mainResource),
                   predicate = URIs.variantLabel,
                   objekt = redirect.replace('_', ' ')
-              ), null, true)
+              ), Module.wiki.name, version, null, true)
             }
           }
         }

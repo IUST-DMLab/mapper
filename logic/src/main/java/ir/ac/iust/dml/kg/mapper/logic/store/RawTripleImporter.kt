@@ -74,6 +74,7 @@ class RawTripleImporter {
     }
 
     val newSubjects = mutableSetOf<String>()
+    val VERSION = 1
 
     result.forEachIndexed { index, p ->
       ir.ac.iust.dml.kg.raw.triple.RawTripleImporter(p).use { reader ->
@@ -145,7 +146,7 @@ class RawTripleImporter {
               if (predicate == defaultProperty) notMappedPropertyHandler.addToNotMapped(triple.predicate)
             } else predicate = triple.predicate
             store.save(source = triple.sourceUrl, subject = subject,
-                objeck = objekt, property = predicate, version = triple.version,
+                objeck = objekt, property = predicate, version = VERSION,
                 extractionTime = triple.extractionTime, module = triple.module, rawText = triple.rawText,
                 accuracy = triple.accuracy)
           } catch (th: Throwable) {
@@ -157,11 +158,11 @@ class RawTripleImporter {
 
     newSubjects.forEach { subject ->
       logger.info("new subject detected: $subject")
-      entityClassImporter.addResourceAsThing(subject, store, Module.raw_mapper_entity_adder.name)
+      entityClassImporter.addResourceAsThing(subject, store, Module.raw_mapper_entity_adder.name, VERSION)
     }
 
     store.flush()
-    notMappedPropertyHandler.writeNotMappedProperties(storeType, true)
+    notMappedPropertyHandler.writeNotMappedProperties("raw", VERSION, storeType, true)
     logger.info("new subjects has been added: ${newSubjects.joinToString("\n")}")
   }
 }

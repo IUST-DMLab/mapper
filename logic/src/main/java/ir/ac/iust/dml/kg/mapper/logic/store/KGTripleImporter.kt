@@ -33,7 +33,7 @@ class KGTripleImporter {
 
   private val invalidPropertyRegex = Regex("\\d+")
 
-  fun writeAbstracts(storeType: StoreType = StoreType.none) {
+  fun writeAbstracts(version: Int, storeType: StoreType = StoreType.none) {
     val path = PathUtils.getAbstractPath()
     val maxNumberOfEntities = TestUtils.getMaxTuples()
     val store = storeProvider.getStore(storeType, path)
@@ -56,7 +56,8 @@ class KGTripleImporter {
             if (entityIndex > maxNumberOfEntities) return@forEach
             val subject = URIs.getFkgResourceUri(entity)
             store.save(source = "http://fa.wikipedia.org/wiki/" + entity.replace(' ', '_'),
-                subject = subject, objeck = abstract, property = ABSTRACT_PREDICATE)
+                subject = subject, objeck = abstract, property = ABSTRACT_PREDICATE,
+                module = Module.wiki.name, version = version)
           }
           logger.warn("$index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
         }
@@ -66,7 +67,7 @@ class KGTripleImporter {
     store.flush()
   }
 
-  fun writeEntitiesWithoutInfoBox(storeType: StoreType = StoreType.none) {
+  fun writeEntitiesWithoutInfoBox(version: Int, storeType: StoreType = StoreType.none) {
     val path = PathUtils.getWithoutInfoboxPath()
     val maxNumberOfEntities = TestUtils.getMaxTuples()
     val store = storeProvider.getStore(storeType, path)
@@ -86,7 +87,7 @@ class KGTripleImporter {
           revisionIdMap.keys.forEach { entity ->
             entityIndex++
             if (entityIndex > maxNumberOfEntities) return@forEachIndexed
-            entityClassImporter.addResourceAsThing(entity, store, Module.wiki.name)
+            entityClassImporter.addResourceAsThing(entity, store, Module.wiki.name, version)
           }
           logger.warn("$index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
         }
@@ -96,7 +97,7 @@ class KGTripleImporter {
     store.flush()
   }
 
-  fun writeEntitiesWithInfoBox(storeType: StoreType = StoreType.none) {
+  fun writeEntitiesWithInfoBox(version: Int, storeType: StoreType = StoreType.none) {
     holder.writeToKS()
     holder.loadFromKS()
 
@@ -145,7 +146,7 @@ class KGTripleImporter {
           it.tree = tree.split("/")
           tress.add(it)
         }
-        entityClassImporter.writeEntityTrees(entity, tress, store, Module.wiki.name)
+        entityClassImporter.writeEntityTrees(entity, tress, store, Module.wiki.name, version)
       } catch (th: Throwable) {
         println("entity: >>>> $entity")
         logger.error(th)
@@ -156,7 +157,7 @@ class KGTripleImporter {
     store.flush()
   }
 
-  fun writeTriples(storeType: StoreType = StoreType.none, insert: Boolean = true) {
+  fun writeTriples(version: Int, storeType: StoreType = StoreType.none, insert: Boolean = true) {
     holder.writeToKS()
     holder.loadFromKS()
 
@@ -213,7 +214,8 @@ class KGTripleImporter {
 
             templateMapping.rules!!.forEach {
               numberOfMapped++
-              if (insert) store.saveTriple(source = triple.source!!, subject = subject, objeck = objekt, rule = it)
+              if (insert) store.saveTriple(source = triple.source!!, subject = subject, objeck = objekt,
+                  rule = it, version = version)
             }
 
             val propertyMapping = templateMapping.properties!![PropertyNormaller.removeDigits(property)]
@@ -229,18 +231,18 @@ class KGTripleImporter {
               if (classMaps.containsKey(key)) {
                 numberOfMappedInTree++
                 if (insert) store.saveTriple(source = triple.source!!, subject = subject,
-                    objeck = objekt, rule = classMaps[key]!!)
+                    objeck = objekt, rule = classMaps[key]!!, version = version)
               } else {
                 numberOfNotMapped++
                 notMappedPropertyHandler.addToNotMapped(property)
                 if (insert) store.convertAndSave(source = triple.source!!, subject = subject,
-                    objeck = objekt, property = property)
+                    objeck = objekt, property = property, version = version, module = Module.wiki.name)
               }
             } else {
               numberOfMapped++
               propertyMapping.rules.forEach {
                 if (insert) store.saveTriple(source = triple.source!!, subject = subject,
-                    objeck = objekt, rule = it)
+                    objeck = objekt, rule = it, version = version)
               }
             }
           } catch (th: Throwable) {
@@ -259,7 +261,7 @@ class KGTripleImporter {
     logger.info("number of mapped is $numberOfMapped")
   }
 
-  private fun FkgTripleDao.saveTriple(source: String, subject: String, objeck: String, rule: MapRule) {
+  private fun FkgTripleDao.saveTriple(source: String, subject: String, objeck: String, version: Int, rule: MapRule) {
     var type: ValueType? = null
     if (rule.predicate == null) return
     val value = if (rule.transform != null) {
@@ -271,7 +273,7 @@ class KGTripleImporter {
     this.save(FkgTriple(source = source, subject = subject,
         predicate = URIs.prefixedToUri(rule.predicate),
         objekt = URIs.prefixedToUri(value.toString()),
-        valueType = type, dataType = rule.unit), null)
+        valueType = type, dataType = rule.unit), Module.wiki.name, version, null)
   }
 
 }

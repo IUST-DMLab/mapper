@@ -2,16 +2,14 @@ package ir.ac.iust.dml.kg.mapper.logic.store
 
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
+import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.mapper.logic.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.data.ExportedPropertyData
 import ir.ac.iust.dml.kg.mapper.logic.store.data.OntologyClassData
 import ir.ac.iust.dml.kg.mapper.logic.store.data.OntologyPropertyData
 import ir.ac.iust.dml.kg.mapper.logic.test.TestUtils
 import ir.ac.iust.dml.kg.mapper.logic.type.StoreType
-import ir.ac.iust.dml.kg.raw.utils.ConfigReader
-import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
-import ir.ac.iust.dml.kg.raw.utils.PagedData
-import ir.ac.iust.dml.kg.raw.utils.URIs
+import ir.ac.iust.dml.kg.raw.utils.*
 import ir.ac.iust.dml.kg.services.client.ApiClient
 import ir.ac.iust.dml.kg.services.client.swagger.V1expertsApi
 import ir.ac.iust.dml.kg.services.client.swagger.V1triplesApi
@@ -37,6 +35,7 @@ class OntologyLogic {
   private val childrenCache = mutableMapOf<String, List<String>>()
   private val traversedTree = mutableListOf<String>()
   @Autowired lateinit var storeProvider: StoreProvider
+  private val VERSION = 1
 
   init {
     val client = ApiClient()
@@ -44,6 +43,10 @@ class OntologyLogic {
     client.connectTimeout = 1200000
     tripleApi = V1triplesApi(client)
     expertApi = V1expertsApi(client)
+  }
+
+  fun save(store: FkgTripleDao, source: String, subject: String, predicate: String, `object`: String) {
+    store.save(source, subject, predicate, `object`, Module.expert.name, VERSION)
   }
 
   fun importFromDBpedia(storeType: StoreType = StoreType.knowledgeStore) {
@@ -70,31 +73,32 @@ class OntologyLogic {
           val subject = property.replace(dbpediaMainPrefix, fkgMainPrefix)
           if (index % 1000 == 0) logger.info("writing property $property: $data")
           val source = if (data.wasDerivedFrom == null) property else data.wasDerivedFrom!!
-          if (data.label != null) store.save(source, subject, data.label!!, URIs.label)
-          if (data.comment != null) store.save(source, subject, data.comment!!, URIs.comment)
+          if (data.label != null) save(store, source, subject, data.label!!, URIs.label)
+          if (data.comment != null) save(store, source, subject, data.comment!!, URIs.comment)
           if (data.domain != null) {
             val oldDomains = store.read(subject = subject, predicate = URIs.propertyDomain)
             oldDomains.forEach { store.delete(it.subject!!, it.predicate!!, it.objekt!!) }
-            store.save(source, subject, data.domain!!.replace(dbpediaMainPrefix, fkgMainPrefix), URIs.propertyDomain)
-          } else store.save(source, subject, thing, URIs.propertyDomain)
+            save(store, source, subject, data.domain!!.replace(dbpediaMainPrefix, fkgMainPrefix), URIs.propertyDomain)
+          } else save(store, source, subject, thing, URIs.propertyDomain)
           val result = store.read(subject = subject, predicate = URIs.name)
           if (result.isEmpty()) {
             val name = subject.substring(subject.indexOf("/ontology/") + 10)
-            store.convertAndSave(source = subject, subject = subject, property = URIs.name, objeck = name)
+            store.convertAndSave(source = subject, subject = subject, property = URIs.name, objeck = name,
+                module = Module.expert.name, version = VERSION)
           }
-          if (data.range != null) store.save(source, subject,
+          if (data.range != null) save(store, source, subject,
               data.range!!.replace(dbpediaMainPrefix, fkgMainPrefix), URIs.propertyRange)
-          if (data.wasDerivedFrom != null) store.save(source, subject, data.wasDerivedFrom!!, URIs.wasDerivedFrom)
-          if (data.equivalentProperty != null) store.save(source, subject,
+          if (data.wasDerivedFrom != null) save(store, source, subject, data.wasDerivedFrom!!, URIs.wasDerivedFrom)
+          if (data.equivalentProperty != null) save(store, source, subject,
               data.equivalentProperty!!.replace(dbpediaMainPrefix, fkgMainPrefix), URIs.equivalentProperty)
 
           if (data.type != null) {
             val typeUrl = URIs.prefixedToUri(data.type)!!
             val oldTypes = store.read(subject = subject, predicate = URIs.type)
             oldTypes.forEach { store.delete(it.subject!!, it.predicate!!, it.objekt!!) }
-            store.save(source, subject, typeUrl, URIs.type)
+            save(store, source, subject, typeUrl, URIs.type)
           }
-          store.save(source, subject, URIs.typeOfAnyProperties, URIs.type)
+          save(store, source, subject, URIs.typeOfAnyProperties, URIs.type)
         }
       }
     } catch (th: Throwable) {

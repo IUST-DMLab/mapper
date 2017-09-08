@@ -11,9 +11,12 @@ abstract class FkgTripleDao {
 
   private val transformers = Transformers()
 
+  abstract fun newVersion(module: String): Int
+
   abstract fun flush()
 
-  abstract fun save(t: FkgTriple, mapping: FkgPropertyMapping?, approved: Boolean = false)
+  abstract fun save(t: FkgTriple, module: String, version: Int, mapping: FkgPropertyMapping?,
+                    approved: Boolean = false)
 
   abstract fun delete(subject: String, predicate: String, `object`: String)
 
@@ -24,20 +27,23 @@ abstract class FkgTripleDao {
   abstract fun read(subject: String? = null, predicate: String? = null, objekt: String? = null,
                     status: MappingStatus? = null): MutableList<FkgTriple>
 
-  fun convertAndSave(source: String, subject: String, objeck: String, property: String, module: String? = null) {
+  fun convertAndSave(source: String, subject: String, objeck: String, property: String,
+                     module: String, version: Int) {
     this.save(FkgTriple(source = source, subject = subject,
         predicate = URIs.convertToNotMappedFkgPropertyUri(property),
-        objekt = URIs.prefixedToUri(objeck), module = module), null)
+        objekt = URIs.prefixedToUri(objeck)), module, version, null)
   }
 
-  fun save(source: String, subject: String, objeck: String, property: String) {
-    this.save(FkgTriple(source = source, subject = subject, predicate = property, objekt = objeck), null)
+  fun save(source: String, subject: String, objeck: String, property: String, module: String, version: Int) {
+    this.save(FkgTriple(source = source, subject = subject, predicate = property, objekt = objeck),
+        module, version, null)
   }
 
   fun save(source: String, subject: String, objeck: String, module: String,
            property: String, rawText: String? = null, accuracy: Double? = null, extractionTime: Long? = null,
-           version: String? = null) {
+           version: Int) {
     this.save(FkgTriple(source = source, subject = subject, predicate = property, objekt = objeck,
-        accuracy = accuracy, rawText = rawText, module = module, extractionTime = extractionTime, version = version), null)
+        accuracy = accuracy, rawText = rawText, extractionTime = extractionTime),
+        module, version, null)
   }
 }
