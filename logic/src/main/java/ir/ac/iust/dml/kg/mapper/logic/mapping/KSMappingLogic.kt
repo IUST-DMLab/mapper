@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.mapper.logic
+package ir.ac.iust.dml.kg.mapper.logic.mapping
 
 import ir.ac.iust.dml.kg.mapper.logic.data.PropertyStats
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
@@ -67,27 +67,27 @@ class KSMappingLogic {
           if (className.contains(":")) className
           else URIs.getFkgOntologyClassPrefixed(className)
       filtered = filtered.filter {
-        it.rules.filter {
+        it.rules.any {
           it.predicate == URIs.type && compare(classNameLike, it.constant, classNameAndPrefix)
-        }.isNotEmpty()
+        }
       }
     }
     if (propertyName != null) {
       filtered = filtered.filter {
-        it.properties.filter { compare(propertyNameLike, it.property, propertyName) }.isNotEmpty()
+        it.properties.any { compare(propertyNameLike, it.property, propertyName) }
       }
     }
     if (predicateName != null) {
       filtered = filtered.filter {
-        it.properties.filter {
-          it.rules.filter { compare(predicateNameLike, it.predicate, predicateName) }.isNotEmpty()
-              || it.recommendations.filter { compare(predicateNameLike, it.predicate, predicateName) }.isNotEmpty()
-        }.isNotEmpty()
+        it.properties.any {
+          it.rules.any { compare(predicateNameLike, it.predicate, predicateName) }
+              || it.recommendations.any { compare(predicateNameLike, it.predicate, predicateName) }
+        }
       }
     }
     if (approved != null) {
       filtered = filtered.filter {
-        it.properties.filter { it.recommendations.isEmpty() == approved }.isNotEmpty()
+        it.properties.any { it.recommendations.isEmpty() == approved }
       }
     }
     return asPages(page, pageSize, filtered)

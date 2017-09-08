@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.mapper.logic
+package ir.ac.iust.dml.kg.mapper.logic.utils
 
 import ir.ac.iust.dml.kg.knowledge.core.ValueType
 import ir.ac.iust.dml.kg.mapper.logic.data.MapRule

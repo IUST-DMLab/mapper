@@ -1,6 +1,7 @@
-package ir.ac.iust.dml.kg.mapper.logic
+package ir.ac.iust.dml.kg.mapper.logic.ontology
 
 import ir.ac.iust.dml.kg.mapper.logic.data.StoreType
+import ir.ac.iust.dml.kg.mapper.logic.utils.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.utils.TestUtils
 import ir.ac.iust.dml.kg.raw.utils.URIs
 import org.apache.log4j.Logger

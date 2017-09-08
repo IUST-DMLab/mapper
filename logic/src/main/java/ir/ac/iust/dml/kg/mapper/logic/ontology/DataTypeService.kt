@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.mapper.logic
+package ir.ac.iust.dml.kg.mapper.logic.ontology
 
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson

@@ -2,6 +2,8 @@ package ir.ac.iust.dml.kg.mapper.logic
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.mapper.logic.data.StoreType
+import ir.ac.iust.dml.kg.mapper.logic.ontology.OntologyLogic
+import ir.ac.iust.dml.kg.mapper.logic.utils.StoreProvider
 import ir.ac.iust.dml.kg.raw.utils.Module
 import ir.ac.iust.dml.kg.raw.utils.URIs
 import org.apache.log4j.Logger

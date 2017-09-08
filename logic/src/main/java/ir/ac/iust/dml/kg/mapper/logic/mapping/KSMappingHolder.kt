@@ -1,7 +1,9 @@
-package ir.ac.iust.dml.kg.mapper.logic
+package ir.ac.iust.dml.kg.mapper.logic.mapping
 
 import ir.ac.iust.dml.kg.mapper.logic.data.PropertyMapping
 import ir.ac.iust.dml.kg.mapper.logic.data.TemplateMapping
+import ir.ac.iust.dml.kg.mapper.logic.ontology.OntologyLogic
+import ir.ac.iust.dml.kg.mapper.logic.utils.KSMappingConverter
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PropertyNormaller
 import ir.ac.iust.dml.kg.raw.utils.URIs

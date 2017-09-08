@@ -2,6 +2,9 @@ package ir.ac.iust.dml.kg.mapper.logic
 
 import ir.ac.iust.dml.kg.mapper.logic.data.InfoBoxAndCount
 import ir.ac.iust.dml.kg.mapper.logic.data.StoreType
+import ir.ac.iust.dml.kg.mapper.logic.ontology.EntityClassImporter
+import ir.ac.iust.dml.kg.mapper.logic.ontology.OntologyLogic
+import ir.ac.iust.dml.kg.mapper.logic.utils.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.utils.TestUtils
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.Module
@@ -15,7 +18,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 @Service
-class KGTableImporter {
+class TableTripleImporter {
   private val logger = Logger.getLogger(this.javaClass)!!
   @Autowired private lateinit var ontologyLogic: OntologyLogic
   @Autowired private lateinit var entityClassImporter: EntityClassImporter

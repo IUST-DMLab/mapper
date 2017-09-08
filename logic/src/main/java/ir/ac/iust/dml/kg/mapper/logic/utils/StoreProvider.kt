@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.mapper.logic
+package ir.ac.iust.dml.kg.mapper.logic.utils
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.dao.file.FileFkgTripleDaoImpl
@@ -18,7 +18,7 @@ class StoreProvider {
   private var ksDao: KnowledgeStoreFkgTripleDaoImpl? = null
 
   fun getStore(storeType: StoreType, path: Path? = null): FkgTripleDao {
-    val store = when (storeType) {
+    return when (storeType) {
       StoreType.file -> {
         if (fileDao == null) fileDao = FileFkgTripleDaoImpl(path!!.resolve("mapped"))
         return fileDao!!
@@ -33,6 +33,5 @@ class StoreProvider {
         return ksDao!!
       }
     }
-    return store
   }
 }

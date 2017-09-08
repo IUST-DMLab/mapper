@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.mapper.logic
+package ir.ac.iust.dml.kg.mapper.logic.mapping
 
 import ir.ac.iust.dml.kg.knowledge.core.TypedValue
 import ir.ac.iust.dml.kg.knowledge.core.transforms.TransformScanner

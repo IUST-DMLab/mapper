@@ -2,7 +2,12 @@ package ir.ac.iust.dml.kg.mapper.logic
 
 import ir.ac.iust.dml.kg.mapper.logic.data.MapRule
 import ir.ac.iust.dml.kg.mapper.logic.data.StoreType
+import ir.ac.iust.dml.kg.mapper.logic.mapping.KSMappingHolder
+import ir.ac.iust.dml.kg.mapper.logic.ontology.EntityClassImporter
+import ir.ac.iust.dml.kg.mapper.logic.ontology.NotMappedPropertyHandler
+import ir.ac.iust.dml.kg.mapper.logic.ontology.OntologyLogic
 import ir.ac.iust.dml.kg.mapper.logic.utils.PathUtils
+import ir.ac.iust.dml.kg.mapper.logic.utils.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.utils.TestUtils
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.Module

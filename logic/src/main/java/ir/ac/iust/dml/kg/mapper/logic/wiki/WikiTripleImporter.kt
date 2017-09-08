@@ -1,4 +1,4 @@
-package ir.ac.iust.dml.kg.mapper.logic
+package ir.ac.iust.dml.kg.mapper.logic.wiki
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -8,7 +8,13 @@ import ir.ac.iust.dml.kg.knowledge.core.ValueType
 import ir.ac.iust.dml.kg.mapper.logic.data.InfoBoxAndCount
 import ir.ac.iust.dml.kg.mapper.logic.data.MapRule
 import ir.ac.iust.dml.kg.mapper.logic.data.StoreType
+import ir.ac.iust.dml.kg.mapper.logic.mapping.KSMappingHolder
+import ir.ac.iust.dml.kg.mapper.logic.mapping.TransformService
+import ir.ac.iust.dml.kg.mapper.logic.ontology.EntityClassImporter
+import ir.ac.iust.dml.kg.mapper.logic.ontology.NotMappedPropertyHandler
+import ir.ac.iust.dml.kg.mapper.logic.ontology.OntologyLogic
 import ir.ac.iust.dml.kg.mapper.logic.utils.PathUtils
+import ir.ac.iust.dml.kg.mapper.logic.utils.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.utils.TestUtils
 import ir.ac.iust.dml.kg.raw.utils.*
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
@@ -20,7 +26,7 @@ import java.io.FileInputStream
 import java.io.InputStreamReader
 
 @Service
-class KGTripleImporter {
+class WikiTripleImporter {
 
   private val logger = Logger.getLogger(this.javaClass)!!
   @Autowired private lateinit var holder: KSMappingHolder

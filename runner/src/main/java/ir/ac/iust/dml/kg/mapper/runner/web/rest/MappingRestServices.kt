@@ -1,9 +1,9 @@
 package ir.ac.iust.dml.kg.mapper.runner.web.rest
 
 import io.swagger.annotations.Api
-import ir.ac.iust.dml.kg.mapper.logic.DataTypeService
-import ir.ac.iust.dml.kg.mapper.logic.KSMappingLogic
-import ir.ac.iust.dml.kg.mapper.logic.TransformService
+import ir.ac.iust.dml.kg.mapper.logic.mapping.KSMappingLogic
+import ir.ac.iust.dml.kg.mapper.logic.mapping.TransformService
+import ir.ac.iust.dml.kg.mapper.logic.ontology.DataTypeService
 import ir.ac.iust.dml.kg.services.client.swagger.model.TemplateData
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
