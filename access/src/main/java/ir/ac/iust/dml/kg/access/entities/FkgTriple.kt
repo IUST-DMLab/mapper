@@ -25,10 +25,6 @@ class FkgTriple(
     var predicate: String? = null,
     @Column(name = "object")
     var objekt: String? = null,
-    @Column(name = "template_type")
-    var templateName: String? = null,
-    @Column(name = "raw_property")
-    var rawProperty: String? = null,
     @Index(name = "t_status")
     @Enumerated
     @Column(name = "status")
