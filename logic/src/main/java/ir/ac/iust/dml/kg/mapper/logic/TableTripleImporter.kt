@@ -49,6 +49,7 @@ class TableTripleImporter {
     var tripleNumber = 0
     val extractionTime = System.currentTimeMillis()
     val version = 1
+    val informer = ProgressInformer(result.size + 1)
 
     result.forEachIndexed { index, p ->
       TableJsonFileReader(p).use { reader ->
@@ -72,6 +73,7 @@ class TableTripleImporter {
           }
         }
       }
+      informer.stepDone(index + 1)
     }
 
     subjects.forEach { subject ->
@@ -87,5 +89,6 @@ class TableTripleImporter {
     }
 
     store.flush()
+    informer.done()
   }
 }

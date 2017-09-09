@@ -68,9 +68,6 @@ class RawTripleImporter {
           }
           if (ontologyClass != null) {
             predicatesOfClass.getOrPut(ontologyClass, { mutableSetOf() }).add(property)
-//                ontologyLogic.getTree(ontologyClass)?.split("/")?.forEach {
-//                  predicatesOfClass.getOrPut(it, { mutableSetOf() }).add(rule.predicate!!)
-//                }
           }
         }
       }
@@ -78,83 +75,89 @@ class RawTripleImporter {
 
     val newSubjects = mutableSetOf<String>()
     val VERSION = 1
+    val informer = ProgressInformer(result.size + 2)
 
     result.forEachIndexed { index, p ->
-      ir.ac.iust.dml.kg.raw.triple.RawTripleImporter(p).use { reader ->
-        while (reader.hasNext()) {
-          val triple = reader.next()
-          tripleNumber++
-          if (tripleNumber > maxNumberOfTriples) break
-          try {
-            if (tripleNumber % 1000 == 0)
-              logger.warn("triple number is $tripleNumber. $index file is $p. " +
-                  "time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
-            val subjectLabel = if (triple.subject.contains("/")) triple.subject.substringAfterLast("/") else triple.subject
-            val subjects = tripleApi.search1(null, null, null, null, URIs.variantLabel,
-                null, subjectLabel, null, 0, 0).data.map { it.subject }
-            val subjectsData = subjects.map { subject ->
-              val subjectData = SubjectData(subject)
-              val subjectInfoBoxes = entityInfoLogic.resources[subject.substringAfterLast("/").replace('_', ' ')]
-              subjectInfoBoxes?.forEach { infobox ->
-                val map = holder.getTemplateMapping(infobox).rules?.filter { it.predicate == URIs.typePrefixed }?.firstOrNull()
-                if (map != null && map.constant != null) {
-                  val ontologyClass = map.constant!!.substringAfterLast(":")
-                  val classParents = ontologyLogic.getClassParents(ontologyClass)!!
-                  if (classParents.size > subjectData.classDepth) {
-                    subjectData.classDepth = classParents.size
-                    subjectData.ontologyClass = ontologyClass.substringAfterLast("/")
+      try {
+        ir.ac.iust.dml.kg.raw.triple.RawTripleImporter(p).use { reader ->
+          while (reader.hasNext()) {
+            val triple = reader.next()
+            tripleNumber++
+            if (tripleNumber > maxNumberOfTriples) break
+            try {
+              if (tripleNumber % 1000 == 0)
+                logger.warn("triple number is $tripleNumber. $index file is $p. " +
+                    "time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
+              val subjectLabel = if (triple.subject.contains("/")) triple.subject.substringAfterLast("/") else triple.subject
+              val subjects = tripleApi.search1(null, null, null, null, URIs.variantLabel,
+                  null, subjectLabel, null, 0, 0).data.map { it.subject }
+              val subjectsData = subjects.map { subject ->
+                val subjectData = SubjectData(subject)
+                val subjectInfoBoxes = entityInfoLogic.resources[subject.substringAfterLast("/").replace('_', ' ')]
+                subjectInfoBoxes?.forEach { infobox ->
+                  val map = holder.getTemplateMapping(infobox).rules?.filter { it.predicate == URIs.typePrefixed }?.firstOrNull()
+                  if (map?.constant != null) {
+                    val ontologyClass = map.constant!!.substringAfterLast(":")
+                    val classParents = ontologyLogic.getClassParents(ontologyClass)!!
+                    if (classParents.size > subjectData.classDepth) {
+                      subjectData.classDepth = classParents.size
+                      subjectData.ontologyClass = ontologyClass.substringAfterLast("/")
+                    }
                   }
                 }
+                subjectData
+              }.sortedByDescending { it.classDepth }
+
+              var subject = subjectsData.filter {
+                (it.ontologyClass != null) && (predicatesOfClass[it.ontologyClass!!] ?: mutableSetOf())
+                    .contains(triple.predicate)
+              }.firstOrNull()?.subject
+              if (subject == null) subject = subjectsData.firstOrNull()?.subject
+              if (subject == null) {
+                subject = URIs.getFkgResourceUri(subjectLabel)
+                newSubjects.add(subject)
               }
-              subjectData
-            }.sortedByDescending { it.classDepth }
 
-            var subject = subjectsData.filter {
-              (it.ontologyClass != null) && (predicatesOfClass[it.ontologyClass!!] ?: mutableSetOf())
-                  .contains(triple.predicate)
-            }.firstOrNull()?.subject
-            if (subject == null) subject = subjectsData.firstOrNull()?.subject
-            if (subject == null) {
-              subject = URIs.getFkgResourceUri(subjectLabel)
-              newSubjects.add(subject)
-            }
-
-            val objekt = if (entityInfoLogic.resources.containsKey(triple.`object`))
-              URIs.getFkgResourceUri(triple.`object`) else triple.`object`
-            val predicate: String
-            val stemmedPredicate = Stemmer.i().stem(triple.predicate)
-            if (triple.isNeedsMapping) {
-              val subjectInfoBoxes = entityInfoLogic.resources[subject.substringAfterLast("/").replace('_', ' ')]
-              val defaultProperty = URIs.convertToNotMappedFkgPropertyUri(triple.predicate)!!
-              predicate =
-                  if (subjectInfoBoxes == null) defaultProperty
-                  else {
-                    var m = mutableSetOf<MapRule>()
-                    subjectInfoBoxes.forEach {
-                      val pm = holder.examinePropertyMapping(it, triple.predicate)
-                      if (pm != null && pm.rules.isNotEmpty()) {
-                        m = pm.rules
-                        return@forEach
+              val objekt = if (entityInfoLogic.resources.containsKey(triple.`object`))
+                URIs.getFkgResourceUri(triple.`object`) else triple.`object`
+              val predicate: String
+              val stemmedPredicate = Stemmer.i().stem(triple.predicate)
+              if (triple.isNeedsMapping) {
+                val subjectInfoBoxes = entityInfoLogic.resources[subject.substringAfterLast("/").replace('_', ' ')]
+                val defaultProperty = URIs.convertToNotMappedFkgPropertyUri(triple.predicate)!!
+                predicate =
+                    if (subjectInfoBoxes == null) defaultProperty
+                    else {
+                      var m = mutableSetOf<MapRule>()
+                      subjectInfoBoxes.forEach {
+                        val pm = holder.examinePropertyMapping(it, triple.predicate)
+                        if (pm != null && pm.rules.isNotEmpty()) {
+                          m = pm.rules
+                          return@forEach
+                        }
+                      }
+                      if (m.isNotEmpty()) URIs.prefixedToUri(m.iterator().next().predicate!!)!!
+                      else {
+                        val ped = mutableSetOf<String>()
+                        ped.addAll(propertyToPredicates[stemmedPredicate] ?: mutableSetOf())
+                        ped.addAll(propertyToPredicates[triple.predicate] ?: mutableSetOf())
+                        if (ped.isNotEmpty()) ped.first()
+                        else defaultProperty
                       }
                     }
-                    if (m.isNotEmpty()) URIs.prefixedToUri(m.iterator().next().predicate!!)!!
-                    else {
-                      val ped = mutableSetOf<String>()
-                      ped.addAll(propertyToPredicates[stemmedPredicate] ?: mutableSetOf())
-                      ped.addAll(propertyToPredicates[triple.predicate] ?: mutableSetOf())
-                      if (ped.isNotEmpty()) ped.first()
-                      else defaultProperty
-                    }
-                  }
-              if (predicate == defaultProperty) notMappedPropertyHandler.addToNotMapped(triple.predicate)
-            } else predicate = triple.predicate
-            store.save(triple.sourceUrl, subject, predicate, objekt, triple.module!!, VERSION,
-                triple.rawText, triple.accuracy, triple.extractionTime)
-          } catch (th: Throwable) {
-            th.printStackTrace()
+                if (predicate == defaultProperty) notMappedPropertyHandler.addToNotMapped(triple.predicate)
+              } else predicate = triple.predicate
+              store.save(triple.sourceUrl, subject, predicate, objekt, triple.module!!, VERSION,
+                  triple.rawText, triple.accuracy, triple.extractionTime)
+            } catch (th: Throwable) {
+              th.printStackTrace()
+            }
           }
         }
+      } catch (th: Throwable) {
+        logger.error(th)
       }
+      informer.stepDone(index + 1)
     }
 
     newSubjects.forEach { subject ->
@@ -163,7 +166,9 @@ class RawTripleImporter {
     }
 
     store.flush()
+    informer.stepDone(result.size + 1)
     notMappedPropertyHandler.writeNotMappedProperties("raw", VERSION, storeType, true)
     logger.info("new subjects has been added: ${newSubjects.joinToString("\n")}")
+    informer.done()
   }
 }

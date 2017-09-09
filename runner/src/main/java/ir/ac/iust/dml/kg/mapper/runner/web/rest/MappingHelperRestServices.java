@@ -1,6 +1,7 @@
 package ir.ac.iust.dml.kg.mapper.runner.web.rest;
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao;
+import ir.ac.iust.dml.kg.mapper.logic.ProgressInformer;
 import ir.ac.iust.dml.kg.mapper.logic.RawTripleImporter;
 import ir.ac.iust.dml.kg.mapper.logic.TableTripleImporter;
 import ir.ac.iust.dml.kg.mapper.logic.data.StoreType;
@@ -129,14 +130,24 @@ public class MappingHelperRestServices {
       throws Exception {
     final FkgTripleDao store = storeProvider.getStore(type, null);
     int version = store.newVersion(Module.wiki.name());
+    ProgressInformer informer = new ProgressInformer(9);
     if (entitiesWithoutInfoBox) wikiTripleImporter.writeEntitiesWithoutInfoBox(version, type);
+    informer.stepDone(1);
     wikiTripleImporter.writeEntitiesWithInfoBox(version, type);
+    informer.stepDone(2);
+    // 2 percent for triple exporting because of its complication
     wikiTripleImporter.writeTriples(version, type, true);
+    informer.stepDone(4);
     notMappedPropertyHandler.writeNotMappedProperties(Module.wiki.name(), version, type, true);
+    informer.stepDone(5);
     wikiTripleImporter.writeAbstracts(version, type);
+    informer.stepDone(6);
     redirectLogic.write(version, type);
+    informer.stepDone(7);
     ambiguityLogic.write(version, type);
+    informer.stepDone(8);
     predicateImporter.writePredicates(type, true);
+    informer.done();
   }
 
   public boolean raw(@NotNull StoreType type) {
