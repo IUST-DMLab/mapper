@@ -11,9 +11,8 @@ import ir.ac.iust.dml.kg.mapper.logic.utils.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.utils.TestUtils
 import ir.ac.iust.dml.kg.raw.utils.*
 import ir.ac.iust.dml.kg.services.client.ApiClient
-import ir.ac.iust.dml.kg.services.client.swagger.V1expertsApi
-import ir.ac.iust.dml.kg.services.client.swagger.V1triplesApi
-import ir.ac.iust.dml.kg.services.client.swagger.model.TripleData
+import ir.ac.iust.dml.kg.services.client.swagger.V2ontologyApi
+import ir.ac.iust.dml.kg.services.client.swagger.model.OntologyData
 import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValueData
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,8 +26,7 @@ import java.nio.file.Files
 class OntologyLogic {
 
   private val logger = Logger.getLogger(this.javaClass)!!
-  private val tripleApi: V1triplesApi
-  private val expertApi: V1expertsApi
+  private val tripleApi: V2ontologyApi
   private val treeCache = mutableMapOf<String, String>()
   // TODO remove tree cache and use tree paretns
   private val treeParents = mutableMapOf<String, List<String>>()
@@ -41,22 +39,21 @@ class OntologyLogic {
     val client = ApiClient()
     client.basePath = ConfigReader.getString("knowledge.store.url", "http://localhost:8091/rs")
     client.connectTimeout = 1200000
-    tripleApi = V1triplesApi(client)
-    expertApi = V1expertsApi(client)
+    tripleApi = V2ontologyApi(client)
   }
 
   fun save(store: FkgTripleDao, source: String, subject: String, predicate: String, `object`: String) {
     store.save(source, subject, predicate, `object`, Module.expert.name, VERSION)
   }
 
-  fun importFromDBpedia(storeType: StoreType = StoreType.knowledgeStore) {
+  fun importFromDBpedia() {
 
     val exportedJson = ConfigReader.getPath("dbpedia.properties.export", "~/.pkg/data/ontology_property.json")
     if (!Files.exists(exportedJson.parent)) Files.createDirectories(exportedJson.parent)
     if (!Files.exists(exportedJson)) {
       throw Exception("There is no file ${exportedJson.toAbsolutePath()} existed.")
     }
-    val store = storeProvider.getStore(storeType)
+    val store = storeProvider.getStore(StoreType.ontologyStore)
     val gson = Gson()
     val maxWrites = TestUtils.getMaxTuples()
     val type = object : TypeToken<Map<String, ExportedPropertyData>>() {}.type
@@ -136,20 +133,26 @@ class OntologyLogic {
 
   fun reloadTreeCache(): Boolean {
     try {
-      var page = 0
-      do {
-        val classes = getType(null, URIs.typeOfAllClasses, page++, 100)
+      val all = tripleApi.search2(null, null, URIs.subClassOf, null, null, 0, 0)
+      val classParents = mutableMapOf<String, MutableSet<String>>()
+      val classChildren = mutableMapOf<String, MutableSet<String>>()
+      all.data.forEach {
+        val p = classParents.getOrPut(it.subject, { mutableSetOf() })
+        p.add(it.`object`.value)
+        val c = classChildren.getOrPut(it.`object`.value, { mutableSetOf() })
+        c.add(it.subject)
+      }
+      val classes = getType(null, URIs.typeOfAllClasses, 0, 0)
         classes.data.forEach { classUrl ->
+          println("filling $classUrl")
           val name = classUrl.substringAfterLast("/")
           val parents = mutableListOf(classUrl)
-          fillParents(classUrl, parents)
+          fillParents(classUrl, parents, classParents)
           treeCache[name] = parents.map { it.substringAfterLast("/") }.joinToString("/")
           treeParents[name] = parents
-          val children = mutableListOf<String>()
-          fillChildren(classUrl, children)
+          val children = classChildren[classUrl] ?: mutableSetOf()
           childrenCache[name] = children.map { it.substringAfterLast("/") }
         }
-      } while (classes.data.isNotEmpty())
       traversedTree.clear()
       traverseCache("Thing", traversedTree)
       return true
@@ -163,20 +166,14 @@ class OntologyLogic {
     childrenCache[current]?.forEach { traverseCache(it, list) }
   }
 
-  private fun fillParents(classUrl: String, parents: MutableList<String>) {
-    val pages = tripleApi.search1(null, false, classUrl, false,
-        URIs.subClassOf, false, null, false, 0, 1)
-    if (pages.data.isNotEmpty()) {
-      val parentClassUrl = pages.data.first().`object`.value
+  private fun fillParents(classUrl: String, parents: MutableList<String>,
+                          classParents: MutableMap<String, MutableSet<String>>) {
+    val s = classParents[classUrl]
+    if (s != null && s.isNotEmpty()) {
+      val parentClassUrl = s.first()
       parents.add(parentClassUrl)
-      fillParents(parentClassUrl, parents)
+      fillParents(parentClassUrl, parents, classParents)
     }
-  }
-
-  private fun fillChildren(classUrl: String, children: MutableList<String>) {
-    val pages = tripleApi.search1(null, false, null, false,
-        URIs.subClassOf, false, classUrl, false, 0, 10000)
-    children.addAll(pages.data.map { it.subject }.sortedBy { it })
   }
 
   fun getTree(ontologyClass: String) = treeCache[ontologyClass]
@@ -185,13 +182,11 @@ class OntologyLogic {
 
   fun getChildren(ontologyClass: String) = childrenCache[ontologyClass]
 
-  private fun search(subject: String?, predicate: String?, `object`: String?, page: Int, pageSize: Int?,
-                     likeSubject: Boolean = false, likePredicate: Boolean = false, likeObject: Boolean = false) =
-      tripleApi.search1(null, false, subject, likeSubject, predicate,
-          likePredicate, `object`, likeObject, page, pageSize)
+  private fun search(subject: String?, predicate: String?, `object`: String?, page: Int, pageSize: Int?) =
+      tripleApi.search2(null, subject, predicate, `object`, null, page, pageSize)
 
-  private fun getType(keyword: String?, type: String, page: Int, pageSize: Int, like: Boolean = false): PagedData<String> {
-    val result = search(keyword, URIs.type, type, page, pageSize, likeSubject = like)
+  private fun getType(keyword: String?, type: String, page: Int, pageSize: Int): PagedData<String> {
+    val result = search(keyword, URIs.type, type, page, pageSize)
     val data = result.data.map { it.subject }.toMutableList()
     return PagedData<String>(data, page, pageSize, result.pageCount, result.totalSize)
   }
@@ -218,7 +213,7 @@ class OntologyLogic {
   private fun insertAndVote(subject: String?, predicate: String?,
                             objectValue: String,
                             objectType: TypedValueData.TypeEnum = TypedValueData.TypeEnum.RESOURCE): Boolean {
-    val tripleData = TripleData()
+    val tripleData = OntologyData()
     tripleData.context = URIs.defaultContext
     tripleData.subject = subject
     tripleData.predicate = predicate
@@ -226,22 +221,19 @@ class OntologyLogic {
     tripleData.`object`.lang = LanguageChecker.detectLanguage(objectValue)
     tripleData.`object`.type = objectType
     tripleData.`object`.value = objectValue
-    tripleData.module = "ontology"
-    tripleData.precession = 1.0
-    tripleData.urls = mutableListOf(subject)
+    tripleData.approved = true
     return insertAndVote(tripleData)
   }
 
-  private fun insertAndVote(data: TripleData): Boolean {
-    val success = tripleApi.insert3(data)
-    if (!success) return false
-//    val triple = tripleApi.triple1(data.subject, data.predicate, data.`object`.value, data.context)
+  private fun insertAndVote(data: OntologyData): Boolean {
+    tripleApi.insert6(data) ?: return false
+    //    val triple = tripleApi.triple1(data.subject, data.predicate, data.`object`.value, data.context)
 //    expertApi.vote1(triple.identifier, data.module, "expert", "accept")
     return true
   }
 
-  fun classes(page: Int, pageSize: Int, query: String?, like: Boolean)
-      = getType(query, URIs.typeOfAllClasses, page, pageSize, like)
+  fun classes(page: Int, pageSize: Int, query: String?)
+      = getType(query, URIs.typeOfAllClasses, page, pageSize)
 
   data class OntologyNode(var url: String, var label: String? = null, var name: String? = null,
                           var children: MutableList<OntologyNode> = mutableListOf<OntologyNode>())
@@ -284,12 +276,12 @@ class OntologyLogic {
     }
   }
 
-  fun properties(page: Int, pageSize: Int, query: String?, type: String?, like: Boolean): PagedData<String> {
+  fun properties(page: Int, pageSize: Int, query: String?, type: String?): PagedData<String> {
     var t = URIs.typeOfAnyProperties
     if (type != null) t = if (!type.contains("://"))
       (if (type.contains(":")) URIs.prefixedToUri(type)!! else URIs.prefixedToUri("owl:" + type)!!)
     else type
-    return getType(query, t, page, pageSize, like)
+    return getType(query, t, page, pageSize)
   }
 
   fun classData(classUrl: String): OntologyClassData {
@@ -333,8 +325,8 @@ class OntologyLogic {
     if (subject == null || predicate == null || `object` == null) return
     logger.info("removing $subject, $predicate, $`object`")
     //TODO we must remove next line after first run of mapping on data
-    tripleApi.remove1(subject, predicate, `object`, subject)
-    tripleApi.remove1(subject, predicate, `object`, URIs.defaultContext)
+    tripleApi.remove2(subject, predicate, `object`, subject)
+    tripleApi.remove2(subject, predicate, `object`, URIs.defaultContext)
   }
 
   fun saveClass(data: OntologyClassData): OntologyClassData? {

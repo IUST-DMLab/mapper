@@ -76,8 +76,7 @@ public class MappingHelperRestServices {
   public String triples(@RequestParam int version,
                         @RequestParam(defaultValue = "none") StoreType type) throws Exception {
     wikiTripleImporter.writeTriples(version, type, true);
-    notMappedPropertyHandler.writeNotMappedProperties(Module.wiki.name(), version,
-        type, true);
+    notMappedPropertyHandler.writeNotMappedProperties(Module.wiki.name(), version, true);
     return "Imported!";
   }
 
@@ -101,16 +100,15 @@ public class MappingHelperRestServices {
 
   @RequestMapping("/predicates")
   @ResponseBody
-  public Boolean predicates(@RequestParam(defaultValue = "none") StoreType type,
-                            @RequestParam(defaultValue = "true") boolean resolveAmbiguity) {
-    predicateImporter.writePredicates(type, resolveAmbiguity);
+  public Boolean predicates(@RequestParam(defaultValue = "true") boolean resolveAmbiguity) {
+    predicateImporter.writePredicates(resolveAmbiguity);
     return true;
   }
 
   @RequestMapping("/dbpediaPredicates")
   @ResponseBody
-  public Boolean dbpediaPredicates(@RequestParam(defaultValue = "none") StoreType type) {
-    ontologyLogic.importFromDBpedia(type);
+  public Boolean dbpediaPredicates() {
+    ontologyLogic.importFromDBpedia();
     return true;
   }
 
@@ -120,7 +118,7 @@ public class MappingHelperRestServices {
                             @RequestParam(defaultValue = "none") StoreType type,
                             @RequestParam(defaultValue = "true") boolean resolveAmbiguity) {
     wikiTripleImporter.writeTriples(version, type, false);
-    notMappedPropertyHandler.writeNotMappedProperties(Module.wiki.name(), version, type, resolveAmbiguity);
+    notMappedPropertyHandler.writeNotMappedProperties(Module.wiki.name(), version, resolveAmbiguity);
     return true;
   }
 
@@ -138,7 +136,7 @@ public class MappingHelperRestServices {
     // 2 percent for triple exporting because of its complication
     wikiTripleImporter.writeTriples(version, type, true);
     informer.stepDone(4);
-    notMappedPropertyHandler.writeNotMappedProperties(Module.wiki.name(), version, type, true);
+    notMappedPropertyHandler.writeNotMappedProperties(Module.wiki.name(), version, true);
     informer.stepDone(5);
     wikiTripleImporter.writeAbstracts(version, type);
     informer.stepDone(6);
@@ -146,13 +144,13 @@ public class MappingHelperRestServices {
     informer.stepDone(7);
     ambiguityLogic.write(version, type);
     informer.stepDone(8);
-    predicateImporter.writePredicates(type, true);
+    predicateImporter.writePredicates(true);
     informer.done();
   }
 
   public boolean raw(@NotNull StoreType type) {
     rawTripleImporter.writeTriples(type);
-    notMappedPropertyHandler.writeNotMappedProperties("raw", 1, type, true);
+    notMappedPropertyHandler.writeNotMappedProperties("raw", 1, true);
     return true;
   }
 }

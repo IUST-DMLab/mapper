@@ -21,7 +21,7 @@
     <dependency>
       <groupId>ir.ac.iust.dml.kg.services</groupId>
       <artifactId>knowledge-store-client</artifactId>
-      <version>0.3.0</version>
+      <version>0.4.0</version>
       <exclusions>
         <exclusion>
           <groupId>io.swagger</groupId>

@@ -42,5 +42,7 @@ class FkgTriple(
     @Column(name = "valueType")
     var valueType: ValueType? = null,
     @Column(name = "dataType")
-    var dataType: String? = null
+    var dataType: String? = null,
+    @Column(name = "approved")
+    var approved: Boolean? = null
 )

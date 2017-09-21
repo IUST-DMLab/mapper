@@ -21,8 +21,8 @@ class NotMappedPropertyHandler {
     notMappedProperties.add(property)
   }
 
-  fun writeNotMappedProperties(module: String, version: Int, storeType: StoreType = StoreType.none, resolveAmbiguity: Boolean) {
-    val store = storeProvider.getStore(storeType)
+  fun writeNotMappedProperties(module: String, version: Int, resolveAmbiguity: Boolean) {
+    val store = storeProvider.getStore(StoreType.ontologyStore)
     var maxNumberOfTriples = TestUtils.getMaxTuples()
     val startTime = System.currentTimeMillis()
     notMappedProperties.forEachIndexed { index, property ->

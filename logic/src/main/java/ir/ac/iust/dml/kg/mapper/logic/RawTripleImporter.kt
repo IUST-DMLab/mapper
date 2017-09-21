@@ -167,7 +167,7 @@ class RawTripleImporter {
 
     store.flush()
     informer.stepDone(result.size + 1)
-    notMappedPropertyHandler.writeNotMappedProperties("raw", VERSION, storeType, true)
+    notMappedPropertyHandler.writeNotMappedProperties("raw", VERSION, true)
     logger.info("new subjects has been added: ${newSubjects.joinToString("\n")}")
     informer.done()
   }

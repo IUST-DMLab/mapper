@@ -40,10 +40,10 @@ abstract class FkgTripleDao {
   }
 
   fun save(source: String, subject: String, predicate: String, `object`: String,
-           module: String, version: Int,
-           rawText: String? = null, accuracy: Double? = null, extractionTime: Long? = null) {
+           module: String, version: Int, rawText: String? = null, accuracy: Double? = null,
+           extractionTime: Long? = null, approved: Boolean? = false) {
     this.save(FkgTriple(source = source, subject = subject, predicate = predicate, objekt = `object`,
         accuracy = accuracy, rawText = rawText, extractionTime = extractionTime,
-        module = module, version = version))
+        module = module, version = version, approved = approved))
   }
 }

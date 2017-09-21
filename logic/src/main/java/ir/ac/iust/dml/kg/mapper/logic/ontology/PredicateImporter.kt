@@ -19,10 +19,10 @@ class PredicateImporter {
   private val logger = Logger.getLogger(this.javaClass)!!
   private val VERSION = 1
 
-  fun writePredicates(type: StoreType, resolveAmbiguity: Boolean) {
+  fun writePredicates(resolveAmbiguity: Boolean) {
     holder.writeToKS()
     holder.loadFromKS()
-    writePredicates(storeProvider.getStore(type), resolveAmbiguity)
+    writePredicates(storeProvider.getStore(StoreType.ontologyStore), resolveAmbiguity)
   }
 
   private fun save(store: FkgTripleDao, source: String, subject: String, property: String, objekt: String) {
@@ -36,12 +36,12 @@ class PredicateImporter {
     val predicateData = mutableMapOf<String, PredicateData>()
 
     holder.all().forEach { templateMapping ->
-      templateMapping.properties!!.values.forEach { propertyMapping ->
-        val label = propertyMapping.property!!.toLowerCase().replace('_', ' ')
-        propertyMapping.rules.forEach {
+      templateMapping.properties!!.values.forEach { (property, weight, rules) ->
+        val label = property!!.toLowerCase().replace('_', ' ')
+        rules.forEach {
           if (it.predicate == null) return@forEach
           val data = predicateData.getOrPut(it.predicate!!, { PredicateData() })
-          data.labels[label] = (data.labels[label] ?: 0.0) + (propertyMapping.weight ?: 0.0)
+          data.labels[label] = (data.labels[label] ?: 0.0) + (weight ?: 0.0)
           data.domains.add(templateMapping.ontologyClass)
         }
       }

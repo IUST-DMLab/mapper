@@ -26,9 +26,8 @@ class OntologyRestServices {
   @ResponseBody
   fun classes(@RequestParam(required = false, defaultValue = "0") page: Int?,
               @RequestParam(required = false, defaultValue = "20") pageSize: Int?,
-              @RequestParam(required = false) keyword: String?,
-              @RequestParam(required = false, defaultValue = "false") like: Boolean)
-      = logic.classes(page!!, pageSize!!, keyword, like)
+              @RequestParam(required = false) keyword: String?)
+      = logic.classes(page!!, pageSize!!, keyword)
 
   @RequestMapping("classTree", method = arrayOf(RequestMethod.GET))
   @ResponseBody
@@ -46,9 +45,8 @@ class OntologyRestServices {
   fun properties(@RequestParam(required = false, defaultValue = "0") page: Int?,
                  @RequestParam(required = false, defaultValue = "20") pageSize: Int?,
                  @RequestParam(required = false) keyword: String?,
-                 @RequestParam(required = false) type: String?,
-                 @RequestParam(required = false, defaultValue = "false") like: Boolean) =
-      logic.properties(page!!, pageSize!!, keyword, type, like)
+                 @RequestParam(required = false) type: String?) =
+      logic.properties(page!!, pageSize!!, keyword, type)
 
   @RequestMapping("propertyData", method = arrayOf(RequestMethod.GET))
   @ResponseBody

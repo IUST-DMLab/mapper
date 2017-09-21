@@ -35,11 +35,9 @@ class ManualInsertLogic {
     if (label != null) {
       saveTriple(url, URIs.label, label, permanent)
       saveTriple(url, URIs.variantLabel, label, permanent)
-      checkAmbiguity(url, label)
     }
     if (variantLabel != null) {
       saveTriple(url, URIs.variantLabel, variantLabel, permanent)
-      checkAmbiguity(url, variantLabel)
     }
     if (ontologyClass != null) {
       val tree = ontologyLogic.getTree(ontologyClass)
@@ -56,27 +54,11 @@ class ManualInsertLogic {
     if (label != null) {
       saveTriple(url, URIs.label, label, permanent)
       saveTriple(url, URIs.variantLabel, label, permanent)
-      checkAmbiguity(url, label)
     }
     if (variantLabel != null) {
       saveTriple(url, URIs.variantLabel, variantLabel, permanent)
-      checkAmbiguity(url, variantLabel)
     }
     return true
-  }
-
-  // TODO share this piece of code with PredicateImporter
-  fun checkAmbiguity(subject: String, label: String) {
-    if (!initialized) init()
-    val result = kgDao.read(predicate = URIs.variantLabel, objekt = label)
-        .filter { triple -> triple.objekt == label && triple.subject != subject }
-    if (result.isNotEmpty()) {
-      saveAll(source = subject, subject = subject, property = URIs.disambiguatedFrom, objeck = label)
-      result.forEach {
-        saveAll(source = it.source ?: it.subject!!, subject = it.subject!!,
-            property = URIs.disambiguatedFrom, objeck = it.objekt!!)
-      }
-    }
   }
 
   fun saveAll(source: String, subject: String, objeck: String, property: String) {

@@ -29,9 +29,9 @@ class Commander {
         "tables" -> services.tables(StoreType.valueOf(arg1!!)) // write custom table as triples
         "redirects" -> services.redirects(arg1!!.toInt()) // writes all wikipedia redirects
         "ambiguities" -> services.ambiguities(arg1!!.toInt()) // writes all wikipedia ambiguities
-        "predicates" -> services.predicates(StoreType.valueOf(arg1!!), true) // writes all predicates
-        "dbpediaPredicates" -> services.dbpediaPredicates(StoreType.valueOf(arg1!!)) // writes all predicates from dbpedia export
-        "predicatesFast" -> services.predicates(StoreType.valueOf(arg1!!), false) // writes all predicates without ambiguation resolving
+        "predicates" -> services.predicates(true) // writes all predicates
+        "dbpediaPredicates" -> services.dbpediaPredicates() // writes all predicates from dbpedia export
+        "predicatesFast" -> services.predicates(false) // writes all predicates without ambiguation resolving
         "properties" -> services.properties(arg1!!.toInt(), StoreType.valueOf(arg2!!), true) // writes all not mapped properties
         "propertiesFast" -> services.properties(arg1!!.toInt(), StoreType.valueOf(arg2!!), false) // writes all not mapped properties without ambiguation resolving
         "raw" -> services.raw(StoreType.valueOf(arg1!!)) // writes all predicates
