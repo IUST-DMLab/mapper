@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.knowledge.core.ValueType
+import ir.ac.iust.dml.kg.mapper.logic.InfoboxReader
 import ir.ac.iust.dml.kg.mapper.logic.data.InfoBoxAndCount
 import ir.ac.iust.dml.kg.mapper.logic.data.MapRule
 import ir.ac.iust.dml.kg.mapper.logic.data.StoreType
@@ -106,34 +107,18 @@ class WikiTripleImporter {
     holder.writeToKS()
     holder.loadFromKS()
 
-    val path = PathUtils.getWithInfoboxPath()
     val maxNumberOfEntities = TestUtils.getMaxTuples()
-    val store = storeProvider.getStore(storeType, path)
+    val store = storeProvider.getStore(storeType)
 
-    val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
     val startTime = System.currentTimeMillis()
-
-    val type = object : TypeToken<Map<String, Map<String, List<Map<String, String>>>>>() {}.type
-    val gson = Gson()
     var entityIndex = 0
 
     val classInfoBoxes = mutableMapOf<String, MutableList<InfoBoxAndCount>>()
 
-    result.forEachIndexed { index, p ->
-      InputStreamReader(FileInputStream(p.toFile()), "UTF8").use {
-        BufferedReader(it).use {
-          val infoBoxes: Map<String, Map<String, List<Map<String, String>>>> = gson.fromJson(it, type)
-          infoBoxes.forEach { infoBox, entityInfo ->
-            entityInfo.forEach { entity, properties ->
-              classInfoBoxes.getOrPut(entity, { mutableListOf() })
-                  .add(InfoBoxAndCount(infoBox,
-                      if (properties.isNotEmpty()) properties[0].size else 0))
-            }
-          }
-        }
-      }
-      logger.warn("$index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
-    }
+    InfoboxReader.read({ infobox, entity, properties ->
+      classInfoBoxes.getOrPut(entity, { mutableListOf() })
+          .add(InfoBoxAndCount(infobox, properties.size))
+    })
 
     classInfoBoxes.forEach { entity, infoboxes ->
       entityIndex++

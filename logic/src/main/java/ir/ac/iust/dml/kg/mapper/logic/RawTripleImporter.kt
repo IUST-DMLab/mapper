@@ -14,7 +14,7 @@ import ir.ac.iust.dml.kg.raw.utils.Module
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.URIs
 import ir.ac.iust.dml.kg.services.client.ApiClient
-import ir.ac.iust.dml.kg.services.client.swagger.V1triplesApi
+import ir.ac.iust.dml.kg.services.client.swagger.V2triplesApi
 import ir.ac.iust.nlp.jhazm.Stemmer
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,13 +31,13 @@ class RawTripleImporter {
   @Autowired private lateinit var entityClassImporter: EntityClassImporter
   private var propertyToPredicates = mutableMapOf<String, MutableSet<String>>()
   private var predicatesOfClass = mutableMapOf<String, MutableSet<String>>()
-  private val tripleApi: V1triplesApi
+  private val tripleApi: V2triplesApi
 
   init {
     val client = ApiClient()
     client.basePath = ConfigReader.getString("knowledge.store.url", "http://localhost:8091/rs")
     client.connectTimeout = 1200000
-    tripleApi = V1triplesApi(client)
+    tripleApi = V2triplesApi(client)
   }
 
   data class SubjectData(var subject: String, var ontologyClass: String? = null, var classDepth: Int = 0)
@@ -89,8 +89,7 @@ class RawTripleImporter {
                 logger.warn("triple number is $tripleNumber. $index file is $p. " +
                     "time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
               val subjectLabel = if (triple.subject.contains("/")) triple.subject.substringAfterLast("/") else triple.subject
-              val subjects = tripleApi.search1(null, null, null, null, URIs.variantLabel,
-                  null, subjectLabel, null, 0, 0).data.map { it.subject }
+              val subjects = mutableListOf(URIs.getFkgResourceUri(subjectLabel))
               val subjectsData = subjects.map { subject ->
                 val subjectData = SubjectData(subject)
                 val subjectInfoBoxes = entityInfoLogic.resources[subject.substringAfterLast("/").replace('_', ' ')]
