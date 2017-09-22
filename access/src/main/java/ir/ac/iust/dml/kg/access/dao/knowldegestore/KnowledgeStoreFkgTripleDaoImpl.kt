@@ -12,7 +12,6 @@ import ir.ac.iust.dml.kg.services.client.swagger.V2triplesApi
 import ir.ac.iust.dml.kg.services.client.swagger.model.TripleData
 import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValueData
 import org.apache.log4j.Logger
-import java.util.*
 import java.util.regex.Pattern
 
 class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
@@ -57,7 +56,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
     data.context = URIs.defaultContext
     data.module = t.module
     data.version = t.version
-    data.urls = Collections.singletonList(t.source)
+    data.url = t.source
     data.subject = t.subject
     data.predicate = if (!t.predicate!!.contains("://")) URIs.prefixedToUri(t.predicate) else t.predicate
     data.precession = t.accuracy
