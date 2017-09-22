@@ -70,21 +70,11 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
       return
     }
 
-    val objectData = TypedValueData()
-    objectData.type =
-        if (URIs.isHttpUriFast(t.objekt))
-          TypedValueData.TypeEnum.RESOURCE
-        else {
-          if (t.valueType != null) convert(t.valueType!!)
-          else TypedValueData.TypeEnum.STRING
-        }
-
-    objectData.value = t.objekt
-    objectData.lang =
-        if (t.language == null) LanguageChecker.detectLanguage(objectData.value)
-        else t.language!!
+    val objectData = convertTypedValue(t.objekt, t.valueType, t.language)
     data.`object` = objectData
     data.approved = t.approved != null && t.approved!!
+
+    t.properties.forEach { data.properties[it.predicate] = convertTypedValue(it.objekt, it.valueType, it.language) }
 
     if (t.dataType != null) data.parameters["unit"] = t.dataType
     if (t.extractionTime != null) data.parameters["extractionTime"] = t.extractionTime.toString()
@@ -115,6 +105,21 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
         logger.error(th)
       }
     }
+  }
+
+  private fun convertTypedValue(objekt: String?, valueType: ValueType?, language: String?): TypedValueData {
+    val objectData = TypedValueData()
+    objectData.type =
+        if (URIs.isHttpUriFast(objekt))
+          TypedValueData.TypeEnum.RESOURCE
+        else {
+          if (valueType != null) convert(valueType)
+          else TypedValueData.TypeEnum.STRING
+        }
+
+    objectData.value = objekt
+    objectData.lang = language ?: LanguageChecker.detectLanguage(objectData.value)
+    return objectData
   }
 
   private fun convert(valueType: ValueType) = when (valueType) {

@@ -75,7 +75,7 @@ public class MappingHelperRestServices {
   @RequestMapping("/triples")
   public String triples(@RequestParam int version,
                         @RequestParam(defaultValue = "none") StoreType type) throws Exception {
-    wikiTripleImporter.writeTriples(version, type, true);
+    wikiTripleImporter.writeTriples(version, type, true, null);
     notMappedPropertyHandler.writeNotMappedProperties(Module.wiki.name(), version, true);
     return "Imported!";
   }
@@ -117,7 +117,7 @@ public class MappingHelperRestServices {
   public Boolean properties(@RequestParam int version,
                             @RequestParam(defaultValue = "none") StoreType type,
                             @RequestParam(defaultValue = "true") boolean resolveAmbiguity) {
-    wikiTripleImporter.writeTriples(version, type, false);
+    wikiTripleImporter.writeTriples(version, type, false, null);
     notMappedPropertyHandler.writeNotMappedProperties(Module.wiki.name(), version, resolveAmbiguity);
     return true;
   }
@@ -134,7 +134,7 @@ public class MappingHelperRestServices {
     wikiTripleImporter.writeEntitiesWithInfoBox(version, type);
     informer.stepDone(2);
     // 2 percent for triple exporting because of its complication
-    wikiTripleImporter.writeTriples(version, type, true);
+    wikiTripleImporter.writeTriples(version, type, true, null);
     informer.stepDone(4);
     notMappedPropertyHandler.writeNotMappedProperties(Module.wiki.name(), version, true);
     informer.stepDone(5);

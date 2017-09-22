@@ -44,5 +44,7 @@ class FkgTriple(
     @Column(name = "dataType")
     var dataType: String? = null,
     @Column(name = "approved")
-    var approved: Boolean? = null
+    var approved: Boolean? = null,
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "parent")
+    var properties: MutableList<FkgTripleProperty> = mutableListOf()
 )

@@ -2,8 +2,8 @@ package ir.ac.iust.dml.kg.mapper.logic.wiki
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
+import ir.ac.iust.dml.kg.access.entities.FkgTripleProperty
 import ir.ac.iust.dml.kg.knowledge.core.ValueType
 import ir.ac.iust.dml.kg.mapper.logic.InfoboxReader
 import ir.ac.iust.dml.kg.mapper.logic.data.InfoBoxAndCount
@@ -18,13 +18,13 @@ import ir.ac.iust.dml.kg.mapper.logic.utils.PathUtils
 import ir.ac.iust.dml.kg.mapper.logic.utils.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.utils.TestUtils
 import ir.ac.iust.dml.kg.raw.utils.*
-import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.BufferedReader
 import java.io.FileInputStream
 import java.io.InputStreamReader
+import java.nio.file.Path
 
 @Service
 class WikiTripleImporter {
@@ -37,7 +37,6 @@ class WikiTripleImporter {
   @Autowired private lateinit var notMappedPropertyHandler: NotMappedPropertyHandler
   private val transformers = TransformService()
 
-  private val invalidPropertyRegex = Regex("\\d+")
 
   fun writeAbstracts(version: Int, storeType: StoreType = StoreType.none) {
     val path = PathUtils.getAbstractPath()
@@ -147,22 +146,20 @@ class WikiTripleImporter {
     store.flush()
   }
 
-  fun writeTriples(version: Int, storeType: StoreType = StoreType.none, insert: Boolean = true) {
+  data class TripleInfo(var source: String, var subject: String, var `object`: String,
+                        var property: String?, var rule: MapRule?, var version: Int)
+
+  fun writeTriples(version: Int, storeType: StoreType = StoreType.none, insert: Boolean = true, path: Path? = null) {
     holder.writeToKS()
     holder.loadFromKS()
 
-    val path = PathUtils.getTriplesPath()
-
     val store = storeProvider.getStore(storeType, path)
-    val maxNumberOfTriples = TestUtils.getMaxTuples()
 
     val notSeenProperties = mutableMapOf<String, Int>()
     var numberOfMapped = 0
     var numberOfMappedInTree = 0
     var numberOfNotMapped = 0
 
-    val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
-    val startTime = System.currentTimeMillis()
     ontologyLogic.reloadTreeCache()
 
     val classMaps = mutableMapOf<String, MapRule>()
@@ -175,68 +172,65 @@ class WikiTripleImporter {
       }
     }
 
-    var tripleNumber = 0
-    result.forEachIndexed { index, p ->
-      TripleJsonFileReader(p).use { reader ->
-        while (reader.hasNext()) {
-          val triple = reader.next()
-          tripleNumber++
-          if (tripleNumber > maxNumberOfTriples) break
-          try {
-            if (triple.templateType == null || triple.templateNameFull == null) continue
+    InfoboxReader.getTriples { triples ->
+      InfoboxReader.collectTriples(triples).forEach { tripleCollection ->
+        val triplesToWrite = mutableListOf<TripleInfo>()
+        tripleCollection.forEach { triple ->
+          val normalizedTemplate = triple.templateNameFull!!.toLowerCase().replace('_', ' ')
+          val property = triple.predicate!!
+          val subject = URIs.convertWikiUriToResourceUri(triple.subject!!)
+          val objekt = URIs.convertWikiUriToResourceUri(triple.objekt!!)
 
-            if (triple.objekt!!.startsWith("fa.wikipedia.org/wiki"))
-              triple.objekt = "http://" + triple.objekt
+          // generate template-specific rules in first time of object
+          val templateMapping = holder.getTemplateMapping(normalizedTemplate)
 
-            if (tripleNumber % 1000 == 0)
-              logger.warn("triple number is $tripleNumber. $index file is $p. " +
-                  "time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
+          templateMapping.rules!!.forEach {
+            numberOfMapped++
+            if (insert) store.save(getAsTripe(TripleInfo(triple.source!!, subject, objekt, null, it, version))!!)
+          }
 
-            val normalizedTemplate = triple.templateNameFull!!.toLowerCase().replace('_', ' ')
-            val property = triple.predicate!!
-            // some properties are invalid based on rdf standards
-            if (property.trim().isBlank() || property.matches(invalidPropertyRegex)) continue
-            val subject = URIs.convertWikiUriToResourceUri(triple.subject!!)
-            val objekt = URIs.convertWikiUriToResourceUri(triple.objekt!!)
-
-            // generate template-specific rules in first time of object
-            val templateMapping = holder.getTemplateMapping(normalizedTemplate)
-
-            templateMapping.rules!!.forEach {
-              numberOfMapped++
-              if (insert) store.saveTriple(triple.source!!, subject, objekt, it, version)
-            }
-
-            val propertyMapping = templateMapping.properties!![PropertyNormaller.removeDigits(property)]
-            if (propertyMapping == null || propertyMapping.rules.isEmpty()) {
-              if (propertyMapping != null && !propertyMapping.recommendations.isEmpty()) {
-                // not too bad, we have at least some recommendations. this block is only for better clearance of code
-              } else {
-                val key = normalizedTemplate + "/" + property
-                val old = notSeenProperties.getOrDefault(key, 0)
-                notSeenProperties[key] = old + 1
-              }
-              val key = templateMapping.ontologyClass + "~" + property
-              if (classMaps.containsKey(key)) {
-                numberOfMappedInTree++
-                if (insert) store.saveTriple(triple.source!!, subject, objekt, classMaps[key]!!, version)
-              } else {
-                numberOfNotMapped++
-                notMappedPropertyHandler.addToNotMapped(property)
-                if (insert) store.convertAndSave(triple.source!!, subject,
-                    property, objekt, Module.wiki.name, version)
-              }
+          val propertyMapping = templateMapping.properties!![PropertyNormaller.removeDigits(property)]
+          if (propertyMapping == null || propertyMapping.rules.isEmpty()) {
+            if (propertyMapping != null && !propertyMapping.recommendations.isEmpty()) {
+              // not too bad, we have at least some recommendations. this block is only for better clearance of code
             } else {
-              numberOfMapped++
-              propertyMapping.rules.forEach {
-                if (insert) store.saveTriple(triple.source!!, subject, objekt, it, version)
-              }
+              val key = normalizedTemplate + "/" + property
+              val old = notSeenProperties.getOrDefault(key, 0)
+              notSeenProperties[key] = old + 1
             }
-          } catch (th: Throwable) {
-            logger.info("triple: $triple")
-            logger.error(th)
+            val key = templateMapping.ontologyClass + "~" + property
+            if (classMaps.containsKey(key)) {
+              numberOfMappedInTree++
+              if (insert) triplesToWrite.add(TripleInfo(triple.source!!, subject, objekt,
+                  null, classMaps[key]!!, version))
+            } else {
+              numberOfNotMapped++
+              notMappedPropertyHandler.addToNotMapped(property)
+              if (insert)
+                triplesToWrite.add(TripleInfo(triple.source!!, subject, objekt, property, null, version))
+            }
+          } else {
+            numberOfMapped++
+            propertyMapping.rules.forEach {
+              if (insert) triplesToWrite.add(TripleInfo(triple.source!!, subject, objekt, null, it, version))
+            }
           }
         }
+        if (triplesToWrite.isEmpty()) return@getTriples
+        val first = getAsTripe(triplesToWrite[0])
+        if (first != null) {
+          for (i in 1 until triplesToWrite.size) {
+            val child = getAsTripe(triplesToWrite[i])
+            if (child != null)
+              first.properties.add(FkgTripleProperty(null, first, child.predicate, child.objekt,
+                  child.language, child.valueType))
+          }
+          store.save(first)
+        } else
+          for (i in 1 until triplesToWrite.size) {
+            val child = getAsTripe(triplesToWrite[i])
+            if (child != null) store.save(child)
+          }
       }
     }
 
@@ -248,20 +242,31 @@ class WikiTripleImporter {
     logger.info("number of mapped is $numberOfMapped")
   }
 
-  private fun FkgTripleDao.saveTriple(source: String, subject: String, `object`: String, rule: MapRule, version: Int) {
+  private fun getAsTripe(info: TripleInfo) =
+      getAsTripe(info.source, info.subject, info.`object`, info.property, info.rule, info.version)
+
+
+  private fun getAsTripe(source: String, subject: String, `object`: String, property: String?,
+                         rule: MapRule?, version: Int): FkgTriple? {
+    if (rule == null) {
+      return FkgTriple(source = source, subject = subject,
+          predicate = URIs.convertToNotMappedFkgPropertyUri(property!!),
+          objekt = URIs.prefixedToUri(`object`),
+          module = Module.wiki.name, version = version)
+    }
     var type: ValueType? = null
-    if (rule.predicate == null) return
+    if (rule.predicate == null) return null
     val value = if (rule.transform != null) {
       val value = transformers.transform(rule.transform!!, `object`, LanguageChecker.detectLanguage(`object`)!!)
       type = value.type
       value.value!!
     } else if (rule.constant != null) rule.constant
     else `object`
-    this.save(FkgTriple(source = source, subject = subject,
+    return FkgTriple(source = source, subject = subject,
         predicate = URIs.prefixedToUri(rule.predicate),
         objekt = URIs.prefixedToUri(value.toString()),
         valueType = type, dataType = rule.unit,
-        module = Module.wiki.name, version = version))
+        module = Module.wiki.name, version = version)
   }
 
 }
