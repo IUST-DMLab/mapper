@@ -12,7 +12,7 @@ import java.io.BufferedReader
 import java.io.FileInputStream
 import java.io.InputStreamReader
 
-object InfoboxReader {
+object DumpUtils {
 
   private val logger = Logger.getLogger(this.javaClass)!!
   private val type = object : TypeToken<Map<String, Map<String, List<Map<String, String>>>>>() {}.type!!
@@ -46,6 +46,8 @@ object InfoboxReader {
     return builder.toString()
   }
 
+  // check all triples of a subject and give them as collections.
+  // it handles numbered keys. for example put all (a1,b1,c1) to one collection
   fun collectTriples(triplesOfSubject: MutableList<TripleData>): List<List<TripleData>> {
     val result = mutableListOf<List<TripleData>>()
     val index = 1

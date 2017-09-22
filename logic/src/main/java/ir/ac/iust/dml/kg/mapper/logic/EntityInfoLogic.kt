@@ -34,7 +34,7 @@ class EntityInfoLogic {
       }
     }
 
-    InfoboxReader.read({ infobox, entity, _ ->
+    DumpUtils.read({ infobox, entity, _ ->
       resources.getOrPut(entity, { mutableListOf() }).add(infobox)
     })
   }

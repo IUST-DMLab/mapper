@@ -5,7 +5,7 @@ import com.google.gson.reflect.TypeToken
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.FkgTripleProperty
 import ir.ac.iust.dml.kg.knowledge.core.ValueType
-import ir.ac.iust.dml.kg.mapper.logic.InfoboxReader
+import ir.ac.iust.dml.kg.mapper.logic.DumpUtils
 import ir.ac.iust.dml.kg.mapper.logic.data.InfoBoxAndCount
 import ir.ac.iust.dml.kg.mapper.logic.data.MapRule
 import ir.ac.iust.dml.kg.mapper.logic.data.StoreType
@@ -114,7 +114,7 @@ class WikiTripleImporter {
 
     val classInfoBoxes = mutableMapOf<String, MutableList<InfoBoxAndCount>>()
 
-    InfoboxReader.read({ infobox, entity, properties ->
+    DumpUtils.read({ infobox, entity, properties ->
       classInfoBoxes.getOrPut(entity, { mutableListOf() })
           .add(InfoBoxAndCount(infobox, properties.size))
     })
@@ -172,8 +172,10 @@ class WikiTripleImporter {
       }
     }
 
-    InfoboxReader.getTriples { triples ->
-      InfoboxReader.collectTriples(triples).forEach { tripleCollection ->
+    DumpUtils.getTriples { triples ->
+      DumpUtils.collectTriples(triples).forEach { tripleCollection ->
+        // triple collection can be just one triple in most of cases. but when we have numbered keys, they are
+        // collected as a collection with size > 1
         val triplesToWrite = mutableListOf<TripleInfo>()
         tripleCollection.forEach { triple ->
           val normalizedTemplate = triple.templateNameFull!!.toLowerCase().replace('_', ' ')
