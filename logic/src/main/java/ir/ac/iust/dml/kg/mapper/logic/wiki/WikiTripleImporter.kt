@@ -11,7 +11,6 @@ import com.google.gson.reflect.TypeToken
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.access.entities.FkgTripleProperty
 import ir.ac.iust.dml.kg.knowledge.core.ValueType
-import ir.ac.iust.dml.kg.mapper.logic.DumpUtils
 import ir.ac.iust.dml.kg.mapper.logic.data.InfoBoxAndCount
 import ir.ac.iust.dml.kg.mapper.logic.data.MapRule
 import ir.ac.iust.dml.kg.mapper.logic.data.StoreType
@@ -178,6 +177,8 @@ class WikiTripleImporter {
       }
     }
 
+    val NOT_MAPPED_PREFIX = URIs.fkgNotMappedPropertyPrefix + ":"
+
     DumpUtils.getTriples { triples ->
       DumpUtils.collectTriples(triples).forEach { tripleCollection ->
         // triple collection can be just one triple in most of cases. but when we have numbered keys, they are
@@ -198,7 +199,11 @@ class WikiTripleImporter {
           }
 
           val propertyMapping = templateMapping.properties!![PropertyNormaller.removeDigits(property)]
-          if (propertyMapping == null || propertyMapping.rules.isEmpty()) {
+          val propertyRules = if (propertyMapping == null) null else propertyMapping.rules.filter {
+            // This filter just fixes wrong mappings which are mapped to not ontology maps.
+            it.predicate != null && !it.predicate!!.startsWith(NOT_MAPPED_PREFIX)
+          }
+          if (propertyRules == null || propertyRules.isEmpty()) {
             if (propertyMapping != null && !propertyMapping.recommendations.isEmpty()) {
               // not too bad, we have at least some recommendations. this block is only for better clearance of code
             } else {
@@ -219,7 +224,7 @@ class WikiTripleImporter {
             }
           } else {
             numberOfMapped++
-            propertyMapping.rules.forEach {
+            propertyRules.forEach {
               if (insert) triplesToWrite.add(TripleInfo(triple.source!!, subject, objekt, null, it, version))
             }
           }
@@ -264,15 +269,18 @@ class WikiTripleImporter {
     }
     var type: ValueType? = null
     if (rule.predicate == null) return null
-    val value = if (rule.transform != null) {
-      val value = transformers.transform(rule.transform!!, `object`, LanguageChecker.detectLanguage(`object`)!!)
-      type = value.type
-      value.value!!
-    } else if (rule.constant != null) rule.constant
-    else `object`
+    val value = when {
+      rule.transform != null -> {
+        val value = transformers.transform(rule.transform!!, `object`, LanguageChecker.detectLanguage(`object`)!!)
+        type = value.type
+        value.value!!
+      }
+      rule.constant != null -> rule.constant
+      else -> `object`
+    }
     return FkgTriple(source = source, subject = subject,
         predicate = URIs.prefixedToUri(rule.predicate),
-        objekt = URIs.prefixedToUri(value.toString()),
+        objekt = URIs.prefixedToUri(value.toString()) ?: value.toString(),
         valueType = type, dataType = rule.unit,
         module = Module.wiki.name, version = version)
   }

@@ -4,7 +4,13 @@
  * Developed by Majid Asgari.
  */
 
-package ir.ac.iust.dml.kg.mapper.logic
+/*
+ * Farsi Knowledge Graph Project
+ * Iran University of Science and Technology (Year 2017)
+ * Developed by Majid Asgari.
+ */
+
+package ir.ac.iust.dml.kg.mapper.logic.wiki
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -95,14 +101,14 @@ object DumpUtils {
             if (triple.templateType == null || triple.templateNameFull == null) continue
             if (triple.objekt!!.startsWith("fa.wikipedia.org/wiki"))
               triple.objekt = "http://" + triple.objekt
-            if (tripleNumber % 1000 == 0)
-              logger.warn("triple number is $tripleNumber. $index file is $p. " +
-                  "time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
+            if (triple.objekt.isNullOrBlank()) continue
             val property = triple.predicate!!
             // some properties are invalid based on rdf standards
             if (property.trim().isBlank() || property.matches(invalidPropertyRegex)) continue
             tripleCache.add(triple)
             if (lastSubject != triple.subject && tripleCache.isNotEmpty()) {
+              logger.info("${tripleCache.size} triples of ${triple.subject} has been found. " +
+                  "($tripleNumber triples since now in ${System.currentTimeMillis() - startTime} miliseconds)")
               listener(tripleCache)
               tripleCache.clear()
             }

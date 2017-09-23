@@ -16,6 +16,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import ir.ac.iust.dml.kg.mapper.logic.utils.PathUtils
 import ir.ac.iust.dml.kg.mapper.logic.utils.TestUtils
+import ir.ac.iust.dml.kg.mapper.logic.wiki.DumpUtils
 import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import org.springframework.stereotype.Service
 import java.io.BufferedReader
