@@ -4,7 +4,9 @@
    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
       <layout class="ch.qos.logback.classic.PatternLayout">
          <!--<Pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</Pattern>-->
-         <pattern>%-15thread %highlight(%-5level) %gray(%logger{15}) %red(%-3line) %msg %n</pattern>
+         <pattern>%-15thread %highlight(%-5level) %gray(%logger{15}) %red(%-3line) %msg
+            %ex{full,InvalidLoginExceptionSuppressor}%n
+         </pattern>
       </layout>
    </appender>
 
@@ -17,7 +19,7 @@
          </timeBasedFileNamingAndTriggeringPolicy>
       </rollingPolicy>
       <layout class="ch.qos.logback.classic.PatternLayout">
-         <pattern>%-15thread %-5level %logger{15} %-3line %ex %msg %n</pattern>
+         <pattern>%-15thread %-5level %logger{15} %-3line %ex %msg %ex{full,InvalidLoginExceptionSuppressor}%n</pattern>
       </layout>
    </appender>
 

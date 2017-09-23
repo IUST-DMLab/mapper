@@ -50,8 +50,8 @@ object DumpUtils {
   // it handles numbered keys. for example put all (a1,b1,c1) to one collection
   fun collectTriples(triplesOfSubject: MutableList<TripleData>): List<List<TripleData>> {
     val result = mutableListOf<List<TripleData>>()
-    val index = 1
-    while (true) {
+    var index = triplesOfSubject.size
+    while (index > 0) {
       val englishDigit = "$index"
       val persianDigit = convertToPersian(englishDigit)
       val indexCollection = mutableListOf<TripleData>()
@@ -59,10 +59,13 @@ object DumpUtils {
         if (it.predicate?.endsWith(englishDigit) == true
             || it.predicate?.endsWith(persianDigit) == true) indexCollection.add(it)
       }
-      if (indexCollection.size == 0) break
-      result.add(indexCollection)
-      triplesOfSubject.removeAll(indexCollection)
+      if (indexCollection.isNotEmpty()) {
+        result.add(indexCollection)
+        triplesOfSubject.removeAll(indexCollection)
+      }
+      index--
     }
+    result.reverse()
     triplesOfSubject.forEach { result.add(listOf(it)) }
     return result
   }
@@ -92,11 +95,11 @@ object DumpUtils {
             val property = triple.predicate!!
             // some properties are invalid based on rdf standards
             if (property.trim().isBlank() || property.matches(invalidPropertyRegex)) continue
+            tripleCache.add(triple)
             if (lastSubject != triple.subject && tripleCache.isNotEmpty()) {
               listener(tripleCache)
               tripleCache.clear()
             }
-            tripleCache.add(triple)
             lastSubject = triple.subject
           } catch (th: Throwable) {
             logger.info("triple: $triple")
