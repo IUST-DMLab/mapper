@@ -1,3 +1,9 @@
+/*
+ * Farsi Knowledge Graph Project
+ * Iran University of Science and Technology (Year 2017)
+ * Developed by Majid Asgari.
+ */
+
 package ir.ac.iust.dml.kg.mapper.deprecated.templateequalities
 
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
@@ -18,10 +24,8 @@ fun main(args: Array<String>) {
 
   var count = 0
   val startTime = System.currentTimeMillis()
-  WikiDumpReader(path).use {
-    reader ->
-    WikiDumpWriter(path.parent.resolve("just_templates.xml")).use {
-      writer ->
+  WikiDumpReader(path).use { reader ->
+    WikiDumpWriter(path.parent.resolve("just_templates.xml")).use { writer ->
       while (reader.hasNext()) {
         val article = reader.next()
         if (count % 10000 == 0) println(count)

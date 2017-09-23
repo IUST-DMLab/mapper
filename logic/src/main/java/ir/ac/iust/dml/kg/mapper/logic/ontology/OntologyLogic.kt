@@ -1,3 +1,9 @@
+/*
+ * Farsi Knowledge Graph Project
+ * Iran University of Science and Technology (Year 2017)
+ * Developed by Majid Asgari.
+ */
+
 package ir.ac.iust.dml.kg.mapper.logic.ontology
 
 import com.google.common.reflect.TypeToken
@@ -143,16 +149,16 @@ class OntologyLogic {
         c.add(it.subject)
       }
       val classes = getType(null, URIs.typeOfAllClasses, 0, 0)
-        classes.data.forEach { classUrl ->
-          println("filling $classUrl")
-          val name = classUrl.substringAfterLast("/")
-          val parents = mutableListOf(classUrl)
-          fillParents(classUrl, parents, classParents)
-          treeCache[name] = parents.map { it.substringAfterLast("/") }.joinToString("/")
-          treeParents[name] = parents
-          val children = classChildren[classUrl] ?: mutableSetOf()
-          childrenCache[name] = children.map { it.substringAfterLast("/") }
-        }
+      classes.data.forEach { classUrl ->
+        println("filling $classUrl")
+        val name = classUrl.substringAfterLast("/")
+        val parents = mutableListOf(classUrl)
+        fillParents(classUrl, parents, classParents)
+        treeCache[name] = parents.map { it.substringAfterLast("/") }.joinToString("/")
+        treeParents[name] = parents
+        val children = classChildren[classUrl] ?: mutableSetOf()
+        childrenCache[name] = children.map { it.substringAfterLast("/") }
+      }
       traversedTree.clear()
       traverseCache("Thing", traversedTree)
       return true
