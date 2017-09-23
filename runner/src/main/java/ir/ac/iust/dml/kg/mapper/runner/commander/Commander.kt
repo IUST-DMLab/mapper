@@ -23,6 +23,7 @@ class Commander {
       when (command) {
         "ksMapLoad" -> services.ksMapLoad() // just for tests. can be removed.
         "triples" -> services.triples(arg1!!.toInt(), StoreType.valueOf(arg2!!)) //writes wikipedia triples
+        "categoryTriples" -> services.categoryTriples(arg1!!.toInt(), StoreType.valueOf(arg2!!)) //writes wikipedia triples
         "abstracts" -> services.abstracts(arg1!!.toInt(), StoreType.valueOf(arg2!!)) // writes wikipedia abstracts
         "withoutInfoBox" -> services.withoutInfoBox(arg1!!.toInt(), StoreType.valueOf(arg2!!)) // write wikipedia entities without info boxes
         "withInfoBox" -> services.withInfoBox(arg1!!.toInt(), StoreType.valueOf(arg2!!)) // write wikipedia entities with info boxes

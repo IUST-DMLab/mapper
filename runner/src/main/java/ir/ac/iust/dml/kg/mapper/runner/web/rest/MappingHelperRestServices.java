@@ -80,6 +80,13 @@ public class MappingHelperRestServices {
     return "Imported!";
   }
 
+  @RequestMapping("/categoryTriples")
+  public String categoryTriples(@RequestParam int version,
+                                @RequestParam(defaultValue = "none") StoreType type) throws Exception {
+    wikiTripleImporter.writeCategoryTriples(version, type, true, null);
+    return "Imported!";
+  }
+
   @RequestMapping("/tables")
   public String tables(@RequestParam(defaultValue = "none") StoreType type) throws Exception {
     tableTripleImporter.writeTriples(type);

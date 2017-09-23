@@ -23,6 +23,7 @@ import org.apache.log4j.Logger
 import java.io.BufferedReader
 import java.io.FileInputStream
 import java.io.InputStreamReader
+import java.nio.file.Path
 
 object DumpUtils {
 
@@ -83,10 +84,10 @@ object DumpUtils {
   }
 
   private val invalidPropertyRegex = Regex("\\d+")
-  fun getTriples(listener: (triples: MutableList<TripleData>) -> Unit) {
+  fun getTriples(path: Path, pattern: String, listener: (triples: MutableList<TripleData>) -> Unit,
+                 needsTemplate: Boolean = false) {
     val maxNumberOfTriples = TestUtils.getMaxTuples()
-    val path = PathUtils.getTriplesPath()
-    val result = PathWalker.getPath(path, Regex("\\d+-infoboxes\\.json"))
+    val result = PathWalker.getPath(path, Regex(pattern))
     val startTime = System.currentTimeMillis()
     var tripleNumber = 0
     val tripleCache = mutableListOf<TripleData>()
@@ -98,7 +99,7 @@ object DumpUtils {
           tripleNumber++
           if (tripleNumber > maxNumberOfTriples) break
           try {
-            if (triple.templateType == null || triple.templateNameFull == null) continue
+            if (needsTemplate && (triple.templateType == null || triple.templateNameFull == null)) continue
             if (triple.objekt!!.startsWith("fa.wikipedia.org/wiki"))
               triple.objekt = "http://" + triple.objekt
             if (triple.objekt.isNullOrBlank()) continue

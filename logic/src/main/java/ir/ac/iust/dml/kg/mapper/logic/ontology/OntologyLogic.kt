@@ -150,7 +150,6 @@ class OntologyLogic {
       }
       val classes = getType(null, URIs.typeOfAllClasses, 0, 0)
       classes.data.forEach { classUrl ->
-        println("filling $classUrl")
         val name = classUrl.substringAfterLast("/")
         val parents = mutableListOf(classUrl)
         fillParents(classUrl, parents, classParents)

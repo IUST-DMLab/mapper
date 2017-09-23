@@ -154,6 +154,22 @@ class WikiTripleImporter {
   data class TripleInfo(var source: String, var subject: String, var `object`: String,
                         var property: String?, var rule: MapRule?, var version: Int)
 
+  fun writeCategoryTriples(version: Int, storeType: StoreType = StoreType.none, insert: Boolean = true, path: Path? = null) {
+    val store = storeProvider.getStore(storeType, path)
+    DumpUtils.getTriples(PathUtils.getCategoryTriplesPath(), "\\d+\\.json", { triples ->
+      triples.forEach { triple ->
+        if (triple.source == null || triple.subject == null || triple.objekt == null ||
+            triple.objekt!!.isBlank() || triple.predicate != "wikiCategory")
+          return@getTriples
+        // subject and objects are written reversely in store object <--> subject
+        if (insert)
+          store.save(getAsTripe(TripleInfo(triple.source!!, URIs.getFkgResourceUri(triple.objekt!!),
+              URIs.convertWikiUriToResourceUri(triple.subject!!),
+              URIs.categoryMember, null, version))!!)
+      }
+    }, false)
+  }
+
   fun writeTriples(version: Int, storeType: StoreType = StoreType.none, insert: Boolean = true, path: Path? = null) {
     holder.writeToKS()
     holder.loadFromKS()
@@ -179,7 +195,7 @@ class WikiTripleImporter {
 
     val NOT_MAPPED_PREFIX = URIs.fkgNotMappedPropertyPrefix + ":"
 
-    DumpUtils.getTriples { triples ->
+    DumpUtils.getTriples(PathUtils.getTriplesPath(), "\\d+-infoboxes\\.json", { triples ->
       DumpUtils.collectTriples(triples).forEach { tripleCollection ->
         // triple collection can be just one triple in most of cases. but when we have numbered keys, they are
         // collected as a collection with size > 1
@@ -245,7 +261,7 @@ class WikiTripleImporter {
             if (child != null) store.save(child)
           }
       }
-    }
+    })
 
     if (insert) store.flush()
 
