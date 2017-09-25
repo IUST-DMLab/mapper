@@ -115,6 +115,7 @@ class WikiTripleImporter {
   fun writeEntitiesWithInfoBox(version: Int, storeType: StoreType = StoreType.none) {
     holder.writeToKS()
     holder.loadFromKS()
+    ontologyLogic.reloadTreeCache()
 
     val maxNumberOfEntities = TestUtils.getMaxTuples()
     val store = storeProvider.getStore(storeType)
