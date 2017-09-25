@@ -23,7 +23,7 @@ import java.util.regex.Pattern
 class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
 
   private val logger = Logger.getLogger(this.javaClass)!!
-  private val FLUSH_SIZE = 10000
+  private val FLUSH_SIZE = 1000
   private val tripleApi: V2triplesApi
   private val buffer = mutableListOf<TripleData>()
 
