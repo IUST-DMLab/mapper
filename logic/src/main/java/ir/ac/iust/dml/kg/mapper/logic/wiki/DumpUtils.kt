@@ -38,8 +38,8 @@ object DumpUtils {
     result.forEachIndexed { index, p ->
       logger.info("file $index of ${result.size} starts (${p.toAbsolutePath()}) " +
           "after ${System.currentTimeMillis() - startTime} miliseconds ..")
-      InputStreamReader(FileInputStream(p.toFile()), "UTF8").use {
-        BufferedReader(it).use {
+      InputStreamReader(FileInputStream(p.toFile()), "UTF8").use { stream ->
+        BufferedReader(stream).use {
           val infoBoxes: Map<String, Map<String, List<Map<String, String>>>> = gson.fromJson(it, type)
           infoBoxes.forEach { infoBox, entityInfo ->
             entityInfo.forEach { entity, properties ->
@@ -52,8 +52,8 @@ object DumpUtils {
     logger.info("all infoboxes has been completed in ${System.currentTimeMillis() - startTime} miliseconds")
   }
 
-  val persianDigits = "۰۱۲۳۴۵۶۷۸۹"
-  fun convertToPersian(num: String): String {
+  private val persianDigits = "۰۱۲۳۴۵۶۷۸۹"
+  private fun convertToPersian(num: String): String {
     val builder = StringBuilder()
     for (ch in num) builder.append(persianDigits[ch.toInt() - '0'.toInt()])
     return builder.toString()
@@ -61,8 +61,8 @@ object DumpUtils {
 
   // check all triples of a subject and give them as collections.
   // it handles numbered keys. for example put all (a1,b1,c1) to one collection
-  fun collectTriples(triplesOfSubject: MutableList<TripleData>): List<List<TripleData>> {
-    val result = mutableListOf<List<TripleData>>()
+  fun collectTriples(triplesOfSubject: MutableList<TripleData>): List<MutableList<TripleData>> {
+    val result = mutableListOf<MutableList<TripleData>>()
     var index = triplesOfSubject.size
     while (index > 0) {
       val englishDigit = "$index"
@@ -73,13 +73,22 @@ object DumpUtils {
             || it.predicate?.endsWith(persianDigit) == true) indexCollection.add(it)
       }
       if (indexCollection.isNotEmpty()) {
-        result.add(indexCollection)
+        val priorityIndexCollection = mutableListOf<TripleData>()
+        var mainTriple: TripleData? = null
+        for (triple in indexCollection) {
+          val predicate = triple.predicate
+          if (predicate?.startsWith("order") == true || predicate?.startsWith("office") == true) mainTriple = triple
+          else priorityIndexCollection.add(triple)
+        }
+        priorityIndexCollection.sortBy { it.predicate }
+        if (mainTriple != null) priorityIndexCollection.add(0, mainTriple)
+        result.add(priorityIndexCollection)
         triplesOfSubject.removeAll(indexCollection)
       }
       index--
     }
     result.reverse()
-    triplesOfSubject.forEach { result.add(listOf(it)) }
+    triplesOfSubject.forEach { result.add(mutableListOf(it)) }
     return result
   }
 
@@ -106,13 +115,13 @@ object DumpUtils {
             val property = triple.predicate!!
             // some properties are invalid based on rdf standards
             if (property.trim().isBlank() || property.matches(invalidPropertyRegex)) continue
-            tripleCache.add(triple)
-            if (lastSubject != triple.subject && tripleCache.isNotEmpty()) {
-              logger.info("${tripleCache.size} triples of ${triple.subject} has been found. " +
+            if (lastSubject != null && lastSubject != triple.subject && tripleCache.isNotEmpty()) {
+              logger.info("${tripleCache.size} triples of ${lastSubject} has been found. " +
                   "($tripleNumber triples since now in ${System.currentTimeMillis() - startTime} miliseconds)")
               listener(tripleCache)
               tripleCache.clear()
-            }
+              tripleCache.add(triple)
+            } else tripleCache.add(triple)
             lastSubject = triple.subject
           } catch (th: Throwable) {
             logger.info("triple: $triple")
@@ -121,6 +130,10 @@ object DumpUtils {
         }
       }
     }
-    if (tripleCache.isNotEmpty()) listener(tripleCache)
+    if (tripleCache.isNotEmpty()) {
+      logger.info("${tripleCache.size} triples of ${lastSubject} has been found. " +
+          "($tripleNumber triples since now in ${System.currentTimeMillis() - startTime} miliseconds)")
+      listener(tripleCache)
+    }
   }
 }

@@ -23,6 +23,7 @@ import ir.ac.iust.dml.kg.mapper.logic.utils.PathUtils
 import ir.ac.iust.dml.kg.mapper.logic.utils.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.utils.TestUtils
 import ir.ac.iust.dml.kg.raw.utils.*
+import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleData
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -197,6 +198,20 @@ class WikiTripleImporter {
 
     DumpUtils.getTriples(PathUtils.getTriplesPath(), "\\d+-infoboxes\\.json", { triples ->
       DumpUtils.collectTriples(triples).forEach { tripleCollection ->
+        if (tripleCollection.size == 2 &&
+            tripleCollection[0].objekt != null &&
+            tripleCollection[1].objekt != null &&
+            tripleCollection[0].predicate?.contains("name") == true &&
+            tripleCollection[1].predicate?.contains("type") == true) {
+          val key =
+              if (tripleCollection[1].objekt!!.contains("/"))
+                tripleCollection[1].objekt!!.substringAfterLast('/').replace('_', ' ')
+              else tripleCollection[1].objekt!!
+          tripleCollection.add(0, TripleData(
+              tripleCollection[0].source, tripleCollection[0].subject, key, tripleCollection[0].templateNameFull,
+              tripleCollection[0].templateName, tripleCollection[0].templateType, tripleCollection[0].objekt
+          ))
+        }
         // triple collection can be just one triple in most of cases. but when we have numbered keys, they are
         // collected as a collection with size > 1
         val triplesToWrite = mutableListOf<TripleInfo>()
