@@ -50,7 +50,7 @@ class RedirectLogic {
         BufferedReader(InputStreamReader(FileInputStream(it.toFile()), "UTF8")).use { reader ->
           val map: Map<String, String> = gson.fromJson(reader, type)
           map.forEach { redirect, mainResource ->
-            if (redirect != mainResource) redirects.add(redirect)
+            if (redirect != mainResource) redirects.add(redirect.replace('_', ' '))
           }
         }
       } catch (th: Throwable) {
