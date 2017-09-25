@@ -41,6 +41,7 @@ class WikiTripleImporter {
   @Autowired private lateinit var storeProvider: StoreProvider
   @Autowired private lateinit var entityClassImporter: EntityClassImporter
   @Autowired private lateinit var notMappedPropertyHandler: NotMappedPropertyHandler
+  @Autowired private lateinit var redirectLogic: RedirectLogic
   private val transformers = TransformService()
 
 
@@ -91,6 +92,8 @@ class WikiTripleImporter {
 
     var entityIndex = 0
 
+    val redirects = redirectLogic.getRedirects()
+
     result.forEachIndexed { index, p ->
       InputStreamReader(FileInputStream(p.toFile()), "UTF8").use {
         BufferedReader(it).use {
@@ -98,7 +101,8 @@ class WikiTripleImporter {
           revisionIdMap.keys.forEach { entity ->
             entityIndex++
             if (entityIndex > maxNumberOfEntities) return@forEachIndexed
-            entityClassImporter.addResourceAsThing(entity, store, Module.wiki.name, version)
+            if (!redirects.contains(entity))
+              entityClassImporter.addResourceAsThing(entity, store, Module.wiki.name, version)
           }
           logger.warn("$index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
         }

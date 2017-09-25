@@ -35,6 +35,31 @@ class RedirectLogic {
     val field: MutableList<String> = mutableListOf()
   }
 
+  fun getRedirects(): MutableSet<String> {
+    val gson = Gson()
+    val type = object : TypeToken<Map<String, String>>() {}.type
+    val redirectsFolder = ConfigReader.getPath("wiki.folder.redirects", "~/.pkg/data/redirects")
+    if (!Files.exists(redirectsFolder.parent)) Files.createDirectories(redirectsFolder.parent)
+    if (!Files.exists(redirectsFolder)) {
+      throw Exception("There is no file ${redirectsFolder.toAbsolutePath()} existed.")
+    }
+    val redirects = mutableSetOf<String>()
+    val redirectFile = PathWalker.getPath(redirectsFolder, Regex("[01]-redirects.json"))
+    redirectFile.forEach {
+      try {
+        BufferedReader(InputStreamReader(FileInputStream(it.toFile()), "UTF8")).use { reader ->
+          val map: Map<String, String> = gson.fromJson(reader, type)
+          map.forEach { redirect, mainResource ->
+            if (redirect != mainResource) redirects.add(redirect)
+          }
+        }
+      } catch (th: Throwable) {
+        logger.error(th)
+      }
+    }
+    return redirects
+  }
+
   @Throws(Exception::class)
   fun write(version: Int, storeType: StoreType = StoreType.knowledgeStore) {
     val redirectsFolder = ConfigReader.getPath("wiki.folder.redirects", "~/.pkg/data/redirects")
