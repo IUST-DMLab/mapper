@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/mapping/rest/v2/")
+@RequestMapping("/mapping/rest/v1/")
 @Api(tags = arrayOf("mapping"), description = "سرویس‌های ویرایش نگاشت")
 class MappingRestServices {
   @Autowired lateinit var logic: KSMappingLogic
