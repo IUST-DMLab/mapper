@@ -47,6 +47,8 @@ class OntologyStoreFkgTripleDaoImpl : FkgTripleDao() {
 
   override fun newVersion(module: String) = 1
 
+  override fun activateVersion(module: String, version: Int) = true
+
   private val p = Pattern.compile("[\\\\|`\"<>{}^\\[\\]]", Pattern.CASE_INSENSITIVE);
   private fun isValidUri(uri: String): Boolean {
     val m = p.matcher(uri)

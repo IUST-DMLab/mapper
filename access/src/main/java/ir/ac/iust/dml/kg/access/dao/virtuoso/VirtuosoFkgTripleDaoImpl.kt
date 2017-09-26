@@ -15,6 +15,8 @@ class VirtuosoFkgTripleDaoImpl : FkgTripleDao() {
 
   override fun newVersion(module: String) = 1
 
+  override fun activateVersion(module: String, version: Int) = true
+
   val connector = VirtuosoConnector("http://fkg.iust.ac.ir/")
 
   override fun save(t: FkgTriple) {

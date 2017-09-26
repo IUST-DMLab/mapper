@@ -154,6 +154,7 @@ public class MappingHelperRestServices {
     ambiguityLogic.write(version, type);
     informer.stepDone(8);
     predicateImporter.writePredicates(true);
+    store.activateVersion(Module.wiki.name(), version);
     informer.done();
   }
 

@@ -47,6 +47,8 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
 
   override fun newVersion(module: String) = tripleApi.newVersion2(module)
 
+  override fun activateVersion(module: String, version: Int) = tripleApi.activateVersion2(module, version)
+
   private val p = Pattern.compile("[\\\\|`\"<>{}^\\[\\]]", Pattern.CASE_INSENSITIVE);
   private fun isValidUri(uri: String): Boolean {
     val m = p.matcher(uri)

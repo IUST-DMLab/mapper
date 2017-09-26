@@ -21,6 +21,8 @@ class FileFkgTripleDaoImpl(val path: Path, val flushSize: Int = 1000) : FkgTripl
 
   override fun newVersion(module: String) = 1
 
+  override fun activateVersion(module: String, version: Int) = true
+
   init {
     if (!Files.exists(path)) Files.createDirectories(path)
   }

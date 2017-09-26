@@ -11,7 +11,10 @@ import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.raw.utils.PagedData
 
 class EmptyFkgTripleDaoImpl : FkgTripleDao() {
+
   override fun newVersion(module: String) = 1
+
+  override fun activateVersion(module: String, version: Int) = true
 
   override fun flush() {
   }

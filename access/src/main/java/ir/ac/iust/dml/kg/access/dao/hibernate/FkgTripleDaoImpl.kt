@@ -20,6 +20,8 @@ open class FkgTripleDaoImpl : FkgTripleDao() {
 
   override fun newVersion(module: String) = 1
 
+  override fun activateVersion(module: String, version: Int) = true
+
   @Autowired
   lateinit var sessionFactory: SessionFactory
 

@@ -14,6 +14,8 @@ abstract class FkgTripleDao {
 
   abstract fun newVersion(module: String): Int
 
+  abstract fun activateVersion(module: String, version: Int): Boolean
+
   abstract fun flush()
 
   abstract fun save(t: FkgTriple)
