@@ -163,17 +163,19 @@ class WikiTripleImporter {
   fun writeCategoryTriples(version: Int, storeType: StoreType = StoreType.none, insert: Boolean = true, path: Path? = null) {
     val store = storeProvider.getStore(storeType, path)
     DumpUtils.getTriples(PathUtils.getCategoryTriplesPath(), "\\d+\\.json", { triples ->
+      var subjectUrl: String? = null
       triples.forEach { triple ->
         if (triple.source == null || triple.subject == null || triple.objekt == null ||
             triple.objekt!!.isBlank() || triple.predicate != "wikiCategory")
           return@getTriples
+        if (subjectUrl == null) subjectUrl = URIs.convertWikiUriToResourceUri(triple.subject!!)
         // subject and objects are written reversely in store object <--> subject
         if (insert)
-          store.save(getAsTripe(TripleInfo(triple.source!!, URIs.getFkgResourceUri(triple.objekt!!),
-              URIs.convertWikiUriToResourceUri(triple.subject!!),
-              URIs.categoryMember, null, version))!!)
+          store.save(getAsTripe(TripleInfo(triple.source!!, subjectUrl!!,
+              triple.objekt!!, URIs.categoryMember, null, version))!!)
       }
     }, false)
+    store.flush()
   }
 
   fun writeTriples(version: Int, storeType: StoreType = StoreType.none, insert: Boolean = true, path: Path? = null) {
