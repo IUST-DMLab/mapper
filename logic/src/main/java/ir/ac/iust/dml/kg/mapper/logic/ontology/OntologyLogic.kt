@@ -9,15 +9,13 @@ package ir.ac.iust.dml.kg.mapper.logic.ontology
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
-import ir.ac.iust.dml.kg.mapper.logic.data.ExportedPropertyData
-import ir.ac.iust.dml.kg.mapper.logic.data.OntologyClassData
-import ir.ac.iust.dml.kg.mapper.logic.data.OntologyPropertyData
-import ir.ac.iust.dml.kg.mapper.logic.data.StoreType
+import ir.ac.iust.dml.kg.mapper.logic.data.*
 import ir.ac.iust.dml.kg.mapper.logic.utils.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.utils.TestUtils
 import ir.ac.iust.dml.kg.raw.utils.*
 import ir.ac.iust.dml.kg.services.client.ApiClient
 import ir.ac.iust.dml.kg.services.client.swagger.V2ontologyApi
+import ir.ac.iust.dml.kg.services.client.swagger.model.Ontology
 import ir.ac.iust.dml.kg.services.client.swagger.model.OntologyData
 import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValueData
 import org.apache.log4j.Logger
@@ -281,34 +279,53 @@ class OntologyLogic {
     return getType(query, t, page, pageSize)
   }
 
-  fun classData(classUrl: String): OntologyClassData {
+  @Deprecated("Old service for backward compatibility")
+  fun getNode(name: String): FkgClassData {
+    val classData = classData(URIs.getFkgOntologyClassUri(name), false)
+    return FkgClassData(ontologyClass = classData.url,
+        parentOntologyClass = classData.subClassOf,
+        approved = true,
+        comment = classData.faComment,
+        note = classData.enComment,
+        enLabel = classData.enLabel,
+        faLabel = classData.faLabel,
+        faOtherLabels = classData.faVariantLabels.joinToString(", "))
+  }
+
+  fun classData(classUrl: String, property: Boolean = true): OntologyClassData {
     val classData = OntologyClassData(url = classUrl)
-    val labels = search(classUrl, URIs.label, null, 0, 10)
-    labels.data.forEach {
+
+    val triples = search(classUrl, null, null, 0, 0).data!!
+
+    val labels = filterPredicates(triples, URIs.label)
+    labels.forEach {
       if (it.`object`.lang == "fa") classData.faLabel = it.`object`.value
       if (it.`object`.lang == "en") classData.enLabel = it.`object`.value
     }
 
-    val variantLabels = search(classUrl, URIs.variantLabel, null, 0, 10)
-    variantLabels.data.forEach {
+    val variantLabels = filterPredicates(triples, URIs.variantLabel)
+    variantLabels.forEach {
       if (it.`object`.lang == "fa") classData.faVariantLabels.add(it.`object`.value)
       if (it.`object`.lang == "en") classData.enVariantLabels.add(it.`object`.value)
     }
 
-    val comments = search(classUrl, URIs.comment, null, 0, 10)
-    comments.data.forEach {
+    val comments = filterPredicates(triples, URIs.comment)
+    comments.forEach {
       if (it.`object`.lang == "fa") classData.faComment = it.`object`.value
       if (it.`object`.lang == "en") classData.enComment = it.`object`.value
     }
 
-    classData.name = objectOfPredicate(classUrl, URIs.name)
-    classData.subClassOf = objectOfPredicate(classUrl, URIs.subClassOf)
-    classData.wasDerivedFrom = objectOfPredicate(classUrl, URIs.wasDerivedFrom)
-    classData.equivalentClasses = objectsOfPredicate(classUrl, URIs.equivalentClass)
-    classData.disjointWith = objectsOfPredicate(classUrl, URIs.disjointWith)
-    val properties = subjectsOfPredicate(URIs.propertyDomain, classUrl)
-    properties.forEach {
-      classData.properties.add(propertyData(it))
+    classData.name = filterPredicate(triples, URIs.name)
+    classData.subClassOf = filterPredicate(triples, URIs.subClassOf)
+    classData.wasDerivedFrom = filterPredicate(triples, URIs.wasDerivedFrom)
+    classData.equivalentClasses = filterPredicateValues(triples, URIs.equivalentClass)
+    classData.disjointWith = filterPredicateValues(triples, URIs.disjointWith)
+
+    if (property) {
+      val properties = subjectsOfPredicate(URIs.propertyDomain, classUrl)
+      properties.forEach {
+        classData.properties.add(propertyData(it))
+      }
     }
 
     if (traversedTree.isEmpty()) reloadTreeCache()
@@ -384,29 +401,35 @@ class OntologyLogic {
     return classData(data.url!!)
   }
 
+  fun filterPredicates(triples: List<Ontology>, predicate: String) = triples.filter { it.predicate == predicate }.toMutableList()
+  fun filterPredicateValues(triples: List<Ontology>, predicate: String) = triples.filter { it.predicate == predicate }.map { it.`object`.value }.toMutableList()
+  fun filterPredicate(triples: List<Ontology>, predicate: String) = triples.filter { it.predicate == predicate }.firstOrNull()?.`object`?.value
+
   fun propertyData(propertyUrl: String): OntologyPropertyData {
     val propertyData = OntologyPropertyData(url = propertyUrl)
 
-    val labels = search(propertyUrl, URIs.label, null, 0, 10)
-    labels.data.forEach {
+    val triples = search(propertyUrl, null, null, 0, 0).data!!
+
+    val labels = filterPredicates(triples, URIs.label)
+    labels.forEach {
       if (it.`object`.lang == "fa") propertyData.faLabel = it.`object`.value
       if (it.`object`.lang == "en") propertyData.enLabel = it.`object`.value
     }
 
-    val variantLabels = search(propertyUrl, URIs.variantLabel, null, 0, 10)
-    variantLabels.data.forEach {
+    val variantLabels = filterPredicates(triples, URIs.variantLabel)
+    variantLabels.forEach {
       if (it.`object`.lang == "fa") propertyData.faVariantLabels.add(it.`object`.value)
       if (it.`object`.lang == "en") propertyData.enVariantLabels.add(it.`object`.value)
     }
 
-    propertyData.name = objectOfPredicate(propertyUrl, URIs.name)
-    propertyData.wasDerivedFrom = objectOfPredicate(propertyUrl, URIs.wasDerivedFrom)
-    propertyData.types.addAll(objectsOfPredicate(propertyUrl, URIs.type))
-    propertyData.domains.addAll(objectsOfPredicate(propertyUrl, URIs.propertyDomain))
-    propertyData.autoDomains.addAll(objectsOfPredicate(propertyUrl, URIs.propertyAutoDomain))
-    propertyData.ranges.addAll(objectsOfPredicate(propertyUrl, URIs.propertyRange))
-    propertyData.autoRanges.addAll(objectsOfPredicate(propertyUrl, URIs.propertyAutoRange))
-    propertyData.equivalentProperties.addAll(objectsOfPredicate(propertyUrl, URIs.equivalentProperty))
+    propertyData.name = filterPredicate(triples, URIs.name)
+    propertyData.wasDerivedFrom = filterPredicate(triples, URIs.wasDerivedFrom)
+    propertyData.types.addAll(filterPredicateValues(triples, URIs.type))
+    propertyData.domains.addAll(filterPredicateValues(triples, URIs.propertyDomain))
+    propertyData.autoDomains.addAll(filterPredicateValues(triples, URIs.propertyAutoDomain))
+    propertyData.ranges.addAll(filterPredicateValues(triples, URIs.propertyRange))
+    propertyData.autoRanges.addAll(filterPredicateValues(triples, URIs.propertyAutoRange))
+    propertyData.equivalentProperties.addAll(filterPredicateValues(triples, URIs.equivalentProperty))
 
     return propertyData
   }
