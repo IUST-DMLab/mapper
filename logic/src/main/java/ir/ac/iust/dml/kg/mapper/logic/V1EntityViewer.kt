@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class EntityViewer {
+class V1EntityViewer {
   private val tripleApi: V1triplesApi
   private val THING = URIs.getFkgOntologyClassUri("Thing")
   private val propertyLabelCache = mutableMapOf<String, String?>()

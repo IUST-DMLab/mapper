@@ -142,6 +142,8 @@ public class MappingHelperRestServices {
     informer.stepDone(2);
     // 2 percent for triple exporting because of its complication
     wikiTripleImporter.writeTriples(version, type, true, null);
+    informer.stepDone(3);
+    wikiTripleImporter.writeCategoryTriples(version, type, true, null);
     informer.stepDone(4);
     notMappedPropertyHandler.writeNotMappedProperties(Module.wiki.name(), version, true);
     informer.stepDone(5);
