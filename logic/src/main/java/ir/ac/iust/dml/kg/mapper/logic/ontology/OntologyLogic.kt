@@ -249,7 +249,7 @@ class OntologyLogic {
     return root
   }
 
-  fun fillNode(node: OntologyNode, labelLanguage: String?, depth: Int, maxDepth: Int?) {
+  private fun fillNode(node: OntologyNode, labelLanguage: String?, depth: Int, maxDepth: Int?) {
     if (treeCache.isEmpty()) reloadTreeCache()
     if (labelLanguage != null) node.label = getLabel(node.url, labelLanguage)
     node.name = node.url.substring(node.url.indexOf("/ontology/") + 10)
@@ -263,21 +263,13 @@ class OntologyLogic {
     node.children.sortBy { it.url }
   }
 
-  fun getLabel(url: String, language: String? = null): String? {
-    try {
-      return search(url, URIs.label, null, 0, 0).data.filter {
+  private fun getLabel(url: String, language: String? = null): String? {
+    return try {
+      search(url, URIs.label, null, 0, 0).data.filter {
         language == null || it.`object`?.lang == language
       }.firstOrNull()?.`object`?.value
     } catch (th: Throwable) {
-      return null
-    }
-  }
-
-  fun getName(url: String): String? {
-    try {
-      return search(url, URIs.name, null, 0, 0).data.firstOrNull()?.`object`?.value
-    } catch (th: Throwable) {
-      return null
+      null
     }
   }
 
@@ -332,6 +324,16 @@ class OntologyLogic {
     //TODO we must remove next line after first run of mapping on data
     tripleApi.remove2(subject, predicate, `object`, subject)
     tripleApi.remove2(subject, predicate, `object`, URIs.defaultContext)
+  }
+
+  fun removeClass(classUrl: String): Boolean {
+    val subClasses = search(null, URIs.subClassOf, classUrl, 0, 0)
+    if (subClasses.data.isNotEmpty()) return false
+    val triples = search(classUrl, null, null, 0, 0)
+    triples.data.forEach {
+      remove(it.subject!!, it.predicate!!, it.`object`.value)
+    }
+    return true
   }
 
   fun saveClass(data: OntologyClassData): OntologyClassData? {

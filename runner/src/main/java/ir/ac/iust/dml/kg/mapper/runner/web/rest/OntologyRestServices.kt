@@ -53,6 +53,11 @@ class OntologyRestServices {
   fun propertyData(@RequestParam(required = false) propertyData: String?)
       = logic.propertyData(propertyData!!)
 
+  @RequestMapping("removeClass", method = arrayOf(RequestMethod.POST))
+  @ResponseBody
+  fun removeClass(@RequestParam classUrl: String)
+      = logic.removeClass(classUrl)
+
   @RequestMapping("saveClass", method = arrayOf(RequestMethod.POST))
   @ResponseBody
   fun saveClass(@RequestBody classData: OntologyClassData)
