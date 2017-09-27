@@ -25,6 +25,7 @@ import java.io.BufferedReader
 import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.nio.file.Files
+import kotlin.concurrent.thread
 
 @Service
 class OntologyLogic {
@@ -350,7 +351,31 @@ class OntologyLogic {
     triples.data.forEach {
       remove(it.subject!!, it.predicate!!, it.`object`.value)
     }
+    thread(true) { reloadTreeCache() }
     return true
+  }
+
+  fun removePropertyFromClass(propertyUrl: String, classUrl: String): Boolean {
+    return try {
+      remove(propertyUrl, URIs.propertyDomain, classUrl)
+      true
+    } catch (th: Throwable) {
+      false
+    }
+  }
+
+  fun removePropertyCompletely(propertyUrl: String): Boolean {
+    return try {
+      var triples = search(propertyUrl, null, null, 0, 0)
+      triples.data.forEach { remove(it.subject!!, it.predicate!!, it.`object`.value) }
+      triples = search(null, propertyUrl, null, 0, 0)
+      triples.data.forEach { remove(it.subject!!, it.predicate!!, it.`object`.value) }
+      triples = search(null, null, propertyUrl, 0, 0)
+      triples.data.forEach { remove(it.subject!!, it.predicate!!, it.`object`.value) }
+      true
+    } catch (th: Throwable) {
+      false
+    }
   }
 
   fun saveClass(data: OntologyClassData): OntologyClassData? {
@@ -398,6 +423,7 @@ class OntologyLogic {
         return classData(data.url!!)
       }
     }
+    thread(true) { reloadTreeCache() }
     return classData(data.url!!)
   }
 
