@@ -86,9 +86,8 @@ class V1EntityViewer {
     val result = EntityData()
     val entityDefaultName = url.substringAfterLast("/").replace('_', ' ')
     result.wikiLink = "https://fa.wikipedia.org/wiki/" + entityDefaultName.replace(' ', '_')
-    var searched = search(url, URIs.label, null, true)
-    result.label = if (searched.data.isEmpty()) entityDefaultName else searched.data[0].`object`.value
-    searched = search(url, URIs.abstract, null, true)
+    result.label = entityDefaultName
+    var searched = search(url, URIs.abstract, null, true)
     result.abstract = searched.data.firstOrNull()?.`object`?.value
     if (result.abstract?.length ?: 0 > 250) result.abstract = result.abstract + " ..."
     searched = search(url, URIs.picture, null, true)

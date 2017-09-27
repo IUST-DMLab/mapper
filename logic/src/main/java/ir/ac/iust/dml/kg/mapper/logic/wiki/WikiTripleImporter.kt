@@ -162,6 +162,7 @@ class WikiTripleImporter {
 
   fun writeCategoryTriples(version: Int, storeType: StoreType = StoreType.none, insert: Boolean = true, path: Path? = null) {
     val store = storeProvider.getStore(storeType, path)
+    val categories = mutableSetOf<String>()
     DumpUtils.getTriples(PathUtils.getCategoryTriplesPath(), "\\d+\\.json", { triples ->
       var subjectUrl: String? = null
       triples.forEach { triple ->
@@ -169,10 +170,20 @@ class WikiTripleImporter {
             triple.objekt!!.isBlank() || triple.predicate != "wikiCategory")
           return@getTriples
         if (subjectUrl == null) subjectUrl = URIs.convertWikiUriToResourceUri(triple.subject!!)
+        val categoryUrl = URIs.getFkgCategoryUri(triple.objekt!!)
+        if (!categories.contains(triple.objekt!!)) {
+          categories.add(triple.objekt!!)
+          // it's new category
+          val wikiAddress = "https://fa.wikipedia.org/wiki/Category:${triple.objekt}"
+          store.save(wikiAddress, categoryUrl, URIs.type, URIs.typeOfAllCategories, Module.wiki.name, version)
+          store.save(wikiAddress, categoryUrl, URIs.label, triple.objekt!!, Module.wiki.name, version)
+          store.save(wikiAddress, categoryUrl, URIs.variantLabel, triple.objekt!!, Module.wiki.name, version)
+          store.save(wikiAddress, categoryUrl, URIs.preferedLabel, triple.objekt!!, Module.wiki.name, version)
+          store.save(wikiAddress, categoryUrl, URIs.wasDerivedFrom, wikiAddress, Module.wiki.name, version)
+        }
         // subject and objects are written reversely in store object <--> subject
         if (insert)
-          store.save(getAsTripe(TripleInfo(triple.source!!, subjectUrl!!,
-              triple.objekt!!, URIs.categoryMember, null, version))!!)
+          store.save(triple.source!!, subjectUrl!!, URIs.categoryMember, categoryUrl, Module.wiki.name, version)
       }
     }, false)
     store.flush()
