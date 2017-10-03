@@ -52,7 +52,6 @@ class OntologyLogic {
   }
 
   fun importFromDBpedia() {
-
     val exportedJson = ConfigReader.getPath("dbpedia.properties.export", "~/.pkg/data/ontology_property.json")
     if (!Files.exists(exportedJson.parent)) Files.createDirectories(exportedJson.parent)
     if (!Files.exists(exportedJson)) {
@@ -281,16 +280,38 @@ class OntologyLogic {
   }
 
   @Deprecated("Old service for backward compatibility")
-  fun getNode(name: String): FkgClassData {
+  fun getNode(name: String, old: FkgClassData? = null): FkgClassData {
     val classData = classData(URIs.getFkgOntologyClassUri(name), false)
-    return FkgClassData(ontologyClass = classData.url,
-        parentOntologyClass = classData.subClassOf,
-        approved = true,
-        comment = classData.faComment,
-        note = classData.enComment,
-        enLabel = classData.enLabel,
-        faLabel = classData.faLabel,
-        faOtherLabels = classData.faVariantLabels.joinToString(", "))
+    val result = old ?: FkgClassData(ontologyClass = classData.url)
+    result.parentOntologyClass = classData.subClassOf
+    result.approved = true
+    result.comment = classData.faComment
+    result.note = classData.enComment
+    result.enLabel = classData.enLabel
+    result.faLabel = classData.faLabel
+    result.faOtherLabels = classData.faVariantLabels.joinToString(", ")
+    return result
+  }
+
+  @Deprecated("Old service for backward compatibility")
+  fun search(page: Int, pageSize: Int, like: Boolean, name: String?, parent: String?): PagedData<FkgClassData> {
+    if (treeParents.isEmpty()) reloadTreeCache()
+    val nameLower = name?.toLowerCase()
+    val parentAddress = if (parent != null) URIs.getFkgOntologyClassUri(parent) else null
+    val searched = treeParents.filter {
+      var matched = true
+      if (nameLower != null)
+        matched = if (like) it.key.toLowerCase().contains(nameLower)
+        else it.key.toLowerCase() == nameLower
+      if (matched && parentAddress != null)
+        matched = it.value.contains(parentAddress)
+      matched
+    }.map { FkgClassData(ontologyClass = it.key) }
+    val result = PageUtils.asPages(page, pageSize, searched)
+    result.data.forEach {
+      getNode(it.ontologyClass!!, it)
+    }
+    return result
   }
 
   fun classData(classUrl: String, property: Boolean = true): OntologyClassData {
