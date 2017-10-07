@@ -110,7 +110,8 @@ class V2EntityViewer {
                         var properties: SortedMap<String, SortedSet<EntityProperty>> = sortedMapOf())
 
   private fun ontologySearch(subject: String? = null, predicate: String? = null, `object`: String? = null, one: Boolean)
-      = ontologyApi.search2(null, subject, predicate, `object`, null, 0, if (one) 1 else 0)
+      = ontologyApi.search2(null, null, subject, false, predicate, false,
+      `object`, false, null, 0, if (one) 1 else 0)
 //      = ontologyApi.search1(null, false, subject, false, predicate, false,
 //      `object`, false, 0, if (one) 1 else 0)
 

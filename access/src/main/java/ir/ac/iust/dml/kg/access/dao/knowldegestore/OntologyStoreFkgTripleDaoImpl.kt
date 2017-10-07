@@ -146,8 +146,8 @@ class OntologyStoreFkgTripleDaoImpl : FkgTripleDao() {
 
   override fun read(subject: String?, predicate: String?, objekt: String?): MutableList<FkgTriple> {
     val list = mutableListOf<FkgTriple>()
-    val result = tripleApi.search2(null, subject, predicate,
-        objekt, false, null, null)
+    val result = tripleApi.search2(null, null, subject, null, predicate,
+        null, objekt, null, false, null, null)
     result.data.forEach {
       list.add(FkgTriple(source = it.subject, subject = it.subject, predicate = it.predicate,
           objekt = it.`object`?.value))
