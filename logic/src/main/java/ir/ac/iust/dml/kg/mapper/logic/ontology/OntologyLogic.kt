@@ -137,7 +137,8 @@ class OntologyLogic {
 
   fun reloadTreeCache(): Boolean {
     try {
-      val all = tripleApi.search2(null, null, URIs.subClassOf, null, null, 0, 0)
+      val all = tripleApi.search2(null, null, null, null, URIs.subClassOf,
+          null, null, null, null, 0, 0)
       val classParents = mutableMapOf<String, MutableSet<String>>()
       val classChildren = mutableMapOf<String, MutableSet<String>>()
       all.data.forEach {
@@ -185,13 +186,23 @@ class OntologyLogic {
 
   fun getChildren(ontologyClass: String) = childrenCache[ontologyClass]
 
+  private fun search(subject: String?, subjectLike: Boolean,
+                     predicate: String?, predicateLike: Boolean,
+                     `object`: String?, objectLike: Boolean,
+                     page: Int, pageSize: Int?) =
+      tripleApi.search2(null, null, subject, subjectLike,
+          predicate, predicateLike, `object`, objectLike, null, page, pageSize)
+
   private fun search(subject: String?, predicate: String?, `object`: String?, page: Int, pageSize: Int?) =
-      tripleApi.search2(null, subject, predicate, `object`, null, page, pageSize)
+      tripleApi.search2(null, null, subject, false,
+          predicate, false, `object`, false, null, page, pageSize)
 
   private fun getType(keyword: String?, type: String, page: Int, pageSize: Int): PagedData<String> {
-    val result = search(keyword, URIs.type, type, page, pageSize)
+    val result =
+        if (keyword != null) search(keyword, true, URIs.type, false, type, false, page, pageSize)
+        else search(keyword, URIs.type, type, page, pageSize)
     val data = result.data.map { it.subject }.toMutableList()
-    return PagedData<String>(data, page, pageSize, result.pageCount, result.totalSize)
+    return PagedData(data, page, pageSize, result.pageCount, result.totalSize)
   }
 
   private fun subjectsOfPredicate(predicate: String, `object`: String): MutableList<String> {
