@@ -172,7 +172,7 @@ public class MappingHelperRestServices {
     assert type != null;
     switch (type) {
       case "ontologyLabel":
-        fixers.findOntologyMoreThanOneLables();
+        fixers.findOntologyMoreThanOneLabels();
     }
   }
 }

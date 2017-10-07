@@ -9,6 +9,7 @@ package ir.ac.iust.dml.kg.mapper.logic.ontology
 import ir.ac.iust.dml.kg.mapper.logic.data.StoreType
 import ir.ac.iust.dml.kg.mapper.logic.utils.StoreProvider
 import ir.ac.iust.dml.kg.mapper.logic.utils.TestUtils
+import ir.ac.iust.dml.kg.raw.utils.PropertyNormaller
 import ir.ac.iust.dml.kg.raw.utils.URIs
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,8 +37,9 @@ class NotMappedPropertyHandler {
       val name = property.substringAfterLast("/")
       val propertyUrl = URIs.convertToNotMappedFkgPropertyUri(name)!!
       store.save(SOURCE_URL, propertyUrl, URIs.type, URIs.typeOfAnyProperties, module, version)
-      store.save(SOURCE_URL, propertyUrl, URIs.label, name, module, version)
-      store.save(SOURCE_URL, propertyUrl, URIs.variantLabel, name, module, version)
+      if (store.read(propertyUrl, URIs.label, null).isEmpty())
+        store.save(SOURCE_URL, propertyUrl, URIs.label, PropertyNormaller.removeDigits(name), module, version)
+      store.save(SOURCE_URL, propertyUrl, URIs.variantLabel, PropertyNormaller.removeDigits(name), module, version)
 
       if (resolveAmbiguity) {
         val result = store.read(predicate = URIs.variantLabel, objekt = name)

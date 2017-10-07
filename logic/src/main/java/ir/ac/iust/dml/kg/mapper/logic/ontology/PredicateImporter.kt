@@ -11,6 +11,7 @@ import ir.ac.iust.dml.kg.mapper.logic.data.StoreType
 import ir.ac.iust.dml.kg.mapper.logic.mapping.KSMappingHolder
 import ir.ac.iust.dml.kg.mapper.logic.utils.StoreProvider
 import ir.ac.iust.dml.kg.raw.utils.Module
+import ir.ac.iust.dml.kg.raw.utils.PropertyNormaller
 import ir.ac.iust.dml.kg.raw.utils.URIs
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -75,7 +76,8 @@ class PredicateImporter {
         save(store, pu, pu, URIs.name, name)
       }
 
-      if (labels.isNotEmpty()) save(store, pu, pu, URIs.label, labels[0].first)
+      if (labels.isNotEmpty() && store.read(pu, URIs.label, null).isEmpty())
+        save(store, pu, pu, URIs.label, PropertyNormaller.removeDigits(labels[0].first))
       labels.forEach {
         save(store, pu, pu, URIs.variantLabel, it.first)
         if (resolveAmbiguity) {
