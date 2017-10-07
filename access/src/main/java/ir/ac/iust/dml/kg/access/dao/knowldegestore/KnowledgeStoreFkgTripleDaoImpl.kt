@@ -125,7 +125,8 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
         }
 
     objectData.value = objekt
-    objectData.lang = language ?: LanguageChecker.detectLanguage(objectData.value)
+    objectData.lang = if (objectData.type == TypedValueData.TypeEnum.RESOURCE) null
+    else language ?: LanguageChecker.detectLanguage(objectData.value)
     return objectData
   }
 

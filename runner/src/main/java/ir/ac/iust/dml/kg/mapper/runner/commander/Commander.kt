@@ -21,6 +21,7 @@ class Commander {
     logger.info("====================================")
     try {
       when (command) {
+        "fix" -> services.fix(arg1)
         "ksMapLoad" -> services.ksMapLoad() // just for tests. can be removed.
         "triples" -> services.triples(arg1!!.toInt(), StoreType.valueOf(arg2!!)) //writes wikipedia triples
         "categoryTriples" -> services.categoryTriples(arg1!!.toInt(), StoreType.valueOf(arg2!!)) //writes wikipedia triples

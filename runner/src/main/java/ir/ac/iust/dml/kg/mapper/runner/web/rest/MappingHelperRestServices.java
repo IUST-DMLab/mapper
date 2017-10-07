@@ -1,6 +1,7 @@
 package ir.ac.iust.dml.kg.mapper.runner.web.rest;
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao;
+import ir.ac.iust.dml.kg.mapper.logic.Fixers;
 import ir.ac.iust.dml.kg.mapper.logic.ProgressInformer;
 import ir.ac.iust.dml.kg.mapper.logic.RawTripleImporter;
 import ir.ac.iust.dml.kg.mapper.logic.TableTripleImporter;
@@ -15,6 +16,7 @@ import ir.ac.iust.dml.kg.mapper.logic.wiki.RedirectLogic;
 import ir.ac.iust.dml.kg.mapper.logic.wiki.WikiTripleImporter;
 import ir.ac.iust.dml.kg.raw.utils.Module;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,6 +46,8 @@ public class MappingHelperRestServices {
   private OntologyLogic ontologyLogic;
   @Autowired
   private StoreProvider storeProvider;
+  @Autowired
+  private Fixers fixers;
 
   @RequestMapping("/ksMapLoad")
   public String ksMapLoad() throws Exception {
@@ -162,5 +166,13 @@ public class MappingHelperRestServices {
     rawTripleImporter.writeTriples(type);
     notMappedPropertyHandler.writeNotMappedProperties("raw", 1, true);
     return true;
+  }
+
+  public void fix(@Nullable String type) {
+    assert type != null;
+    switch (type) {
+      case "ontologyLabel":
+        fixers.findOntologyMoreThanOneLables();
+    }
   }
 }
