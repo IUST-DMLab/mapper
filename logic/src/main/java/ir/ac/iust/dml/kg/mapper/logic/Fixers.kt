@@ -58,18 +58,22 @@ class Fixers {
     }
     if (faLabels.size > 1) {
       logger.info("${it.subject} ==>\t${faLabels.joinToString(";\t")}")
-      fixLabelIfItsPossible(it.subject, faLabels)
+      fixLabelIfItsPossible(it.subject, faLabels, "fa")
     }
     if (enLabels.size > 1) {
       logger.info("${it.subject} ==>\t${enLabels.joinToString(";\t")}")
-      fixLabelIfItsPossible(it.subject, enLabels)
+      fixLabelIfItsPossible(it.subject, enLabels, "en")
     }
   }
 
-  private fun fixLabelIfItsPossible(url: String, oldLabels: List<String>) {
+  private fun fixLabelIfItsPossible(url: String, oldLabels: List<String>, lang: String) {
+    if (oldLabels.any { LanguageChecker.detectLanguage(it) != lang }) return
     val uniqueFaLabels = oldLabels.map { PropertyNormaller.removeDigits(it) }.toSet()
-    if (uniqueFaLabels.size == 1) {
-      val fixedLabel = uniqueFaLabels.iterator().next()
+    if (uniqueFaLabels.size == 1 || uniqueFaLabels.size == 2) {
+      val sorted = uniqueFaLabels.sortedByDescending { it.length }
+      if (sorted.size == 2 && (sorted[0].length - sorted[1].length < 2 || (lang == "fa"))) return
+      val fixedLabel = if (uniqueFaLabels.size == 1) uniqueFaLabels.iterator().next()
+      else sorted.first()
       oldLabels.forEach {
         ontologyApi.remove2(url, URIs.label, it, URIs.defaultContext)
       }
