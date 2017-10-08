@@ -13,6 +13,7 @@
 package ir.ac.iust.dml.kg.mapper.logic.wiki
 
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import ir.ac.iust.dml.kg.mapper.logic.utils.PathUtils
 import ir.ac.iust.dml.kg.mapper.logic.utils.TestUtils
@@ -20,9 +21,8 @@ import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleData
 import ir.ac.iust.dml.kg.raw.utils.dump.triple.TripleJsonFileReader
 import org.apache.log4j.Logger
-import java.io.BufferedReader
-import java.io.FileInputStream
-import java.io.InputStreamReader
+import java.io.*
+import java.nio.charset.Charset
 import java.nio.file.Path
 
 object DumpUtils {
@@ -92,6 +92,18 @@ object DumpUtils {
     return result
   }
 
+  fun tripleFilter(path: Path, pattern: String, filteredUris: Set<String>, outPath: Path) {
+    val selected = mutableListOf<TripleData>()
+    getTriples(path, pattern, { triples ->
+      if (filteredUris.contains(triples.first().subject)) {
+        selected.addAll(triples)
+      }
+    })
+    OutputStreamWriter(FileOutputStream(outPath.toFile()), Charset.forName("UTF-8").newEncoder()).use {
+      GsonBuilder().setPrettyPrinting().create().toJson(selected, it)
+    }
+  }
+
   private val invalidPropertyRegex = Regex("\\d+")
   fun getTriples(path: Path, pattern: String, listener: (triples: MutableList<TripleData>) -> Unit,
                  needsTemplate: Boolean = false) {
@@ -102,6 +114,7 @@ object DumpUtils {
     val tripleCache = mutableListOf<TripleData>()
     var lastSubject: String? = null
     result.forEachIndexed { index, p ->
+      logger.info("reading file $p")
       TripleJsonFileReader(p).use { reader ->
         while (reader.hasNext()) {
           val triple = reader.next()
@@ -116,7 +129,7 @@ object DumpUtils {
             // some properties are invalid based on rdf standards
             if (property.trim().isBlank() || property.matches(invalidPropertyRegex)) continue
             if (lastSubject != null && lastSubject != triple.subject && tripleCache.isNotEmpty()) {
-              logger.info("${tripleCache.size} triples of ${lastSubject} has been found. " +
+              logger.trace("${tripleCache.size} triples of ${lastSubject} has been found. " +
                   "($tripleNumber triples since now in ${System.currentTimeMillis() - startTime} miliseconds)")
               listener(tripleCache)
               tripleCache.clear()
@@ -124,8 +137,8 @@ object DumpUtils {
             } else tripleCache.add(triple)
             lastSubject = triple.subject
           } catch (th: Throwable) {
-            logger.info("triple: $triple")
-            logger.error(th)
+            logger.trace("triple: $triple")
+            logger.trace(th)
           }
         }
       }

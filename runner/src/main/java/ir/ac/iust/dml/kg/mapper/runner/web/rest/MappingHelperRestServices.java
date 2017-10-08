@@ -175,4 +175,9 @@ public class MappingHelperRestServices {
         fixers.findOntologyMoreThanOneLabels();
     }
   }
+
+  public void filter(@Nullable String[] filteredSubject) {
+    assert filteredSubject != null;
+    wikiTripleImporter.createTestTriples(filteredSubject);
+  }
 }

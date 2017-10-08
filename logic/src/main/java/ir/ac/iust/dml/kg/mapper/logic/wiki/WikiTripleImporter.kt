@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service
 import java.io.BufferedReader
 import java.io.FileInputStream
 import java.io.InputStreamReader
+import java.nio.file.Files
 import java.nio.file.Path
 
 @Service
@@ -189,6 +190,18 @@ class WikiTripleImporter {
     store.flush()
   }
 
+  fun createTestTriples(vararg subjectToFilter: String?) {
+    logger.info("going to filter ${subjectToFilter.joinToString(", ")} from triples")
+    val outPath = PathUtils.getTriplesTestPath().resolve("0-infoboxes.json")
+    if (!Files.exists(outPath.parent)) Files.createDirectories(outPath.parent)
+    DumpUtils.tripleFilter(PathUtils.getTriplesPath(), "\\d+-infoboxes\\.json",
+        subjectToFilter
+            .mapNotNull { it }
+            .map { "http://fa.wikipedia.org/wiki/${it.replace(' ', '_')}" }
+            .toSet(),
+        outPath)
+  }
+
   fun writeTriples(version: Int, storeType: StoreType = StoreType.none, insert: Boolean = true, path: Path? = null) {
     holder.writeToKS()
     holder.loadFromKS()
@@ -214,7 +227,9 @@ class WikiTripleImporter {
 
     val NOT_MAPPED_PREFIX = URIs.fkgNotMappedPropertyPrefix + ":"
 
-    DumpUtils.getTriples(PathUtils.getTriplesPath(), "\\d+-infoboxes\\.json", { triples ->
+    DumpUtils.getTriples(
+        if (TestUtils.isDebugMode()) PathUtils.getTriplesTestPath() else PathUtils.getTriplesPath(),
+        "\\d+-infoboxes\\.json", { triples ->
       DumpUtils.collectTriples(triples).forEach { tripleCollection ->
         if (tripleCollection.size == 2 &&
             tripleCollection[0].objekt != null &&
