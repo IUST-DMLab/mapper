@@ -32,7 +32,7 @@ class KSMappingHolder {
       = maps.getOrPut(template, { TemplateMapping(template) })
 
   fun getPropertyMapping(template: String, property: String)
-      = getTemplateMapping(template).properties!!.getOrPut(property, { PropertyMapping() })
+      = getTemplateMapping(template).properties!!.getOrPut(property, { PropertyMapping(property = property) })
 
   fun examinePropertyMapping(template: String, property: String)
       = getTemplateMapping(template).properties!![property]
@@ -61,16 +61,22 @@ class KSMappingHolder {
       val tm = getTemplateMapping(it.template)
       tm.weight = it.weight
       tm.template = it.template
-      tm.rules = it.rules.map { KSMappingConverter.convert(it) }.toMutableSet()
+      tm.rules = it.rules.map { KSMappingConverter.convert(it) }.toMutableList()
       tm.ontologyClass = (it.rules.filter { it.predicate == URIs.typePrefixed }
           .firstOrNull()?.constant ?: URIs.getFkgOntologyClassPrefixed("Thing")).substringAfterLast(":")
       tm.tree = ontologyLogic.getTree(tm.ontologyClass)?.split("/") ?: listOf(tm.ontologyClass)
-      it.properties.forEach { pm ->
-        val property = PropertyNormaller.removeDigits(pm.property)
-        tm.properties!![property] = PropertyMapping(
-            property = pm.property, weight = pm.weight,
-            rules = pm.rules.map { KSMappingConverter.convert(it) }.toMutableSet(),
-            recommendations = pm.recommendations.map { KSMappingConverter.convert(it) }.toMutableSet())
+      it.properties.forEach { p ->
+        val property = PropertyNormaller.removeDigits(p.property)
+        val pm = tm.properties!!.getOrPut(property, {
+          PropertyMapping(
+              property = p.property, weight = p.weight)
+        })
+        pm.rules.addAll(p.rules
+            .filter { !(it.predicate?.startsWith("fkgp") ?: false) } // null predicates means deleting property
+            .map { KSMappingConverter.convert(it) })
+        pm.recommendations.addAll(p.recommendations
+            .filter { !(it.predicate?.startsWith("fkgp") ?: false) }
+            .map { KSMappingConverter.convert(it) }.toMutableList())
       }
     }
     logger.info("mapping are loaded in ${System.currentTimeMillis() - start} milliseconds: ${maps.values.size}")

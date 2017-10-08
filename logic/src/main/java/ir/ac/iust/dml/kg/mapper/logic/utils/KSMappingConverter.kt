@@ -25,7 +25,7 @@ internal object KSMappingConverter {
     return td
   }
 
-  internal fun convert(pm: PropertyMapping): PropertyData {
+  private fun convert(pm: PropertyMapping): PropertyData {
     val pd = PropertyData()
     pd.property = pm.property!!
     pd.weight = pm.weight
@@ -36,7 +36,7 @@ internal object KSMappingConverter {
     return pd
   }
 
-  internal fun convert(mr: MapRule): MapRuleData {
+  private fun convert(mr: MapRule): MapRuleData {
     val mrd = MapRuleData()
     mrd.predicate = mr.predicate
     mrd.constant = mr.constant

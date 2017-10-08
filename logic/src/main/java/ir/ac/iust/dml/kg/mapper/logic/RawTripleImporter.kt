@@ -133,7 +133,7 @@ class RawTripleImporter {
                 predicate =
                     if (subjectInfoBoxes == null) defaultProperty
                     else {
-                      var m = mutableSetOf<MapRule>()
+                      var m = mutableListOf<MapRule>()
                       subjectInfoBoxes.forEach {
                         val pm = holder.examinePropertyMapping(it, triple.predicate)
                         if (pm != null && pm.rules.isNotEmpty()) {

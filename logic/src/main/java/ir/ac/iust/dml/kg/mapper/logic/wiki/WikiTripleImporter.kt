@@ -14,6 +14,7 @@ import ir.ac.iust.dml.kg.knowledge.core.ValueType
 import ir.ac.iust.dml.kg.mapper.logic.data.InfoBoxAndCount
 import ir.ac.iust.dml.kg.mapper.logic.data.MapRule
 import ir.ac.iust.dml.kg.mapper.logic.data.StoreType
+import ir.ac.iust.dml.kg.mapper.logic.data.TemplateMapping
 import ir.ac.iust.dml.kg.mapper.logic.mapping.KSMappingHolder
 import ir.ac.iust.dml.kg.mapper.logic.mapping.TransformService
 import ir.ac.iust.dml.kg.mapper.logic.ontology.EntityClassImporter
@@ -139,13 +140,13 @@ class WikiTripleImporter {
             " time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
       try {
         val tress = mutableSetOf<InfoBoxAndCount>()
-        infoboxes.forEach {
-          val normalizedTemplate = it.infoBox.toLowerCase().replace('_', ' ')
+        for (infobox in infoboxes) {
+          val normalizedTemplate = infobox.infoBox.toLowerCase().replace('_', ' ')
           val templateMapping = holder.getTemplateMapping(normalizedTemplate)
           var tree = ontologyLogic.getTree(templateMapping.ontologyClass)
           if (tree == null) tree = "Thing"
-          it.tree = tree.split("/")
-          tress.add(it)
+          infobox.tree = tree.split("/")
+          tress.add(infobox)
         }
         entityClassImporter.writeEntityTrees(entity, tress, store, Module.wiki.name, version)
       } catch (th: Throwable) {
@@ -230,6 +231,26 @@ class WikiTripleImporter {
     DumpUtils.getTriples(
         if (TestUtils.isDebugMode()) PathUtils.getTriplesTestPath() else PathUtils.getTriplesPath(),
         "\\d+-infoboxes\\.json", { triples ->
+      if (triples.isEmpty()) return@getTriples
+      val firstTriple = triples.first()
+      val subject = URIs.convertWikiUriToResourceUri(firstTriple.subject!!)
+
+      val templateMappings = mutableMapOf<String, TemplateMapping>()
+      for (triple in triples) {
+        if (!templateMappings.containsKey(triple.templateNameFull)) {
+          val normalizedTemplate = triple.templateNameFull!!.toLowerCase().replace('_', ' ')
+          // generate template-specific rules in first time of object
+          val templateMapping = holder.getTemplateMapping(normalizedTemplate)
+          for (rule in templateMapping.rules!!) {
+            numberOfMapped++
+            if (rule.constant == null || triple.predicate == null || triple.predicate!!.isBlank()) continue
+            if (insert) store.save(getAsTripe(TripleInfo(firstTriple.source!!, subject, rule.constant!!,
+                rule.predicate, rule, version))!!)
+          }
+          templateMappings[triple.templateNameFull!!] = templateMapping
+        }
+      }
+
       DumpUtils.collectTriples(triples).forEach { tripleCollection ->
         if (tripleCollection.size == 2 &&
             tripleCollection[0].objekt != null &&
@@ -248,30 +269,23 @@ class WikiTripleImporter {
         // triple collection can be just one triple in most of cases. but when we have numbered keys, they are
         // collected as a collection with size > 1
         val triplesToWrite = mutableListOf<TripleInfo>()
-        tripleCollection.forEach { triple ->
-          val normalizedTemplate = triple.templateNameFull!!.toLowerCase().replace('_', ' ')
+        for (triple in tripleCollection) {
           val property = triple.predicate!!
-          val subject = URIs.convertWikiUriToResourceUri(triple.subject!!)
           val objekt = URIs.convertWikiUriToResourceUri(triple.objekt!!)
 
-          // generate template-specific rules in first time of object
-          val templateMapping = holder.getTemplateMapping(normalizedTemplate)
-
-          templateMapping.rules!!.forEach {
-            numberOfMapped++
-            if (insert) store.save(getAsTripe(TripleInfo(triple.source!!, subject, objekt, null, it, version))!!)
-          }
-
-          val propertyMapping = templateMapping.properties!![PropertyNormaller.removeDigits(property)]
-          val propertyRules = if (propertyMapping == null) null else propertyMapping.rules.filter {
+          val templateMapping = templateMappings[triple.templateNameFull]!!
+          val normalizedProperty = PropertyNormaller.removeDigits(property)
+          val propertyMapping = holder.getPropertyMapping(templateMapping.template!!, normalizedProperty)
+//          val propertyMapping = templateMapping.properties!![PropertyNormaller.removeDigits(property)]
+          val propertyRules = propertyMapping.rules.filter {
             // This filter just fixes wrong mappings which are mapped to not ontology maps.
             it.predicate != null && !it.predicate!!.startsWith(NOT_MAPPED_PREFIX)
           }
-          if (propertyRules == null || propertyRules.isEmpty()) {
-            if (propertyMapping != null && !propertyMapping.recommendations.isEmpty()) {
+          if (propertyRules.isEmpty()) {
+            if (!propertyMapping.recommendations.isEmpty()) {
               // not too bad, we have at least some recommendations. this block is only for better clearance of code
             } else {
-              val key = normalizedTemplate + "/" + property
+              val key = templateMapping.template + "/" + property
               val old = notSeenProperties.getOrDefault(key, 0)
               notSeenProperties[key] = old + 1
             }
@@ -317,6 +331,7 @@ class WikiTripleImporter {
     logger.info("number of not mapped properties $numberOfMapped")
     logger.info("number of mapped in tree $numberOfMappedInTree")
     logger.info("number of mapped is $numberOfMapped")
+    holder.writeToKS()
   }
 
   private fun getAsTripe(info: TripleInfo) =
