@@ -48,6 +48,11 @@ class OntologyRestServices {
                  @RequestParam(required = false) type: String?) =
       logic.properties(page!!, pageSize!!, keyword, type)
 
+  @RequestMapping("ontologyPredicates", method = arrayOf(RequestMethod.GET))
+  @ResponseBody
+  fun ontologyPredicates(@RequestParam keyword: String) =
+      logic.ontologyPredicates(keyword)
+
   @RequestMapping("propertyData", method = arrayOf(RequestMethod.GET))
   @ResponseBody
   fun propertyData(@RequestParam(required = false) propertyData: String?)

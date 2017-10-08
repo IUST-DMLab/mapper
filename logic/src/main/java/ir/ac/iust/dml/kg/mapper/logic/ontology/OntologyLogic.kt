@@ -290,6 +290,11 @@ class OntologyLogic {
     return getType(query, t, page, pageSize)
   }
 
+  fun ontologyPredicates(query: String): List<String> {
+    val result = getType(query, URIs.typeOfAnyProperties, 0, 200)
+    return result.data.filter { !it.contains("/property/") }
+  }
+
   @Deprecated("Old service for backward compatibility")
   fun getNode(name: String, old: FkgClassData? = null): FkgClassData {
     val classData = classData(URIs.getFkgOntologyClassUri(name), false)
