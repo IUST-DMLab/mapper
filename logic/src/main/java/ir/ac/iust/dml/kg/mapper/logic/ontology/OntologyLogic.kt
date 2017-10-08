@@ -226,7 +226,7 @@ class OntologyLogic {
 
   private fun insertAndVote(subject: String?, predicate: String?,
                             objectValue: String,
-                            objectType: TypedValueData.TypeEnum = TypedValueData.TypeEnum.RESOURCE): Boolean {
+                            objectType: TypedValueData.TypeEnum): Boolean {
     val tripleData = OntologyData()
     tripleData.context = URIs.defaultContext
     tripleData.subject = subject
@@ -438,19 +438,19 @@ class OntologyLogic {
     oldData.disjointWith.subtract(data.disjointWith).forEach { remove(data.url, URIs.disjointWith, it) }
     oldData.properties.subtract(data.properties).forEach { remove(data.url, URIs.propertyDomain, it.url) }
 
-    insertAndVote(data.url, URIs.type, URIs.typeOfAllClasses)
-    if (data.faLabel != null) insertAndVote(data.url, URIs.label, data.faLabel!!)
-    if (data.enLabel != null) insertAndVote(data.url, URIs.label, data.enLabel!!)
-    if (data.faComment != null) insertAndVote(data.url, URIs.comment, data.faComment!!)
-    if (data.enComment != null) insertAndVote(data.url, URIs.comment, data.enComment!!)
-    if (data.subClassOf != null) insertAndVote(data.url, URIs.subClassOf, data.subClassOf!!)
-    if (data.wasDerivedFrom != null) insertAndVote(data.url, URIs.wasDerivedFrom, data.wasDerivedFrom!!)
-    if (data.name != null) insertAndVote(data.url, URIs.name, data.name!!)
-    data.faVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it) }
-    data.enVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it) }
-    data.equivalentClasses.forEach { insertAndVote(data.url, URIs.equivalentClass, it) }
-    data.disjointWith.forEach { insertAndVote(data.url, URIs.disjointWith, it) }
-    data.properties.forEach { insertAndVote(it.url, URIs.propertyDomain, data.url!!) }
+    insertAndVote(data.url, URIs.type, URIs.typeOfAllClasses, TypedValueData.TypeEnum.RESOURCE)
+    if (data.faLabel != null) insertAndVote(data.url, URIs.label, data.faLabel!!, TypedValueData.TypeEnum.STRING)
+    if (data.enLabel != null) insertAndVote(data.url, URIs.label, data.enLabel!!, TypedValueData.TypeEnum.STRING)
+    if (data.faComment != null) insertAndVote(data.url, URIs.comment, data.faComment!!, TypedValueData.TypeEnum.STRING)
+    if (data.enComment != null) insertAndVote(data.url, URIs.comment, data.enComment!!, TypedValueData.TypeEnum.STRING)
+    if (data.subClassOf != null) insertAndVote(data.url, URIs.subClassOf, data.subClassOf!!, TypedValueData.TypeEnum.RESOURCE)
+    if (data.wasDerivedFrom != null) insertAndVote(data.url, URIs.wasDerivedFrom, data.wasDerivedFrom!!, TypedValueData.TypeEnum.RESOURCE)
+    if (data.name != null) insertAndVote(data.url, URIs.name, data.name!!, TypedValueData.TypeEnum.STRING)
+    data.faVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it, TypedValueData.TypeEnum.STRING) }
+    data.enVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it, TypedValueData.TypeEnum.STRING) }
+    data.equivalentClasses.forEach { insertAndVote(data.url, URIs.equivalentClass, it, TypedValueData.TypeEnum.RESOURCE) }
+    data.disjointWith.forEach { insertAndVote(data.url, URIs.disjointWith, it, TypedValueData.TypeEnum.RESOURCE) }
+    data.properties.forEach { insertAndVote(it.url, URIs.propertyDomain, data.url!!, TypedValueData.TypeEnum.RESOURCE) }
 
     if (data.subClassOf != oldData.subClassOf) {
       // can i load tree?
@@ -512,17 +512,17 @@ class OntologyLogic {
     oldData.ranges.subtract(data.ranges).forEach { remove(data.url, URIs.propertyRange, it) }
     oldData.equivalentProperties.subtract(data.equivalentProperties).forEach { remove(data.url, URIs.equivalentProperty, it) }
 
-    insertAndVote(data.url, URIs.type, URIs.typeOfAnyProperties)
-    if (data.name != null) insertAndVote(data.url, URIs.name, data.name!!)
-    if (data.wasDerivedFrom != null) insertAndVote(data.url, URIs.wasDerivedFrom, data.wasDerivedFrom!!)
-    if (data.faLabel != null) insertAndVote(data.url, URIs.label, data.faLabel!!)
-    if (data.enLabel != null) insertAndVote(data.url, URIs.label, data.enLabel!!)
-    data.faVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it) }
-    data.enVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it) }
-    data.types.forEach { insertAndVote(data.url, URIs.type, it) }
-    data.domains.forEach { insertAndVote(data.url, URIs.propertyDomain, it) }
-    data.ranges.forEach { insertAndVote(data.url, URIs.propertyRange, it) }
-    data.equivalentProperties.forEach { insertAndVote(it, URIs.equivalentProperty, data.url!!) }
+    insertAndVote(data.url, URIs.type, URIs.typeOfAnyProperties, TypedValueData.TypeEnum.RESOURCE)
+    if (data.name != null) insertAndVote(data.url, URIs.name, data.name!!, TypedValueData.TypeEnum.STRING)
+    if (data.wasDerivedFrom != null) insertAndVote(data.url, URIs.wasDerivedFrom, data.wasDerivedFrom!!, TypedValueData.TypeEnum.RESOURCE)
+    if (data.faLabel != null) insertAndVote(data.url, URIs.label, data.faLabel!!, TypedValueData.TypeEnum.STRING)
+    if (data.enLabel != null) insertAndVote(data.url, URIs.label, data.enLabel!!, TypedValueData.TypeEnum.STRING)
+    data.faVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it, TypedValueData.TypeEnum.STRING) }
+    data.enVariantLabels.forEach { insertAndVote(data.url, URIs.variantLabel, it, TypedValueData.TypeEnum.STRING) }
+    data.types.forEach { insertAndVote(data.url, URIs.type, it, TypedValueData.TypeEnum.RESOURCE) }
+    data.domains.forEach { insertAndVote(data.url, URIs.propertyDomain, it, TypedValueData.TypeEnum.RESOURCE) }
+    data.ranges.forEach { insertAndVote(data.url, URIs.propertyRange, it, TypedValueData.TypeEnum.RESOURCE) }
+    data.equivalentProperties.forEach { insertAndVote(it, URIs.equivalentProperty, data.url!!, TypedValueData.TypeEnum.RESOURCE) }
     return propertyData(data.url!!)
   }
 
