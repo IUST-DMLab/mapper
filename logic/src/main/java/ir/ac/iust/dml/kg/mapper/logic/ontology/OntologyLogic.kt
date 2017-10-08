@@ -419,10 +419,9 @@ class OntologyLogic {
     if (data.url == null) return null
 
     val oldData = classData(data.url!!)
-    if ((oldData.faLabel != null) && (oldData.faLabel != data.faLabel))
-      remove(data.url, URIs.label, oldData.faLabel)
-    if ((oldData.enLabel != null) && (oldData.enLabel != data.enLabel))
-      remove(data.url, URIs.label, oldData.enLabel)
+    val labels = tripleApi.search2(null, null, data.url, null,
+        URIs.label, null, null, null, null, 0, 0)
+    labels.data.forEach { remove(data.url, URIs.label, it.`object`.value) }
     if ((oldData.faComment != null) && (oldData.faComment != data.faComment))
       remove(data.url, URIs.comment, oldData.faComment)
     if ((oldData.enComment != null) && (oldData.enComment != data.enComment))
@@ -499,12 +498,10 @@ class OntologyLogic {
 
   fun saveProperty(data: OntologyPropertyData): OntologyPropertyData? {
     if (data.url == null) return null
-
     val oldData = propertyData(data.url!!)
-    if ((oldData.faLabel != null) && (oldData.faLabel != data.faLabel))
-      remove(data.url, URIs.label, oldData.faLabel)
-    if ((oldData.enLabel != null) && (oldData.enLabel != data.enLabel))
-      remove(data.url, URIs.label, oldData.enLabel)
+    val labels = tripleApi.search2(null, null, data.url, null,
+        URIs.label, null, null, null, null, 0, 0)
+    labels.data.forEach { remove(data.url, URIs.label, it.`object`.value) }
     if ((oldData.name != null) && (oldData.name != data.name))
       remove(data.url, URIs.name, oldData.name)
     if ((oldData.wasDerivedFrom != null) && (oldData.wasDerivedFrom != data.wasDerivedFrom))
