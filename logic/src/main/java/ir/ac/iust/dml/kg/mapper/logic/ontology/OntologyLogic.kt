@@ -227,6 +227,7 @@ class OntologyLogic {
   private fun insertAndVote(subject: String?, predicate: String?,
                             objectValue: String,
                             objectType: TypedValueData.TypeEnum): Boolean {
+    if (objectValue.isBlank()) return false
     val tripleData = OntologyData()
     tripleData.context = URIs.defaultContext
     tripleData.subject = subject
