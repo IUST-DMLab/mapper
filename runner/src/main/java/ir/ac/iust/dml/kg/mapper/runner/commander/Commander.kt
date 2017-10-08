@@ -21,7 +21,7 @@ class Commander {
     logger.info("====================================")
     try {
       when (command) {
-        "filter" -> services.filter(args)
+        "createTestSet" -> services.createTestSet(args)
         "fix" -> services.fix(args[0])
         "ksMapLoad" -> services.ksMapLoad() // just for tests. can be removed.
         "triples" -> services.triples(args[0]!!.toInt(), StoreType.valueOf(args[1]!!)) //writes wikipedia triples

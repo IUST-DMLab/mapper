@@ -176,7 +176,7 @@ public class MappingHelperRestServices {
     }
   }
 
-  public void filter(@Nullable String[] filteredSubject) {
+  public void createTestSet(@Nullable String[] filteredSubject) {
     assert filteredSubject != null;
     wikiTripleImporter.createTestTriples(filteredSubject);
   }

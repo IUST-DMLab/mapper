@@ -24,7 +24,7 @@ object PathUtils {
 
   fun getTriplesPath() = getPath("wiki.folder.tuples", "~/.pkg/data/tuples")
 
-  fun getTriplesTestPath() = getPath("wiki.folder.tuples.test", "~/.pkg/data/tuples_test")
+  fun getTriplesTestPath() = getTriplesPath().resolve("test")!!
 
   fun getCategoryTriplesPath() = getPath("wiki.folder.category.tuples", "~/.pkg/data/category_tuples")
 
