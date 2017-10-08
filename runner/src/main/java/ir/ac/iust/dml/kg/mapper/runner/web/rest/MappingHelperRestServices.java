@@ -23,6 +23,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+
 @RestController
 @RequestMapping("/helper")
 public class MappingHelperRestServices {
@@ -176,8 +182,9 @@ public class MappingHelperRestServices {
     }
   }
 
-  public void createTestSet(@Nullable String[] filteredSubject) {
-    assert filteredSubject != null;
-    wikiTripleImporter.createTestTriples(filteredSubject);
+  public void createTestSet(@Nullable String filteredSubjectFile) throws IOException {
+    assert filteredSubjectFile != null;
+    final List<String> list = Files.readAllLines(Paths.get(filteredSubjectFile), Charset.forName("UTF-8"));
+    wikiTripleImporter.createTestTriples(list.toArray(new String[list.size()]));
   }
 }
