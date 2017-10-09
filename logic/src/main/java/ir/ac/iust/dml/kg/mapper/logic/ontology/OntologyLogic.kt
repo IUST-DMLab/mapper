@@ -270,7 +270,11 @@ class OntologyLogic {
       fillNode(child, labelLanguage, depth + 1, maxDepth)
       node.children.add(child)
     }
-    node.children.sortBy { it.url }
+    try {
+      node.children.sortBy { it.url }
+    } catch (th: Throwable) {
+      th.printStackTrace()
+    }
   }
 
   private fun getLabel(url: String, language: String? = null): String? {
