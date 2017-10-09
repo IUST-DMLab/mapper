@@ -42,9 +42,10 @@ abstract class FkgTripleDao {
         module = module, version = version))
   }
 
-  fun save(source: String, subject: String, predicate: String, `object`: String, module: String, version: Int) {
+  fun save(source: String, subject: String, predicate: String, `object`: String, module:
+    String, version: Int, language: String? = null) {
     this.save(FkgTriple(source = source, subject = subject, predicate = predicate, objekt = `object`,
-        module = module, version = version))
+        module = module, version = version, language = language))
   }
 
   fun save(source: String, subject: String, predicate: String, `object`: String,

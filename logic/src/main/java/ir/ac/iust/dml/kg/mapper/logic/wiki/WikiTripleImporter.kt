@@ -65,13 +65,14 @@ class WikiTripleImporter {
       InputStreamReader(FileInputStream(p.toFile()), "UTF8").use {
         BufferedReader(it).use {
           val revisionIdMap: Map<String, String> = gson.fromJson(it, type)
-          revisionIdMap.forEach { entity, abstract ->
+          for(entity in revisionIdMap.keys) {
+            val abstract = revisionIdMap[entity] ?: continue
             entityIndex++
-            if (entityIndex > maxNumberOfEntities) return@forEach
+            if (entityIndex > maxNumberOfEntities) continue
             val subject = URIs.getFkgResourceUri(entity)
             store.save(
                 "http://fa.wikipedia.org/wiki/" + entity.replace(' ', '_'),
-                subject, ABSTRACT_PREDICATE, abstract, Module.wiki.name, version)
+                subject, ABSTRACT_PREDICATE, abstract, Module.wiki.name, version, "fa")
           }
           logger.warn("$index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
         }
