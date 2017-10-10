@@ -65,13 +65,14 @@ class WikiTripleImporter {
       InputStreamReader(FileInputStream(p.toFile()), "UTF8").use {
         BufferedReader(it).use {
           val revisionIdMap: Map<String, String> = gson.fromJson(it, type)
-          revisionIdMap.forEach { entity, abstract ->
+          for(entity in revisionIdMap.keys) {
+            val abstract = revisionIdMap[entity] ?: continue
             entityIndex++
-            if (entityIndex > maxNumberOfEntities) return@forEach
+            if (entityIndex > maxNumberOfEntities) continue
             val subject = URIs.getFkgResourceUri(entity)
             store.save(
-                    "http://fa.wikipedia.org/wiki/" + entity.replace(' ', '_'),
-                    subject, ABSTRACT_PREDICATE, abstract, Module.wiki.name, version)
+                "http://fa.wikipedia.org/wiki/" + entity.replace(' ', '_'),
+                subject, ABSTRACT_PREDICATE, abstract, Module.wiki.name, version, "fa")
           }
           logger.warn("$index file is $p. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
         }
@@ -129,7 +130,7 @@ class WikiTripleImporter {
 
     DumpUtils.read({ infobox, entity, properties ->
       classInfoBoxes.getOrPut(entity, { mutableListOf() })
-              .add(InfoBoxAndCount(infobox, properties.size))
+          .add(InfoBoxAndCount(infobox, properties.size))
     })
 
     classInfoBoxes.forEach { entity, infoboxes ->
@@ -137,7 +138,7 @@ class WikiTripleImporter {
       if (entityIndex > maxNumberOfEntities) return@forEach
       if (entityIndex % 1000 == 0)
         logger.warn("$$entityIndex entities has been done." +
-                " time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
+            " time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
       try {
         val tress = mutableSetOf<InfoBoxAndCount>()
         for (infobox in infoboxes) {
@@ -169,7 +170,7 @@ class WikiTripleImporter {
       var subjectUrl: String? = null
       triples.forEach { triple ->
         if (triple.source == null || triple.subject == null || triple.objekt == null ||
-                triple.objekt!!.isBlank() || triple.predicate != "wikiCategory")
+            triple.objekt!!.isBlank() || triple.predicate != "wikiCategory")
           return@getTriples
         if (subjectUrl == null) subjectUrl = URIs.convertWikiUriToResourceUri(triple.subject!!)
         val categoryUrl = URIs.getFkgCategoryUri(triple.objekt!!)
@@ -196,11 +197,11 @@ class WikiTripleImporter {
     val outPath = PathUtils.getTriplesTestPath().resolve("0-infoboxes.json")
     if (!Files.exists(outPath.parent)) Files.createDirectories(outPath.parent)
     DumpUtils.tripleFilter(PathUtils.getTriplesPath(), "\\d+-infoboxes\\.json",
-            subjectToFilter
-                    .mapNotNull { it }
-                    .map { "http://fa.wikipedia.org/wiki/${it.replace(' ', '_')}" }
-                    .toSet(),
-            outPath)
+        subjectToFilter
+            .mapNotNull { it }
+            .map { "http://fa.wikipedia.org/wiki/${it.replace(' ', '_')}" }
+            .toSet(),
+        outPath)
   }
 
   fun writeTriples(version: Int, storeType: StoreType = StoreType.none, insert: Boolean = true, path: Path? = null) {
@@ -229,8 +230,8 @@ class WikiTripleImporter {
     val NOT_MAPPED_PREFIX = URIs.fkgNotMappedPropertyPrefix + ":"
 
     DumpUtils.getTriples(
-            if (TestUtils.isDebugMode()) PathUtils.getTriplesTestPath() else PathUtils.getTriplesPath(),
-            "\\d+-infoboxes\\.json", { triples ->
+        if (TestUtils.isDebugMode()) PathUtils.getTriplesTestPath() else PathUtils.getTriplesPath(),
+        "\\d+-infoboxes\\.json", { triples ->
       if (triples.isEmpty()) return@getTriples
       val firstTriple = triples.first()
       val subject = URIs.convertWikiUriToResourceUri(firstTriple.subject!!)
@@ -245,7 +246,7 @@ class WikiTripleImporter {
             numberOfMapped++
             if (rule.constant == null || triple.predicate == null || triple.predicate!!.isBlank()) continue
             if (insert) store.save(getAsTripe(TripleInfo(firstTriple.source!!, subject, rule.constant!!,
-                    rule.predicate, rule, version))!!)
+                rule.predicate, rule, version))!!)
           }
           templateMappings[triple.templateNameFull!!] = templateMapping
         }
@@ -253,17 +254,17 @@ class WikiTripleImporter {
 
       DumpUtils.collectTriples(triples).forEach { tripleCollection ->
         if (tripleCollection.size == 2 &&
-                tripleCollection[0].objekt != null &&
-                tripleCollection[1].objekt != null &&
-                tripleCollection[0].predicate?.contains("name") == true &&
-                tripleCollection[1].predicate?.contains("type") == true) {
+            tripleCollection[0].objekt != null &&
+            tripleCollection[1].objekt != null &&
+            tripleCollection[0].predicate?.contains("name") == true &&
+            tripleCollection[1].predicate?.contains("type") == true) {
           val key =
-                  if (tripleCollection[1].objekt!!.contains("/"))
-                    tripleCollection[1].objekt!!.substringAfterLast('/').replace('_', ' ')
-                  else tripleCollection[1].objekt!!
+              if (tripleCollection[1].objekt!!.contains("/"))
+                tripleCollection[1].objekt!!.substringAfterLast('/').replace('_', ' ')
+              else tripleCollection[1].objekt!!
           tripleCollection.add(0, TripleData(
-                  tripleCollection[0].source, tripleCollection[0].subject, key, tripleCollection[0].templateNameFull,
-                  tripleCollection[0].templateName, tripleCollection[0].templateType, tripleCollection[0].objekt
+              tripleCollection[0].source, tripleCollection[0].subject, key, tripleCollection[0].templateNameFull,
+              tripleCollection[0].templateName, tripleCollection[0].templateType, tripleCollection[0].objekt
           ))
         }
         // triple collection can be just one triple in most of cases. but when we have numbered keys, they are
@@ -293,7 +294,7 @@ class WikiTripleImporter {
             if (classMaps.containsKey(key)) {
               numberOfMappedInTree++
               if (insert) triplesToWrite.add(TripleInfo(triple.source!!, subject, objekt,
-                      null, classMaps[key]!!, version))
+                  null, classMaps[key]!!, version))
             } else {
               numberOfNotMapped++
               notMappedPropertyHandler.addToNotMapped(property)
@@ -314,7 +315,7 @@ class WikiTripleImporter {
             val child = getAsTripe(triplesToWrite[i])
             if (child != null)
               first.properties.add(FkgTripleProperty(null, first, child.predicate, child.objekt,
-                      child.language, child.valueType))
+                  child.language, child.valueType))
           }
           store.save(first)
         } else
@@ -335,16 +336,16 @@ class WikiTripleImporter {
   }
 
   private fun getAsTripe(info: TripleInfo) =
-          getAsTripe(info.source, info.subject, info.`object`, info.property, info.rule, info.version)
+      getAsTripe(info.source, info.subject, info.`object`, info.property, info.rule, info.version)
 
 
   private fun getAsTripe(source: String, subject: String, `object`: String, property: String?,
                          rule: MapRule?, version: Int): FkgTriple? {
     if (rule == null) {
       return FkgTriple(source = source, subject = subject,
-              predicate = URIs.convertToNotMappedFkgPropertyUri(property!!),
-              objekt = URIs.prefixedToUri(`object`),
-              module = Module.wiki.name, version = version)
+          predicate = URIs.convertToNotMappedFkgPropertyUri(property!!),
+          objekt = URIs.prefixedToUri(`object`),
+          module = Module.wiki.name, version = version)
     }
     var type: ValueType? = null
     if (rule.predicate == null) return null
@@ -358,10 +359,10 @@ class WikiTripleImporter {
       else -> `object`
     }
     return FkgTriple(source = source, subject = subject,
-            predicate = URIs.prefixedToUri(rule.predicate),
-            objekt = URIs.prefixedToUri(value.toString()) ?: value.toString(),
-            valueType = type, dataType = rule.unit,
-            module = Module.wiki.name, version = version)
+        predicate = URIs.prefixedToUri(rule.predicate),
+        objekt = URIs.prefixedToUri(value.toString()) ?: value.toString(),
+        valueType = type, dataType = rule.unit,
+        module = Module.wiki.name, version = version)
   }
 
 }
