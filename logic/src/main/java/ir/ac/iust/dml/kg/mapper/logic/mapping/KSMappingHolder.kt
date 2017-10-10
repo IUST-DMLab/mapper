@@ -14,7 +14,7 @@ import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PropertyNormaller
 import ir.ac.iust.dml.kg.raw.utils.URIs
 import ir.ac.iust.dml.kg.services.client.ApiClient
-import ir.ac.iust.dml.kg.services.client.swagger.V1mappingsApi
+import ir.ac.iust.dml.kg.services.client.swagger.V2mappingsApi
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -39,24 +39,24 @@ class KSMappingHolder {
 
   override fun toString() = buildString { maps.values.forEach { this.append(it).append('\n') } }
 
-  private val mappingApi: V1mappingsApi
+  private val mappingApi: V2mappingsApi
 
   init {
     val client = ApiClient()
     client.basePath = ConfigReader.getString("knowledge.store.url", "http://localhost:8091/rs")
-    mappingApi = V1mappingsApi(client)
+    mappingApi = V2mappingsApi(client)
   }
 
   fun all() = maps.values
 
   fun writeToKS() {
-    mappingApi.batchInsert1(maps.values.map { KSMappingConverter.convert(it) })
+    mappingApi.batchInsert3(maps.values.map { KSMappingConverter.convert(it) })
   }
 
   fun loadFromKS() {
     maps.clear()
     val start = System.currentTimeMillis()
-    val all = mappingApi.readAll1(0, null).data
+    val all = mappingApi.readAll2(0, null).data
     all.forEach {
       val tm = getTemplateMapping(it.template)
       tm.weight = it.weight

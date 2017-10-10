@@ -12,7 +12,7 @@ import ir.ac.iust.dml.kg.raw.utils.PageUtils
 import ir.ac.iust.dml.kg.raw.utils.PagedData
 import ir.ac.iust.dml.kg.raw.utils.URIs
 import ir.ac.iust.dml.kg.services.client.ApiClient
-import ir.ac.iust.dml.kg.services.client.swagger.V1mappingsApi
+import ir.ac.iust.dml.kg.services.client.swagger.V2mappingsApi
 import ir.ac.iust.dml.kg.services.client.swagger.model.PagingListTemplateMapping
 import ir.ac.iust.dml.kg.services.client.swagger.model.TemplateData
 import ir.ac.iust.dml.kg.services.client.swagger.model.TemplateMapping
@@ -22,7 +22,7 @@ import javax.annotation.PostConstruct
 @Service
 class KSMappingLogic {
 
-  private val mappingApi: V1mappingsApi
+  private val mappingApi: V2mappingsApi
   private val allMapping = mutableListOf<TemplateMapping>()
   private val indexTemplateNames = mutableMapOf<String, Int>()
   private var propertyToTemplate = mutableListOf<PropertyStats>()
@@ -32,29 +32,31 @@ class KSMappingLogic {
     val client = ApiClient()
     client.basePath = ConfigReader.getString("knowledge.store.url", "http://localhost:8091/rs")
     client.connectTimeout = 1200000
-    mappingApi = V1mappingsApi(client)
+    mappingApi = V2mappingsApi(client)
   }
 
   @PostConstruct
   fun load() {
     var page = 0
     do {
-      val pages = mappingApi.readAll1(page++, 100)
+      val pages = mappingApi.readAll2(page++, 100)
       allMapping.addAll(pages.data)
     } while (pages.page < pages.pageCount)
     rebuildIndexes()
   }
 
   fun insert(data: TemplateData): Boolean? {
-    val success = mappingApi.insert2(data)
-    if (success) {
+    if (indexTemplateNames.isEmpty()) load()
+    data.incremental = false
+    val success = mappingApi.insert5(data)
+    if (success != null) {
       val mappingIndex = indexTemplateNames[data.template]!!
-      val updated = mappingApi.readAll1(mappingIndex, 1).data[0]
+      val updated = mappingApi.readAll2(mappingIndex, 1).data[0]
       allMapping[mappingIndex] = updated
       // TODO make it faster. we don't need to calculate stats for all properties
       rebuildPropertyStats()
     }
-    return success
+    return success != null
   }
 
   fun search(page: Int, pageSize: Int,
