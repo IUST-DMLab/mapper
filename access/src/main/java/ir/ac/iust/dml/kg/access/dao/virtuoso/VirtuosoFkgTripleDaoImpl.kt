@@ -8,6 +8,7 @@ package ir.ac.iust.dml.kg.access.dao.virtuoso
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
+import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.PagedData
 import ir.ac.iust.dml.kg.virtuoso.connector.VirtuosoConnector
 
@@ -17,7 +18,7 @@ class VirtuosoFkgTripleDaoImpl : FkgTripleDao() {
 
   override fun activateVersion(module: String, version: Int) = true
 
-  val connector = VirtuosoConnector("http://fkg.iust.ac.ir/")
+  val connector = VirtuosoConnector(ConfigReader.getString("virtuoso.graph", "http://fkg.iust.ac.ir/"))
 
   override fun save(t: FkgTriple) {
     if (t.objekt == null || t.objekt!!.trim().isEmpty()) {
