@@ -40,7 +40,7 @@ class KSMappingLogic {
     var page = 0
     do {
       val pages = mappingApi.readAll2(page++, 100)
-      allMapping.addAll(pages.data)
+      allMapping.addAll(pages.data.sortedByDescending { it.weight })
     } while (pages.page < pages.pageCount)
     rebuildIndexes()
   }
