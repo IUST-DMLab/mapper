@@ -18,6 +18,7 @@ import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValue
 import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValueData
 import org.apache.log4j.Logger
 import org.springframework.stereotype.Service
+import java.net.URI
 
 /**
  * It's a temporary class which finds bugs in data and fix them before main release
@@ -32,6 +33,25 @@ class Fixers {
     client.basePath = ConfigReader.getString("knowledge.store.url", "http://localhost:8091/rs")
     client.connectTimeout = 1200000
     ontologyApi = V2ontologyApi(client)
+  }
+
+  fun findWrongResources() {
+    var page = 0
+    do {
+      val triples = ontologyApi.search2(null, null, null, null,
+          null, null, null, null, null, page++, 10000)
+      triples.data.forEach {
+        if (it.`object`.type == TypedValue.TypeEnum.RESOURCE)
+          try {
+            URI(it.`object`.value)
+          } catch (th: Throwable) {
+            logger.info("wrong resource: ${it.subject}, ${it.predicate} ${it.`object`.value}")
+            it.`object`.type = TypedValue.TypeEnum.STRING
+            val data = convert(it)
+            ontologyApi.insert6(data)
+          }
+      }
+    } while (triples.page < triples.pageCount)
   }
 
   fun findOntologyMoreThanOneLabels() {
@@ -80,6 +100,20 @@ class Fixers {
       insertOntologyLiteral(url, URIs.label, fixedLabel)
       logger.info("label of $url, has been to $fixedLabel")
     }
+  }
+
+  fun convert(ontology: Ontology): OntologyData? {
+    if (ontology.`object`.value.isBlank()) return null
+    val tripleData = OntologyData()
+    tripleData.context = URIs.defaultContext
+    tripleData.subject = ontology.subject
+    tripleData.predicate = ontology.predicate
+    tripleData.`object` = TypedValueData()
+    tripleData.`object`.lang = LanguageChecker.detectLanguage(ontology.`object`.value)
+    tripleData.`object`.type = TypedValueData.TypeEnum.valueOf(ontology.`object`.type.name)
+    tripleData.`object`.value = ontology.`object`.value
+    tripleData.approved = true
+    return tripleData
   }
 
   private fun insertOntologyLiteral(subject: String, predicate: String, `object`: String) {

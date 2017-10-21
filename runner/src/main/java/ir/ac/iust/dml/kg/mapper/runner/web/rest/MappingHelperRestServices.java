@@ -179,6 +179,8 @@ public class MappingHelperRestServices {
     switch (type) {
       case "ontologyLabel":
         fixers.findOntologyMoreThanOneLabels();
+      case "wrongResources":
+        fixers.findWrongResources();
     }
   }
 
