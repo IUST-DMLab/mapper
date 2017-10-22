@@ -348,12 +348,17 @@ class WikiTripleImporter {
           module = Module.wiki.name, version = version)
     }
     var type: ValueType? = null
-    if (rule.predicate == null) return null
+    if (rule.predicate == null || rule.predicate == "NULL") return null
     val value = when {
       rule.transform != null -> {
-        val value = transformers.transform(rule.transform!!, `object`, LanguageChecker.detectLanguage(`object`)!!)
-        type = value.type
-        value.value!!
+        try {
+          val value = transformers.transform(rule.transform!!, `object`, LanguageChecker.detectLanguage(`object`)!!)
+          type = value.type
+          value.value!!
+        } catch (th: Throwable) {
+          type = ValueType.String
+          `object`
+        }
       }
       rule.constant != null -> rule.constant
       else -> `object`

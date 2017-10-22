@@ -69,8 +69,10 @@ object DumpUtils {
       val persianDigit = convertToPersian(englishDigit)
       val indexCollection = mutableListOf<TripleData>()
       triplesOfSubject.forEach {
-        if (it.predicate?.endsWith(englishDigit) == true
-            || it.predicate?.endsWith(persianDigit) == true) indexCollection.add(it)
+        if ((it.predicate?.endsWith(englishDigit) == true
+            || it.predicate?.endsWith(persianDigit) == true)
+            && (index != 2 || it.predicate?.endsWith("km2") == false))
+          indexCollection.add(it)
       }
       if (indexCollection.isNotEmpty()) {
         val priorityIndexCollection = mutableListOf<TripleData>()
