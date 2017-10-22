@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ImportResource;
 
@@ -16,19 +17,20 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.Random;
 
+@EnableCaching
 @SpringBootApplication
 @ImportResource(value = {
-        "classpath:access-context.xml",
+    "classpath:access-context.xml",
     "classpath:template-equals-context.xml",
-        "classpath:mapper-context.xml",
+    "classpath:mapper-context.xml",
     "classpath:ontology-translation-context.xml"
 })
 @EnableAutoConfiguration(exclude = {
-        Jackson2ObjectMapperPrettier.class,
-        FilterRegistrationConfiguration.class,
-        DataSourceAutoConfiguration.class,
-        DataSourceTransactionManagerAutoConfiguration.class,
-        HibernateJpaAutoConfiguration.class})
+    Jackson2ObjectMapperPrettier.class,
+    FilterRegistrationConfiguration.class,
+    DataSourceAutoConfiguration.class,
+    DataSourceTransactionManagerAutoConfiguration.class,
+    HibernateJpaAutoConfiguration.class})
 public class Application {
 
   public static void main(String[] args) {

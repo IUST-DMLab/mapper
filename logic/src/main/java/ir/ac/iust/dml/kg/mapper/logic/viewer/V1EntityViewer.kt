@@ -4,7 +4,13 @@
  * Developed by Majid Asgari.
  */
 
-package ir.ac.iust.dml.kg.mapper.logic
+/*
+ * Farsi Knowledge Graph Project
+ * Iran University of Science and Technology (Year 2017)
+ * Developed by Majid Asgari.
+ */
+
+package ir.ac.iust.dml.kg.mapper.logic.viewer
 
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.LanguageChecker

@@ -1,0 +1,5 @@
+<ehcache updateCheck="true" monitoring="autodetect" dynamicConfig="true" maxBytesLocalHeap="150M"
+         overflowToDisk="true">
+  <diskStore path="java.io.tmpdir"/>
+  <cache name="getEntityData" timeToLiveSeconds="60" maxElementsOnDisk="1000"/>
+</ehcache>

@@ -7,15 +7,15 @@
 package ir.ac.iust.dml.kg.mapper.runner.web.rest
 
 import io.swagger.annotations.Api
-import ir.ac.iust.dml.kg.mapper.logic.viewer.V2EntityViewer
+import ir.ac.iust.dml.kg.mapper.logic.viewer.V3EntityViewer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/entity/rest/v2/")
-@Api(tags = arrayOf("entity/v2"), description = "سرویس‌های مربوط به موجودیت، نسخه دوم")
-class V2EntityRestServices {
-  @Autowired lateinit var logic: V2EntityViewer
+@RequestMapping("/entity/rest/v3/")
+@Api(tags = arrayOf("entity/v3"), description = "سرویس‌های مربوط به موجودیت، نسخه سوم")
+class V3EntityRestServices {
+  @Autowired lateinit var logic: V3EntityViewer
 
   data class EntityURLs(var entities: MutableList<String> = mutableListOf())
 

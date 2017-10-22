@@ -18,7 +18,8 @@ class VirtuosoFkgTripleDaoImpl : FkgTripleDao() {
 
   override fun activateVersion(module: String, version: Int) = true
 
-  val connector = VirtuosoConnector(ConfigReader.getString("virtuoso.graph", "http://fkg.iust.ac.ir/"))
+  private val connector = VirtuosoConnector(ConfigReader.getString("virtuoso.graph",
+      "http://fkg.iust.ac.ir/"))
 
   override fun save(t: FkgTriple) {
     if (t.objekt == null || t.objekt!!.trim().isEmpty()) {
