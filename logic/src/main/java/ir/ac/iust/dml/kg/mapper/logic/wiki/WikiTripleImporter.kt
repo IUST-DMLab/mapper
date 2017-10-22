@@ -65,7 +65,7 @@ class WikiTripleImporter {
       InputStreamReader(FileInputStream(p.toFile()), "UTF8").use {
         BufferedReader(it).use {
           val revisionIdMap: Map<String, String> = gson.fromJson(it, type)
-          for(entity in revisionIdMap.keys) {
+          for (entity in revisionIdMap.keys) {
             val abstract = revisionIdMap[entity] ?: continue
             entityIndex++
             if (entityIndex > maxNumberOfEntities) continue
@@ -309,19 +309,24 @@ class WikiTripleImporter {
           }
         }
         if (triplesToWrite.isEmpty()) return@getTriples
-        val first = getAsTripe(triplesToWrite[0])
-        if (first != null) {
-          for (i in 1 until triplesToWrite.size) {
-            val child = getAsTripe(triplesToWrite[i])
-            if (child != null)
-              first.properties.add(FkgTripleProperty(null, first, child.predicate, child.objekt,
-                  child.language, child.valueType))
-          }
-          store.save(first)
-        } else
-          for (i in 1 until triplesToWrite.size) {
-            val child = getAsTripe(triplesToWrite[i])
-            if (child != null) store.save(child)
+        if (tripleCollection.size > 1) {
+          val first = getAsTripe(triplesToWrite[0])
+          if (first != null) {
+            (1 until triplesToWrite.size)
+                .mapNotNull { getAsTripe(triplesToWrite[it]) }
+                .forEach {
+                  first.properties.add(FkgTripleProperty(null, first, it.predicate, it.objekt,
+                      it.language, it.valueType))
+                }
+            store.save(first)
+          } else
+            (1 until triplesToWrite.size)
+                .mapNotNull { getAsTripe(triplesToWrite[it]) }
+                .forEach { store.save(it) }
+        } else // collection may have just one triple but maps to more than one triple.
+          triplesToWrite.forEach {
+            val triple = getAsTripe(it)
+            if (triple != null) store.save(triple)
           }
       }
     })
