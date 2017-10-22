@@ -52,7 +52,7 @@ class KSMappingLogic {
     if (success != null) {
       val mappingIndex = indexTemplateNames[data.template]!!
       val updated = mappingApi.readAll2(mappingIndex, 1).data[0]
-      allMapping[mappingIndex] = updated
+      if (updated != null) allMapping[mappingIndex] = updated
       // TODO make it faster. we don't need to calculate stats for all properties
       rebuildPropertyStats()
     }
