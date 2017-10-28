@@ -10,6 +10,7 @@ import ir.ac.iust.dml.kg.knowledge.core.ValueType
 import ir.ac.iust.dml.kg.mapper.logic.data.MapRule
 import ir.ac.iust.dml.kg.mapper.logic.data.PropertyMapping
 import ir.ac.iust.dml.kg.mapper.logic.data.TemplateMapping
+import ir.ac.iust.dml.kg.raw.utils.URIs
 import ir.ac.iust.dml.kg.services.client.swagger.model.MapRuleData
 import ir.ac.iust.dml.kg.services.client.swagger.model.PropertyData
 import ir.ac.iust.dml.kg.services.client.swagger.model.TemplateData
@@ -38,7 +39,7 @@ internal object KSMappingConverter {
 
   private fun convert(mr: MapRule): MapRuleData {
     val mrd = MapRuleData()
-    mrd.predicate = mr.predicate
+    mrd.predicate = URIs.replaceAllPrefixesInString(mr.predicate)
     mrd.constant = mr.constant
     mrd.type = MapRuleData.TypeEnum.valueOf(mr.type!!.toString().toUpperCase())
     mrd.transform = mr.transform
@@ -47,7 +48,7 @@ internal object KSMappingConverter {
   }
 
   internal fun convert(it: ir.ac.iust.dml.kg.services.client.swagger.model.MapRule)
-      = MapRule(predicate = it.predicate,
+      = MapRule(predicate = URIs.replaceAllPrefixesInString(it.predicate),
       transform = it.transform, constant = it.constant, unit = it.unit,
       type = ValueType.valueOf((it.type ?: ir.ac.iust.dml.kg.services.client.swagger.model.MapRule.TypeEnum.STRING)
           .name.toLowerCase().capitalize()))

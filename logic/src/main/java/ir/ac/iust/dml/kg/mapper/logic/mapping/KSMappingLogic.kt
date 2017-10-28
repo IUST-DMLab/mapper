@@ -13,6 +13,7 @@ import ir.ac.iust.dml.kg.raw.utils.PagedData
 import ir.ac.iust.dml.kg.raw.utils.URIs
 import ir.ac.iust.dml.kg.services.client.ApiClient
 import ir.ac.iust.dml.kg.services.client.swagger.V2mappingsApi
+import ir.ac.iust.dml.kg.services.client.swagger.V2ontologyApi
 import ir.ac.iust.dml.kg.services.client.swagger.model.PagingListTemplateMapping
 import ir.ac.iust.dml.kg.services.client.swagger.model.TemplateData
 import ir.ac.iust.dml.kg.services.client.swagger.model.TemplateMapping
@@ -23,9 +24,11 @@ import javax.annotation.PostConstruct
 class KSMappingLogic {
 
   private val mappingApi: V2mappingsApi
+  private val ontologyApi: V2ontologyApi
   private val allMapping = mutableListOf<TemplateMapping>()
   private val indexTemplateNames = mutableMapOf<String, Int>()
   private var propertyToTemplate = mutableListOf<PropertyStats>()
+  private var uniquePredicates = mutableSetOf<String>()
   private var indexPropertyToTemplate = mutableMapOf<String, Int>()
 
   init {
@@ -33,6 +36,7 @@ class KSMappingLogic {
     client.basePath = ConfigReader.getString("knowledge.store.url", "http://localhost:8091/rs")
     client.connectTimeout = 1200000
     mappingApi = V2mappingsApi(client)
+    ontologyApi = V2ontologyApi(client)
   }
 
   @PostConstruct
@@ -40,12 +44,42 @@ class KSMappingLogic {
     var page = 0
     do {
       val pages = mappingApi.readAll2(page++, 100)
+      pages.data.forEach { fixData(it) }
       allMapping.addAll(pages.data.sortedByDescending { it.weight })
     } while (pages.page < pages.pageCount)
     rebuildIndexes()
   }
 
-  fun insert(data: TemplateData): Boolean? {
+  private fun fixData(data: TemplateMapping) {
+    data.rules.forEach {
+      if (it.predicate?.startsWith("http://") == true) it.predicate = URIs.replaceAllPrefixesInString(it.predicate)
+    }
+    data.properties.forEach {
+      it.rules?.forEach {
+        if (it.predicate?.startsWith("http://") == true) it.predicate = URIs.replaceAllPrefixesInString(it.predicate)
+      }
+      it.recommendations.forEach {
+        if (it.predicate?.startsWith("http://") == true) it.predicate = URIs.replaceAllPrefixesInString(it.predicate)
+      }
+    }
+  }
+
+  private fun fixData(data: TemplateData) {
+    data.rules.forEach {
+      if (it.predicate?.startsWith("http://") == true) it.predicate = URIs.replaceAllPrefixesInString(it.predicate)
+    }
+    data.properties.forEach {
+      it.rules?.forEach {
+        if (it.predicate?.startsWith("http://") == true) it.predicate = URIs.replaceAllPrefixesInString(it.predicate)
+      }
+      it.recommendations.forEach {
+        if (it.predicate?.startsWith("http://") == true) it.predicate = URIs.replaceAllPrefixesInString(it.predicate)
+      }
+    }
+  }
+
+  fun insert(data: TemplateData): TemplateMapping? {
+    fixData(data)
     if (indexTemplateNames.isEmpty()) load()
     data.incremental = false
     val success = mappingApi.insert5(data)
@@ -55,8 +89,9 @@ class KSMappingLogic {
       if (updated != null) allMapping[mappingIndex] = updated
       // TODO make it faster. we don't need to calculate stats for all properties
       rebuildPropertyStats()
+      return updated
     }
-    return success != null
+    return null
   }
 
   fun search(page: Int, pageSize: Int,
@@ -130,6 +165,21 @@ class KSMappingLogic {
     return PageUtils.asPages(page, pageSize, filtered)
   }
 
+  fun predicateProposal(keyword: String): List<String> {
+    val proposals = mutableListOf<String>()
+    // search in ontology and other mapped predicates
+    val lc = keyword.toLowerCase()
+    uniquePredicates.forEach { if (it.toLowerCase().contains(lc)) proposals.add(it) }
+    if (keyword.length < 2) return mutableListOf()
+    val result = ontologyApi.search2(null, null, keyword, true, URIs.type, null,
+        URIs.typeOfAnyProperties, null, null, 0, 0)
+    val propertyPrefix = URIs.prefixedToUri(URIs.fkgNotMappedPropertyPrefix + ":")!!
+    result.data.forEach {
+      if (!it.subject.startsWith(propertyPrefix)) proposals.add(URIs.replaceAllPrefixesInString(it.subject)!!)
+    }
+    return proposals
+  }
+
   private fun rebuildIndexes() {
     allMapping.forEachIndexed { index, mapping ->
       indexTemplateNames[mapping.template] = index
@@ -139,20 +189,30 @@ class KSMappingLogic {
 
   private fun rebuildPropertyStats() {
     val properties = mutableMapOf<String, PropertyStats>()
+    uniquePredicates.clear()
     allMapping.forEach { template ->
       val classes = mutableSetOf<String>()
-      template.rules.forEach { if (it.predicate == URIs.type && it.constant != null) classes.add(it.constant) }
+      template.rules.forEach {
+        if (it.predicate == URIs.type && it.constant != null) classes.add(it.constant)
+        if (it.predicate != null && !it.predicate.startsWith(URIs.fkgMainPrefix)) uniquePredicates.add(it.predicate)
+      }
 
       template.properties.forEach { pm ->
         val stats = properties.getOrPut(pm.property, { PropertyStats(property = pm.property) })
         stats.templates.add(template.template)
         stats.classes.addAll(classes)
         pm.recommendations.forEach {
-          if (it.predicate != null) stats.predicates.add(it.predicate)
+          if (it.predicate != null) {
+            stats.predicates.add(it.predicate)
+            if (!it.predicate.startsWith(URIs.fkgMainPrefix)) uniquePredicates.add(it.predicate)
+          }
           else stats.nullInTemplates.add(template.template)
         }
         pm.rules.forEach {
-          if (it.predicate != null) stats.predicates.add(it.predicate)
+          if (it.predicate != null) {
+            stats.predicates.add(it.predicate)
+            if (!it.predicate.startsWith(URIs.fkgMainPrefix)) uniquePredicates.add(it.predicate)
+          }
           else stats.nullInTemplates.add(template.template)
           stats.approvedInTemplates.add(template.template)
         }

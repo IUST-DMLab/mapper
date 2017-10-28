@@ -69,4 +69,8 @@ class MappingRestServices {
       logic.searchProperty(page, pageSize, propertyName, propertyNameLike, templateName, templateNameLike,
           className, classNameLike, predicateName, predicateNameLike, allNull, oneNull, approved)
 
+  @RequestMapping("predicateProposal", method = arrayOf(RequestMethod.GET))
+  @ResponseBody
+  fun predicateProposal(@RequestParam keyword: String) = logic.predicateProposal(keyword)
+
 }
