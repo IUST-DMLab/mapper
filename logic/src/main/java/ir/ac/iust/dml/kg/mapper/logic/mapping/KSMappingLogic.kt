@@ -51,7 +51,7 @@ class KSMappingLogic {
     val success = mappingApi.insert5(data)
     if (success != null) {
       val mappingIndex = indexTemplateNames[data.template]!!
-      val updated = mappingApi.readAll2(mappingIndex, 1).data[0]
+      val updated = mappingApi.readAll2(0, 0).data.first { it.template == data.template }
       if (updated != null) allMapping[mappingIndex] = updated
       // TODO make it faster. we don't need to calculate stats for all properties
       rebuildPropertyStats()
