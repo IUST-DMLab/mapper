@@ -55,6 +55,7 @@ class KSMappingLogic {
       if (it.predicate?.startsWith("http://") == true) it.predicate = URIs.replaceAllPrefixesInString(it.predicate)
     }
     data.properties.forEach {
+      if (it.recommendations.size == 1 && it.rules.size > 0) it.recommendations.clear()
       it.rules?.forEach {
         if (it.predicate?.startsWith("http://") == true) it.predicate = URIs.replaceAllPrefixesInString(it.predicate)
       }
