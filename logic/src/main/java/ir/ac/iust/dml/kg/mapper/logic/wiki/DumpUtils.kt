@@ -148,7 +148,11 @@ object DumpUtils {
     if (tripleCache.isNotEmpty()) {
       logger.info("${tripleCache.size} triples of ${lastSubject} has been found. " +
           "($tripleNumber triples since now in ${System.currentTimeMillis() - startTime} miliseconds)")
-      listener(tripleCache)
+      try {
+        listener(tripleCache)
+      } catch (th: Throwable) {
+
+      }
     }
   }
 }
