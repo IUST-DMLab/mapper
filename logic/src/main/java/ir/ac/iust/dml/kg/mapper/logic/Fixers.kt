@@ -36,6 +36,21 @@ class Fixers {
     ontologyApi = V2ontologyApi(client)
   }
 
+  fun migrateUrls(sourceUrl: String, destinationUrl: String) {
+    val triples = ontologyApi.search2(null, null, null, null, null, null, null, null, null, 0, 0)
+    triples.data.forEachIndexed { index, triple ->
+      if (index % 1000 == 0)
+        logger.info("writing triple $index from ${triples.totalSize}")
+      if (triple.`object` == null) return@forEachIndexed
+      ontologyApi.remove2(triple.subject, triple.predicate, triple.`object`.value, triple.context)
+      triple.context = triple.context?.replace(sourceUrl, destinationUrl)
+      triple.predicate = triple.predicate?.replace(sourceUrl, destinationUrl)
+      triple.subject = triple.subject?.replace(sourceUrl, destinationUrl)
+      triple.`object`.value = triple.`object`.value?.replace(sourceUrl, destinationUrl)
+      ontologyApi.insert6(convert(triple))
+    }
+  }
+
   fun findWrongResources() {
     var page = 0
     do {

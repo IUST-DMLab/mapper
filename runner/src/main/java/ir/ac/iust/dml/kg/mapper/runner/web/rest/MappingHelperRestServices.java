@@ -174,13 +174,15 @@ public class MappingHelperRestServices {
     return true;
   }
 
-  public void fix(@Nullable String type) {
-    assert type != null;
-    switch (type) {
+  public void fix(String[] arguments) {
+    assert arguments.length > 0;
+    switch (arguments[0]) {
       case "ontologyLabel":
         fixers.findOntologyMoreThanOneLabels();
       case "wrongResources":
         fixers.findWrongResources();
+      case "migrateUrls":
+        fixers.migrateUrls(arguments[1], arguments[2]);
     }
   }
 
