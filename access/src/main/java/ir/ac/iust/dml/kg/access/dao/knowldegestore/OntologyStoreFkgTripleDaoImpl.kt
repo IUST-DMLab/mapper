@@ -130,6 +130,7 @@ class OntologyStoreFkgTripleDaoImpl : FkgTripleDao() {
     ValueType.Float -> TypedValueData.TypeEnum.FLOAT
     ValueType.Long -> TypedValueData.TypeEnum.LONG
     ValueType.Short -> TypedValueData.TypeEnum.SHORT
+    ValueType.Date -> TypedValueData.TypeEnum.DATE
   }
 
   override fun delete(subject: String, predicate: String, `object`: String) {
