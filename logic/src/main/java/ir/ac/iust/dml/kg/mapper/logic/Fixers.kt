@@ -19,6 +19,7 @@ import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValueData
 import org.apache.log4j.Logger
 import org.springframework.stereotype.Service
 import java.net.URI
+import java.net.URL
 
 /**
  * It's a temporary class which finds bugs in data and fix them before main release
@@ -44,6 +45,7 @@ class Fixers {
         if (it.`object`.type == TypedValue.TypeEnum.RESOURCE)
           try {
             URI(it.`object`.value)
+            URL(it.`object`.value)
           } catch (th: Throwable) {
             logger.info("wrong resource: ${it.subject}, ${it.predicate} ${it.`object`.value}")
             it.`object`.type = TypedValue.TypeEnum.STRING
