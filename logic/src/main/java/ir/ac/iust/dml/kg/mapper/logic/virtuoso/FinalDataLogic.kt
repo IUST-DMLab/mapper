@@ -19,7 +19,7 @@ import java.io.OutputStream
 @Service
 class FinalDataLogic {
   private var connector: VirtuosoConnector? = null
-  private var graphName = ConfigReader.getString("virtuoso.graph", "http://fkg.iust.ac.ir/")
+  private var graphName = ConfigReader.getString("virtuoso.graph", URIs.defaultContext)
 
   fun getTriplesOfSubject(subjectUrl: String): MutableList<VirtuosoTriple>? {
     if (connector == null) connector = VirtuosoConnector(graphName)

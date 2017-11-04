@@ -43,7 +43,7 @@ open class V3EntityViewer {
   @Cacheable(value = *arrayOf("getEntityData"))
   fun getEntityData(url: String, properties: Boolean = true): EntityData {
     if (connector == null) {
-      connector = VirtuosoConnector(ConfigReader.getString("virtuoso.graph", "http://fkg.iust.ac.ir/"))
+      connector = VirtuosoConnector(ConfigReader.getString("virtuoso.graph", URIs.defaultContext))
     }
     val result = EntityData()
     val triples = connector!!.getTriplesOfSubject(url)

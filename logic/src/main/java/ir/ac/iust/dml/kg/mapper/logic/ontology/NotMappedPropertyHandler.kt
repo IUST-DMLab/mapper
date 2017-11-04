@@ -22,7 +22,7 @@ class NotMappedPropertyHandler {
   @Autowired private lateinit var storeProvider: StoreProvider
   private val logger = Logger.getLogger(this.javaClass)!!
 
-  private val SOURCE_URL = "http://fkg.iust.ac.ir/mapper"
+  private val sourceUrl = URIs.prefixedToUri("fkg:mapper")!!
 
   fun addToNotMapped(property: String) {
     notMappedProperties.add(property)
@@ -36,10 +36,10 @@ class NotMappedPropertyHandler {
       maxNumberOfTriples++
       val name = property.substringAfterLast("/")
       val propertyUrl = URIs.convertToNotMappedFkgPropertyUri(name)!!
-      store.save(SOURCE_URL, propertyUrl, URIs.type, URIs.typeOfAnyProperties, module, version)
+      store.save(sourceUrl, propertyUrl, URIs.type, URIs.typeOfAnyProperties, module, version)
       if (store.read(propertyUrl, URIs.label, null).isEmpty())
-        store.save(SOURCE_URL, propertyUrl, URIs.label, PropertyNormaller.removeDigits(name), module, version)
-      store.save(SOURCE_URL, propertyUrl, URIs.variantLabel, PropertyNormaller.removeDigits(name), module, version)
+        store.save(sourceUrl, propertyUrl, URIs.label, PropertyNormaller.removeDigits(name), module, version)
+      store.save(sourceUrl, propertyUrl, URIs.variantLabel, PropertyNormaller.removeDigits(name), module, version)
 
       if (resolveAmbiguity) {
         val result = store.read(predicate = URIs.variantLabel, objekt = name)
