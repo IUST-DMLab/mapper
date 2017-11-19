@@ -23,14 +23,14 @@ import java.util.regex.Pattern
 class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
 
   private val logger = Logger.getLogger(this.javaClass)!!
-  private val FLUSH_SIZE = 20000
+  private val flushSize = ConfigReader.getInt("store.batch.size", "1000")
   private val tripleApi: V2triplesApi
   private val buffer = mutableListOf<TripleData>()
 
   init {
     val client = ApiClient()
     client.basePath = ConfigReader.getString("knowledge.store.url", "http://localhost:8091/rs")
-    client.connectTimeout = 4800000
+    client.connectTimeout = ConfigReader.getInt("store.timeout", "4800000")
     tripleApi = V2triplesApi(client)
   }
 
@@ -104,7 +104,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
     }
 
     buffer.add(data)
-    if (buffer.size > FLUSH_SIZE) {
+    if (buffer.size > flushSize) {
       try {
         logger.info("batch insert ...")
         if (tripleApi.batchInsert5(buffer)) buffer.clear()

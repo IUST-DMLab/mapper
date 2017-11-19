@@ -23,14 +23,14 @@ import java.util.regex.Pattern
 class OntologyStoreFkgTripleDaoImpl : FkgTripleDao() {
 
   private val logger = Logger.getLogger(this.javaClass)!!
-  private val FLUSH_SIZE = 10000
+  private val flushSize = ConfigReader.getInt("store.batch.size", "1000")
   private val tripleApi: V2ontologyApi
   private val buffer = mutableListOf<OntologyData>()
 
   init {
     val client = ApiClient()
     client.basePath = ConfigReader.getString("knowledge.store.url", "http://localhost:8091/rs")
-    client.connectTimeout = 4800000
+    client.connectTimeout = ConfigReader.getInt("store.timeout", "4800000")
     tripleApi = V2ontologyApi(client)
   }
 
@@ -110,7 +110,7 @@ class OntologyStoreFkgTripleDaoImpl : FkgTripleDao() {
     }
 
     buffer.add(data)
-    if (buffer.size > FLUSH_SIZE) {
+    if (buffer.size > flushSize) {
       try {
         logger.info("batch insert ...")
         if (tripleApi.batchInsert4(buffer).isNotEmpty()) buffer.clear()
