@@ -24,7 +24,7 @@ class OldMappingServices {
   init {
     val fkgPrefixConvert = ConfigReader.getString("fkg.prefix.convert", "fkg")
     URIs.prefixAddresses.forEach {
-      prefixAddresses[it.key.replace("fkg", fkgPrefixConvert)] = it.value
+      prefixAddresses[it.key] = it.value.replace("fkg", fkgPrefixConvert)
     }
   }
 
