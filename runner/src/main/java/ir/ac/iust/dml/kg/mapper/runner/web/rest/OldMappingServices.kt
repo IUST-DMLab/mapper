@@ -30,5 +30,5 @@ class OldMappingServices {
 
   @RequestMapping("prefixes", method = arrayOf(RequestMethod.GET))
   @ResponseBody
-  fun prefixes() = URIs.prefixAddresses
+  fun prefixes() = prefixAddresses
 }
