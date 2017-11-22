@@ -6,18 +6,18 @@
 
 package ir.ac.iust.dml.kg.access.dao.file
 
+import com.fasterxml.jackson.dataformat.yaml.snakeyaml.util.UriEncoder
+import com.google.common.reflect.TypeToken
 import com.google.gson.GsonBuilder
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.raw.utils.PagedData
 import org.apache.commons.io.FileUtils
-import java.io.BufferedWriter
-import java.io.FileOutputStream
-import java.io.OutputStreamWriter
+import java.io.*
 import java.nio.file.Files
 import java.nio.file.Path
 
-class FileFkgTripleDaoImpl(val path: Path, val flushSize: Int = 1000) : FkgTripleDao() {
+class FileFkgTripleDaoImpl(val path: Path, private val flushSize: Int = 10) : FkgTripleDao() {
 
   override fun newVersion(module: String) = 1
 
@@ -27,26 +27,38 @@ class FileFkgTripleDaoImpl(val path: Path, val flushSize: Int = 1000) : FkgTripl
     if (!Files.exists(path)) Files.createDirectories(path)
   }
 
-  var fileIndex = 0;
-  var notFlushedTriples = mutableListOf<FkgTriple>()
-  var gson = GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create()
+  private var notFlushedTriples = mutableMapOf<String, MutableList<FkgTriple>>()
+  private var gson = GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create()
+  private val type = object : TypeToken<List<FkgTriple>>() {}.type!!
 
   override fun save(t: FkgTriple) {
     synchronized(notFlushedTriples) {
-      notFlushedTriples.add(t)
+      notFlushedTriples.getOrPut(t.subject!!, { mutableListOf() }).add(t)
       if (notFlushedTriples.size > flushSize) {
-        val p = path.resolve("${fileIndex / 100}").resolve("$fileIndex.json")
-        if (!Files.exists(p.parent)) Files.createDirectories(p.parent)
-        gson.toJson(notFlushedTriples, BufferedWriter(OutputStreamWriter(
-            FileOutputStream(p.toFile()), "UTF-8")))
-        notFlushedTriples.clear()
-        fileIndex++
+        flush()
       }
     }
   }
 
   override fun flush() {
-    // nothing to do
+
+    notFlushedTriples.forEach { subject, triples ->
+      val subjectName = subject.substringAfterLast('/')
+      val folder = if (subjectName.length > 1) subjectName.substring(0, 2) else subjectName
+      val subjectFolder = path.resolve(folder)
+      if (!Files.exists(subjectFolder)) Files.createDirectories(subjectFolder)
+      val subjectFile = subjectFolder.resolve(UriEncoder.encode(subject) + ".json")
+      val oldList = mutableListOf<FkgTriple>()
+      if (Files.exists(subjectFile)) {
+        BufferedReader(InputStreamReader(FileInputStream(subjectFile.toFile()), "UTF8")).use {
+          val l: List<FkgTriple> = gson.fromJson(it, type)
+          oldList.addAll(l)
+        }
+      }
+      oldList.addAll(triples)
+      gson.toJson(oldList, BufferedWriter(OutputStreamWriter(
+          FileOutputStream(subjectFile.toFile()), "UTF-8")))
+    }
   }
 
   override fun deleteAll() {

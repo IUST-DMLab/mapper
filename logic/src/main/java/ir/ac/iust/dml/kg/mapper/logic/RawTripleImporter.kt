@@ -51,7 +51,7 @@ class RawTripleImporter {
   fun writeTriples(storeType: StoreType = StoreType.none) {
     val path = PathUtils.getPath("raw.folder.input", "~/raw/triples")
     val maxNumberOfTriples = TestUtils.getMaxTuples()
-    val store = storeProvider.getStore(storeType, path)
+    val store = storeProvider.getStore(storeType)
 
     val result = PathWalker.getPath(path, Regex(".*\\.json"))
     val startTime = System.currentTimeMillis()

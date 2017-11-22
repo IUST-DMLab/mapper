@@ -42,7 +42,7 @@ class TableTripleImporter {
   fun writeTriples(storeType: StoreType = StoreType.none) {
     val path = getTriplesPath()
 
-    val store = storeProvider.getStore(storeType, path)
+    val store = storeProvider.getStore(storeType)
     val maxNumberOfTriples = TestUtils.getMaxTuples()
 
     val entityTree = mutableMapOf<String, MutableSet<String>>()

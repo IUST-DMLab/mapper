@@ -50,7 +50,7 @@ class WikiTripleImporter {
   fun writeAbstracts(version: Int, storeType: StoreType = StoreType.none) {
     val path = PathUtils.getAbstractPath()
     val maxNumberOfEntities = TestUtils.getMaxTuples()
-    val store = storeProvider.getStore(storeType, path)
+    val store = storeProvider.getStore(storeType)
 
     val type = object : TypeToken<Map<String, String>>() {}.type
     val gson = Gson()
@@ -85,7 +85,7 @@ class WikiTripleImporter {
   fun writeEntitiesWithoutInfoBox(version: Int, storeType: StoreType = StoreType.none) {
     val path = PathUtils.getWithoutInfoboxPath()
     val maxNumberOfEntities = TestUtils.getMaxTuples()
-    val store = storeProvider.getStore(storeType, path)
+    val store = storeProvider.getStore(storeType)
 
     val result = PathWalker.getPath(path, Regex("\\d+-revision_ids\\.json"))
     val startTime = System.currentTimeMillis()
@@ -164,7 +164,7 @@ class WikiTripleImporter {
                         var property: String?, var rule: MapRule?, var version: Int)
 
   fun writeCategoryTriples(version: Int, storeType: StoreType = StoreType.none, insert: Boolean = true, path: Path? = null) {
-    val store = storeProvider.getStore(storeType, path)
+    val store = storeProvider.getStore(storeType)
     val categories = mutableSetOf<String>()
     DumpUtils.getTriples(PathUtils.getCategoryTriplesPath(), "\\d+\\.json", { triples ->
       var subjectUrl: String? = null
@@ -204,11 +204,11 @@ class WikiTripleImporter {
         outPath)
   }
 
-  fun writeTriples(version: Int, storeType: StoreType = StoreType.none, insert: Boolean = true, path: Path? = null) {
+  fun writeTriples(version: Int, storeType: StoreType = StoreType.none, insert: Boolean = true) {
     holder.writeToKS()
     holder.loadFromKS()
 
-    val store = storeProvider.getStore(storeType, path)
+    val store = storeProvider.getStore(storeType)
 
     val notSeenProperties = mutableMapOf<String, Int>()
     var numberOfMapped = 0

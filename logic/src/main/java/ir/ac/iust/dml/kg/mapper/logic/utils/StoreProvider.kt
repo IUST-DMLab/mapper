@@ -13,9 +13,9 @@ import ir.ac.iust.dml.kg.access.dao.knowldegestore.OntologyStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.none.EmptyFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.mapper.logic.data.StoreType
+import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.nio.file.Path
 
 @Service
 class StoreProvider {
@@ -27,10 +27,10 @@ class StoreProvider {
   private var ontologyDao: OntologyStoreFkgTripleDaoImpl? = null
   private var emptyDao: EmptyFkgTripleDaoImpl? = null
 
-  fun getStore(storeType: StoreType, path: Path? = null): FkgTripleDao {
+  fun getStore(storeType: StoreType): FkgTripleDao {
     return when (storeType) {
       StoreType.file -> {
-        if (fileDao == null) fileDao = FileFkgTripleDaoImpl(path!!.resolve("mapped"))
+        if (fileDao == null) fileDao = FileFkgTripleDaoImpl(ConfigReader.getPath("triple.file.store", "~/triple_store"))
         return fileDao!!
       }
       StoreType.mysql -> tripleDao

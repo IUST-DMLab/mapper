@@ -85,7 +85,7 @@ public class MappingHelperRestServices {
   @RequestMapping("/triples")
   public String triples(@RequestParam int version,
                         @RequestParam(defaultValue = "none") StoreType type) throws Exception {
-    wikiTripleImporter.writeTriples(version, type, true, null);
+    wikiTripleImporter.writeTriples(version, type, true);
     notMappedPropertyHandler.writeNotMappedProperties(Module.wiki.name(), version, true);
     return "Imported!";
   }
@@ -134,7 +134,7 @@ public class MappingHelperRestServices {
   public Boolean properties(@RequestParam int version,
                             @RequestParam(defaultValue = "none") StoreType type,
                             @RequestParam(defaultValue = "true") boolean resolveAmbiguity) {
-    wikiTripleImporter.writeTriples(version, type, false, null);
+    wikiTripleImporter.writeTriples(version, type, false);
     notMappedPropertyHandler.writeNotMappedProperties(Module.wiki.name(), version, resolveAmbiguity);
     return true;
   }
@@ -143,7 +143,7 @@ public class MappingHelperRestServices {
   public void completeDumpUpdate(@RequestParam(defaultValue = "none") StoreType type,
                                  @RequestParam(defaultValue = "false") boolean entitiesWithoutInfoBox)
       throws Exception {
-    final FkgTripleDao store = storeProvider.getStore(type, null);
+    final FkgTripleDao store = storeProvider.getStore(type);
     int version = store.newVersion(Module.wiki.name());
     ProgressInformer informer = new ProgressInformer(9);
     if (entitiesWithoutInfoBox) wikiTripleImporter.writeEntitiesWithoutInfoBox(version, type);
@@ -151,7 +151,7 @@ public class MappingHelperRestServices {
     wikiTripleImporter.writeEntitiesWithInfoBox(version, type);
     informer.stepDone(2);
     // 2 percent for triple exporting because of its complication
-    wikiTripleImporter.writeTriples(version, type, true, null);
+    wikiTripleImporter.writeTriples(version, type, true);
     informer.stepDone(3);
     wikiTripleImporter.writeCategoryTriples(version, type, true, null);
     informer.stepDone(4);
