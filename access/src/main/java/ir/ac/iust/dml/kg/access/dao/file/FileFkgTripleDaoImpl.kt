@@ -47,7 +47,7 @@ class FileFkgTripleDaoImpl(private val path: Path, private val flushSize: Int = 
   }
 
   private val prefixedUriSplicer = Regex("[:/]")
-  private fun getPath(uri: String): Path {
+  private fun getPath(uri: String): Path? {
     val prefixedUri = URIs.replaceAllPrefixesInString(uri)
     var subjectPath: Path
     try {
@@ -64,14 +64,19 @@ class FileFkgTripleDaoImpl(private val path: Path, private val flushSize: Int = 
     } catch (th: Throwable) {
       subjectPath = path.resolve("error").resolve(URLEncoder.encode(uri, "UTF-8") + ".json")
     }
-    val subjectFolder = subjectPath.toAbsolutePath().parent
-    if (!Files.exists(subjectFolder)) Files.createDirectories(subjectFolder)
-    return subjectPath
+    return try {
+      val subjectFolder = subjectPath.toAbsolutePath().parent
+      if (!Files.exists(subjectFolder)) Files.createDirectories(subjectFolder)
+      subjectPath
+    } catch (th: Throwable) {
+      logger.error(th)
+      null
+    }
   }
 
   override fun flush() {
     notFlushedTriples.forEach { subject, triples ->
-      val subjectPath = getPath(subject)
+      val subjectPath = getPath(subject) ?: return@forEach
       val oldList = mutableListOf<FkgTriple>()
       if (Files.exists(subjectPath)) {
         BufferedReader(InputStreamReader(FileInputStream(subjectPath.toFile()), "UTF8")).use {
@@ -80,13 +85,17 @@ class FileFkgTripleDaoImpl(private val path: Path, private val flushSize: Int = 
         }
       }
       oldList.addAll(triples)
-      FileOutputStream(subjectPath.toFile()).use {
-        OutputStreamWriter(it, "UTF-8").use {
-          BufferedWriter(it).use {
-            logger.trace("writing $subjectPath")
-            gson.toJson(oldList, it)
+      try {
+        FileOutputStream(subjectPath.toFile()).use {
+          OutputStreamWriter(it, "UTF-8").use {
+            BufferedWriter(it).use {
+              logger.trace("writing $subjectPath")
+              gson.toJson(oldList, it)
+            }
           }
         }
+      } catch (th: Throwable) {
+        logger.error(th)
       }
     }
     notFlushedTriples.clear()
