@@ -50,15 +50,19 @@ class FileFkgTripleDaoImpl(private val path: Path, private val flushSize: Int = 
   private fun getPath(uri: String): Path {
     val prefixedUri = URIs.replaceAllPrefixesInString(uri)
     var subjectPath: Path
-    if (prefixedUri != uri && prefixedUri != null) {
-      val parts = prefixedUri.split(prefixedUriSplicer)
-      subjectPath = path.resolve(parts[0])
-      val l = parts.last()
-      subjectPath = subjectPath.resolve(if (l.length > 1) l.substring(0, 2) else l.substring(0, 1))
-      for (i in 1 until parts.size - 1) subjectPath = subjectPath.resolve(parts[i])
-      subjectPath = subjectPath.resolve(parts.last() + ".json")
-    } else {
-      subjectPath = path.resolve("no-prefix").resolve(URLEncoder.encode(uri, "UTF-8") + ".json")
+    try {
+      if (prefixedUri != uri && prefixedUri != null) {
+        val parts = prefixedUri.split(prefixedUriSplicer)
+        subjectPath = path.resolve(parts[0])
+        val l = parts.last()
+        subjectPath = subjectPath.resolve(if (l.length > 1) l.substring(0, 2) else l.substring(0, 1))
+        for (i in 1 until parts.size - 1) subjectPath = subjectPath.resolve(parts[i])
+        subjectPath = subjectPath.resolve(parts.last() + ".json")
+      } else {
+        subjectPath = path.resolve("no-prefix").resolve(URLEncoder.encode(uri, "UTF-8") + ".json")
+      }
+    } catch (th: Throwable) {
+      subjectPath = path.resolve("error").resolve(URLEncoder.encode(uri, "UTF-8") + ".json")
     }
     val subjectFolder = subjectPath.toAbsolutePath().parent
     if (!Files.exists(subjectFolder)) Files.createDirectories(subjectFolder)
