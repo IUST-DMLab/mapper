@@ -7,10 +7,10 @@
 package ir.ac.iust.dml.kg.access.dao.knowldegestore
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
+import ir.ac.iust.dml.kg.access.dao.TripleFixer
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
 import ir.ac.iust.dml.kg.knowledge.core.ValueType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
-import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
 import ir.ac.iust.dml.kg.raw.utils.PagedData
 import ir.ac.iust.dml.kg.raw.utils.URIs
 import ir.ac.iust.dml.kg.services.client.ApiClient
@@ -18,7 +18,6 @@ import ir.ac.iust.dml.kg.services.client.swagger.V2triplesApi
 import ir.ac.iust.dml.kg.services.client.swagger.model.TripleData
 import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValueData
 import org.apache.log4j.Logger
-import java.util.regex.Pattern
 
 class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
 
@@ -49,59 +48,29 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
 
   override fun activateVersion(module: String, version: Int) = tripleApi.activateVersion2(module, version)
 
-  private val p = Pattern.compile("[\\\\|`\"<>{}^\\[\\]]", Pattern.CASE_INSENSITIVE);
-  private fun isValidUri(uri: String): Boolean {
-    val m = p.matcher(uri)
-    return !m.find()
-  }
-
   override fun save(t: FkgTriple) {
-    if (t.objekt == null || t.objekt!!.trim().isEmpty()) {
-      logger.error("short triple here: ${t.source} ${t.predicate} ${t.objekt}")
-      return
-    }
+    if (!TripleFixer.fix(t)) return
     val data = TripleData()
     data.context = URIs.defaultContext
     data.module = t.module
     data.version = t.version
     data.url = t.source
     data.subject = t.subject
-    data.predicate = if (!t.predicate!!.contains("://")) URIs.prefixedToUri(t.predicate) else t.predicate
+    data.predicate = t.predicate
     data.precession = t.accuracy
-    if (!URIs.isHttpUriFast(t.predicate)) {
-      logger.error("wrong subject format: " + data.predicate + ": " + t.predicate)
-      return
-    }
-    if (!URIs.isHttpUriFast(t.subject)) {
-      logger.error("wrong subject format: " + data.subject + ": " + t.subject)
-      return
-    }
 
-    val objectData = convertTypedValue(t.objekt!!, t.valueType, t.language)
+    val objectData = convertTypedValue(t.objekt!!, t.valueType!!, t.language!!)
     data.`object` = objectData
     data.approved = t.approved != null && t.approved!!
 
-    t.properties.forEach { data.properties[it.predicate] = convertTypedValue(it.objekt!!, it.valueType, it.language) }
+    t.properties.forEach {
+      data.properties[it.predicate] =
+          convertTypedValue(it.objekt!!, it.valueType!!, it.language!!)
+    }
 
     if (t.dataType != null) data.parameters["unit"] = t.dataType
     if (t.extractionTime != null) data.parameters["extractionTime"] = t.extractionTime.toString()
     if (t.rawText != null) data.parameters["rawText"] = t.rawText
-
-    // TODO:
-    if ((!isValidUri(data.subject))) {
-      logger.error("wrong subject url: " + data.subject)
-      return
-    }
-
-    if ((!isValidUri(data.predicate))) {
-      logger.error("wrong predicate url: " + data.predicate)
-      return
-    }
-
-    if (data.`object`.type == TypedValueData.TypeEnum.RESOURCE && !isValidUri(data.`object`.value)) {
-      logger.error("wrong object url: " + data.`object`.value)
-      return
-    }
 
     buffer.add(data)
     if (buffer.size > flushSize) {
@@ -114,19 +83,11 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
     }
   }
 
-  private fun convertTypedValue(objekt: String, valueType: ValueType?, language: String?): TypedValueData {
+  private fun convertTypedValue(objekt: String, valueType: ValueType, language: String): TypedValueData {
     val objectData = TypedValueData()
-    objectData.type =
-        if (URIs.isHttpUriFast(objekt))
-          TypedValueData.TypeEnum.RESOURCE
-        else {
-          if (valueType != null) convert(valueType)
-          else TypedValueData.TypeEnum.STRING
-        }
-
+    objectData.type = convert(valueType)
     objectData.value = objekt
-    objectData.lang = if (objectData.type == TypedValueData.TypeEnum.RESOURCE) null
-    else language ?: LanguageChecker.detectLanguage(objectData.value)
+    objectData.lang = language
     return objectData
   }
 

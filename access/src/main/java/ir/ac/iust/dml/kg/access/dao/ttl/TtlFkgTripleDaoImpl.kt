@@ -4,7 +4,7 @@
  * Developed by Majid Asgari.
  */
 
-package ir.ac.iust.dml.kg.access.dao.file
+package ir.ac.iust.dml.kg.access.dao.ttl
 
 import com.google.common.reflect.TypeToken
 import com.google.gson.GsonBuilder
@@ -20,7 +20,7 @@ import java.net.URLEncoder
 import java.nio.file.Files
 import java.nio.file.Path
 
-class FileFkgTripleDaoImpl(private val path: Path, private val flushSize: Int = 100) : FkgTripleDao() {
+class TtlFkgTripleDaoImpl(private val path: Path, private val flushSize: Int = 100) : FkgTripleDao() {
   private val logger = Logger.getLogger(this.javaClass)!!
 
   override fun newVersion(module: String) = 1

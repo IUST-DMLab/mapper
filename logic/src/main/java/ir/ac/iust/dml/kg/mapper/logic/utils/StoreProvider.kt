@@ -11,6 +11,7 @@ import ir.ac.iust.dml.kg.access.dao.file.FileFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.knowldegestore.KnowledgeStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.knowldegestore.OntologyStoreFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.none.EmptyFkgTripleDaoImpl
+import ir.ac.iust.dml.kg.access.dao.ttl.TtlFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.access.dao.virtuoso.VirtuosoFkgTripleDaoImpl
 import ir.ac.iust.dml.kg.mapper.logic.data.StoreType
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
@@ -22,6 +23,7 @@ class StoreProvider {
 
   @Autowired private lateinit var tripleDao: FkgTripleDao
   private var fileDao: FileFkgTripleDaoImpl? = null
+  private var ttlDao: TtlFkgTripleDaoImpl? = null
   private var virtuosoDao: VirtuosoFkgTripleDaoImpl? = null
   private var ksDao: KnowledgeStoreFkgTripleDaoImpl? = null
   private var ontologyDao: OntologyStoreFkgTripleDaoImpl? = null
@@ -30,8 +32,12 @@ class StoreProvider {
   fun getStore(storeType: StoreType): FkgTripleDao {
     return when (storeType) {
       StoreType.file -> {
-        if (fileDao == null) fileDao = FileFkgTripleDaoImpl(ConfigReader.getPath("triple.file.store", "~/triple_store"))
+        if (fileDao == null) fileDao = FileFkgTripleDaoImpl(ConfigReader.getPath("store.file.root", "~/triple_store"))
         return fileDao!!
+      }
+      StoreType.ttl -> {
+        if (ttlDao == null) ttlDao = TtlFkgTripleDaoImpl(ConfigReader.getPath("store.ttl.root", "~/ttl_store"))
+        return ttlDao!!
       }
       StoreType.mysql -> tripleDao
       StoreType.virtuoso -> {
