@@ -35,7 +35,7 @@ class NotMappedPropertyHandler {
     notMappedProperties.forEachIndexed { index, property ->
       maxNumberOfTriples++
       val name = property.substringAfterLast("/")
-      val propertyUrl = URIs.convertToNotMappedFkgPropertyUri(name)!!
+      val propertyUrl = URIs.convertToNotMappedFkgPropertyUri(name) ?: return@forEachIndexed
       store.save(sourceUrl, propertyUrl, URIs.type, URIs.typeOfAnyProperties, module, version)
       if (store.read(propertyUrl, URIs.label, null).isEmpty())
         store.save(sourceUrl, propertyUrl, URIs.label, PropertyNormaller.removeDigits(name), module, version)
