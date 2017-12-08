@@ -7,6 +7,7 @@
 package ir.ac.iust.dml.kg.access.dao
 
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
+import ir.ac.iust.dml.kg.access.entities.FkgTripleProperty
 import ir.ac.iust.dml.kg.knowledge.core.ValueType
 import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
 import ir.ac.iust.dml.kg.raw.utils.URIs
@@ -64,8 +65,39 @@ object TripleFixer {
       else LanguageChecker.detectLanguage(t.objekt)
 
     for (p in t.properties)
-      if (!fix(t)) return false
+      if (!fix(p)) return false
 
+    return true
+  }
+
+  private fun fix(t: FkgTripleProperty): Boolean {
+    if (t.objekt == null || t.objekt!!.trim().isEmpty()) {
+      logger.error("short triple here: ${t.parent.subject} ${t.predicate} ${t.objekt}")
+      return false
+    }
+    if (!t.predicate!!.contains("://")) t.predicate = URIs.prefixedToUri(t.predicate)
+    if (!URIs.isHttpUriFast(t.predicate)) {
+      logger.error("wrong subject format: " + t.parent.subject + ": " + t.predicate)
+      return false
+    }
+
+    if ((!isValidUri(t.predicate!!))) {
+      logger.error("wrong predicate url: " + t.predicate)
+      return false
+    }
+
+    if (t.valueType == TypedValueData.TypeEnum.RESOURCE && !isValidUri(t.objekt!!)) {
+      logger.error("wrong object url: " + t.objekt!!)
+      return false
+    }
+
+    if (t.valueType == null)
+      t.valueType =
+          if (URIs.isHttpUriFast(t.objekt!!)) ValueType.Resource
+          else ValueType.String
+    if (t.language == null)
+      t.language = if (t.valueType == ValueType.Resource) null
+      else LanguageChecker.detectLanguage(t.objekt)
     return true
   }
 }

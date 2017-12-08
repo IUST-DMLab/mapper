@@ -151,7 +151,7 @@ object DumpUtils {
       try {
         listener(tripleCache)
       } catch (th: Throwable) {
-
+        th.printStackTrace()
       }
     }
   }

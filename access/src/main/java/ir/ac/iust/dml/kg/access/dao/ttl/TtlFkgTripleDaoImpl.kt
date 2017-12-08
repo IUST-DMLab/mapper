@@ -6,21 +6,27 @@
 
 package ir.ac.iust.dml.kg.access.dao.ttl
 
-import com.google.common.reflect.TypeToken
-import com.google.gson.GsonBuilder
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.dao.TripleFixer
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
+import ir.ac.iust.dml.kg.knowledge.core.ValueType
 import ir.ac.iust.dml.kg.raw.utils.PagedData
 import ir.ac.iust.dml.kg.raw.utils.URIs
 import org.apache.commons.io.FileUtils
 import org.apache.log4j.Logger
-import java.io.*
-import java.net.URLEncoder
+import org.eclipse.rdf4j.model.Value
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory
+import org.eclipse.rdf4j.model.util.ModelBuilder
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema
+import org.eclipse.rdf4j.rio.RDFFormat
+import org.eclipse.rdf4j.rio.Rio
+import java.io.FileOutputStream
+import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.*
 
-class TtlFkgTripleDaoImpl(private val path: Path, private val flushSize: Int = 100) : FkgTripleDao() {
+class TtlFkgTripleDaoImpl(private val path: Path, private val flushSize: Int = 50000) : FkgTripleDao() {
   private val logger = Logger.getLogger(this.javaClass)!!
 
   override fun newVersion(module: String) = 1
@@ -31,61 +37,90 @@ class TtlFkgTripleDaoImpl(private val path: Path, private val flushSize: Int = 1
     if (!Files.exists(path)) Files.createDirectories(path)
   }
 
-  private var notFlushedTriples = mutableMapOf<String, MutableList<FkgTriple>>()
-  private var gson = GsonBuilder().excludeFieldsWithoutExposeAnnotation()
-      .setPrettyPrinting().disableHtmlEscaping().create()
-  private val type = object : TypeToken<List<FkgTriple>>() {}.type!!
+  private var notFlushedTriples = mutableListOf<FkgTriple>()
+  private var subRelations = mutableMapOf<String, Int>()
+  private var numberOfFiles = 0
 
   override fun save(t: FkgTriple) {
     synchronized(notFlushedTriples) {
       if (!TripleFixer.fix(t)) return
-      notFlushedTriples.getOrPut(t.subject!!, { mutableListOf() }).add(t)
+      notFlushedTriples.add(t)
       if (notFlushedTriples.size > flushSize) {
         flush()
       }
     }
   }
 
-  private val prefixedUriSplicer = Regex("[:/]")
-  private fun getPath(uri: String): Path {
-    val prefixedUri = URIs.replaceAllPrefixesInString(uri)
-    var subjectPath: Path
-    if (prefixedUri != uri && prefixedUri != null) {
-      val parts = prefixedUri.split(prefixedUriSplicer)
-      subjectPath = path.resolve(parts[0])
-      val l = parts.last()
-      subjectPath = subjectPath.resolve(if (l.length > 1) l.substring(0, 2) else l.substring(0, 1))
-      for (i in 1 until parts.size - 1) subjectPath = subjectPath.resolve(parts[i])
-      subjectPath = subjectPath.resolve(parts.last() + ".json")
-    } else {
-      subjectPath = path.resolve("no-prefix").resolve(URLEncoder.encode(uri, "UTF-8") + ".json")
-    }
-    val subjectFolder = subjectPath.toAbsolutePath().parent
-    if (!Files.exists(subjectFolder)) Files.createDirectories(subjectFolder)
-    return subjectPath
-  }
-
   override fun flush() {
-    notFlushedTriples.forEach { subject, triples ->
-      val subjectPath = getPath(subject)
-      val oldList = mutableListOf<FkgTriple>()
-      if (Files.exists(subjectPath)) {
-        BufferedReader(InputStreamReader(FileInputStream(subjectPath.toFile()), "UTF8")).use {
-          val l: List<FkgTriple> = gson.fromJson(it, type)
-          oldList.addAll(l)
-        }
-      }
-      oldList.addAll(triples)
-      FileOutputStream(subjectPath.toFile()).use {
-        OutputStreamWriter(it, "UTF-8").use {
-          BufferedWriter(it).use {
-            logger.trace("writing $subjectPath")
-            gson.toJson(oldList, it)
+    val builder = ModelBuilder()
+    val out: FileOutputStream
+    try {
+      out = FileOutputStream(path.resolve("$numberOfFiles.ttl").toFile())
+      val writer = Rio.createWriter(RDFFormat.TURTLE, out)
+      writer.startRDF()
+      writer.handleNamespace(URIs.fkgResourcePrefix,
+          URIs.prefixedToUri(URIs.fkgResourcePrefix + ":"))
+      writer.handleNamespace(URIs.fkgNotMappedPropertyPrefix,
+          URIs.prefixedToUri(URIs.fkgNotMappedPropertyPrefix + ":"))
+      writer.handleNamespace(URIs.fkgCategoryPrefix,
+          URIs.prefixedToUri(URIs.fkgCategoryPrefix + ":"))
+      writer.handleNamespace(URIs.fkgDataTypePrefix,
+          URIs.prefixedToUri(URIs.fkgDataTypePrefix + ":"))
+      writer.handleNamespace(URIs.fkgOntologyPrefix,
+          URIs.prefixedToUri(URIs.fkgOntologyPrefix + ":"))
+      writer.handleNamespace("rdfs", "http://www.w3.org/2000/01/rdf-schema#")
+      writer.handleNamespace("skos", "http://www.w3.org/2004/02/skos/core#")
+      writer.handleNamespace("foaf", "http://xmlns.com/foaf/0.1/")
+      writer.handleNamespace("owl", "http://www.w3.org/2002/07/owl#")
+      writer.handleNamespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#")
+      writer.handleNamespace("dct", "http://dublincore.org/2012/06/14/dcterms#")
+      writer.handleNamespace("dbpm", "http://mappings.dbpedia.org/index.php/")
+      notFlushedTriples.forEach { triple ->
+        if (triple.properties.isEmpty())
+          builder.namedGraph(URIs.defaultContext).add(triple.subject, triple.predicate,
+              createValue(triple.objekt!!, triple.language, triple.valueType!!))
+        else {
+          val number = subRelations.getOrDefault(triple.subject!!, 0)
+          val relation = triple.subject + "_" + "/relation_" + number
+          subRelations[triple.subject!!] = number + 1
+          val relationValue = SimpleValueFactory.getInstance().createIRI(relation)
+          val defaultPredicateValue = SimpleValueFactory.getInstance().createIRI(triple.predicate)
+          builder.namedGraph(URIs.defaultContext)
+              .add(triple.subject, URIs.relatedPredicates, relationValue)
+              .add(relation, URIs.type, SimpleValueFactory.getInstance().createIRI(URIs.relatedPredicatesClass))
+              .add(relation, URIs.mainPredicate, defaultPredicateValue)
+              .add(relation, triple.predicate, createValue(triple.objekt!!, triple.language, triple.valueType!!))
+          for (prop in triple.properties) {
+            builder.namedGraph(URIs.defaultContext).add(relation,
+                prop.predicate,
+                createValue(prop.objekt!!, prop.language, prop.valueType!!))
           }
         }
       }
+      val model = builder.build()
+      model.forEach { writer.handleStatement(it) }
+      writer.endRDF()
+    } catch (e: IOException) {
+      e.printStackTrace()
     }
+    numberOfFiles++
     notFlushedTriples.clear()
+  }
+
+  private fun createValue(value: String, language: String?, type: ValueType): Value {
+    val vf = SimpleValueFactory.getInstance()
+    return when (type) {
+      ValueType.Resource -> vf.createIRI(value)
+      ValueType.String -> vf.createLiteral(value, language!!)
+      ValueType.Boolean -> vf.createLiteral(value, XMLSchema.BOOLEAN)
+      ValueType.Byte -> vf.createLiteral(value, XMLSchema.BYTE)
+      ValueType.Short -> vf.createLiteral(value, XMLSchema.SHORT)
+      ValueType.Integer -> vf.createLiteral(value, XMLSchema.INTEGER)
+      ValueType.Long -> vf.createLiteral(value, XMLSchema.LONG)
+      ValueType.Double -> vf.createLiteral(value, XMLSchema.DOUBLE)
+      ValueType.Float -> vf.createLiteral(value, XMLSchema.FLOAT)
+      ValueType.Date -> vf.createLiteral(Date(value.toLong()))
+    }
   }
 
   override fun deleteAll() {
