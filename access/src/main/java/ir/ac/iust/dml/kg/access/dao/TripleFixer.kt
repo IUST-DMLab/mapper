@@ -30,6 +30,7 @@ object TripleFixer {
       logger.error("short triple here: ${t.source} ${t.predicate} ${t.objekt}")
       return false
     }
+    if (t.predicate == null) return false
     if (!t.predicate!!.contains("://")) t.predicate = URIs.prefixedToUri(t.predicate)
     if (!URIs.isHttpUriFast(t.predicate)) {
       logger.error("wrong subject format: " + t.subject + ": " + t.predicate)
@@ -75,6 +76,7 @@ object TripleFixer {
       logger.error("short triple here: ${t.parent.subject} ${t.predicate} ${t.objekt}")
       return false
     }
+    if (t.predicate == null) return false
     if (!t.predicate!!.contains("://")) t.predicate = URIs.prefixedToUri(t.predicate)
     if (!URIs.isHttpUriFast(t.predicate)) {
       logger.error("wrong subject format: " + t.parent.subject + ": " + t.predicate)
