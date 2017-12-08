@@ -59,7 +59,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
     data.predicate = t.predicate
     data.precession = t.accuracy
 
-    val objectData = convertTypedValue(t.objekt!!, t.valueType!!, t.language!!)
+    val objectData = convertTypedValue(t.objekt!!, t.valueType!!, t.language)
     data.`object` = objectData
     data.approved = t.approved != null && t.approved!!
 
@@ -83,7 +83,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
     }
   }
 
-  private fun convertTypedValue(objekt: String, valueType: ValueType, language: String): TypedValueData {
+  private fun convertTypedValue(objekt: String, valueType: ValueType, language: String?): TypedValueData {
     val objectData = TypedValueData()
     objectData.type = convert(valueType)
     objectData.value = objekt
