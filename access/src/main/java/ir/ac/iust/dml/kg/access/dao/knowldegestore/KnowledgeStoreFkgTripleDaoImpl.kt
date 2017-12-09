@@ -65,7 +65,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
 
     t.properties.forEach {
       data.properties[it.predicate] =
-          convertTypedValue(it.objekt!!, it.valueType!!, it.language!!)
+          convertTypedValue(it.objekt!!, it.valueType!!, it.language)
     }
 
     if (t.dataType != null) data.parameters["unit"] = t.dataType
