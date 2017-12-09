@@ -1,6 +1,7 @@
 package ir.ac.iust.dml.kg.mapper.runner.web.rest;
 
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao;
+import ir.ac.iust.dml.kg.access.entities.FkgTriple;
 import ir.ac.iust.dml.kg.mapper.logic.Fixers;
 import ir.ac.iust.dml.kg.mapper.logic.ProgressInformer;
 import ir.ac.iust.dml.kg.mapper.logic.RawTripleImporter;
@@ -15,6 +16,7 @@ import ir.ac.iust.dml.kg.mapper.logic.wiki.AmbiguityLogic;
 import ir.ac.iust.dml.kg.mapper.logic.wiki.RedirectLogic;
 import ir.ac.iust.dml.kg.mapper.logic.wiki.WikiTripleImporter;
 import ir.ac.iust.dml.kg.raw.utils.Module;
+import ir.ac.iust.dml.kg.raw.utils.PagedData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -190,5 +192,25 @@ public class MappingHelperRestServices {
     assert filteredSubjectFile != null;
     final List<String> list = Files.readAllLines(Paths.get(filteredSubjectFile), Charset.forName("UTF-8"));
     wikiTripleImporter.createTestTriples(list.toArray(new String[list.size()]));
+  }
+
+  public void fileToStore() {
+    final FkgTripleDao knowledgeStore = storeProvider.getStore(StoreType.knowledgeStore);
+    knowledgeStore.setValidate(false);
+    final FkgTripleDao fileStore = storeProvider.getStore(StoreType.file);
+    int version = knowledgeStore.newVersion(Module.wiki.name());
+    int pageSize = 1000;
+    int page = 0;
+    PagedData<FkgTriple> list = fileStore.list(pageSize, page);
+    ProgressInformer informer = new ProgressInformer((int) list.getPageCount());
+    while (true) {
+      list.getData().forEach(knowledgeStore::save);
+      knowledgeStore.flush();
+      if (list.getData().isEmpty()) break;
+      list = fileStore.list(pageSize, ++page);
+      informer.stepDone(page);
+    }
+    knowledgeStore.activateVersion(Module.wiki.name(), version);
+    informer.done();
   }
 }

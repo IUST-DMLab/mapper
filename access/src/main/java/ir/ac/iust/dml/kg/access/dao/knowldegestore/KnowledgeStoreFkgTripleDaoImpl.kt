@@ -49,7 +49,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
   override fun activateVersion(module: String, version: Int) = tripleApi.activateVersion2(module, version)
 
   override fun save(t: FkgTriple) {
-    if (!TripleFixer.fix(t)) return
+    if (validate && !TripleFixer.fix(t)) return
     val data = TripleData()
     data.context = URIs.defaultContext
     data.module = t.module

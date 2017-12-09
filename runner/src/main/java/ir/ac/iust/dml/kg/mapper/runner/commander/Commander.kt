@@ -40,6 +40,7 @@ class Commander {
         "raw" -> services.raw(StoreType.valueOf(args[0]!!)) // writes all predicates
         "dumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(args[0]!!), false) // all needed tasks in one place
         "completeDumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(args[0]!!), true) // all needed tasks in one place
+        "fileToStore" -> services.fileToStore()
       }
     } catch (th: Throwable) {
       th.printStackTrace()

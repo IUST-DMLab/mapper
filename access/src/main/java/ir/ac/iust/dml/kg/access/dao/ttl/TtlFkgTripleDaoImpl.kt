@@ -43,7 +43,7 @@ class TtlFkgTripleDaoImpl(private val path: Path, private val flushSize: Int = 5
 
   override fun save(t: FkgTriple) {
     synchronized(notFlushedTriples) {
-      if (!TripleFixer.fix(t)) return
+      if (validate && !TripleFixer.fix(t)) return
       notFlushedTriples.add(t)
       if (notFlushedTriples.size > flushSize) {
         flush()

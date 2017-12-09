@@ -11,7 +11,9 @@ import com.google.gson.GsonBuilder
 import ir.ac.iust.dml.kg.access.dao.FkgTripleDao
 import ir.ac.iust.dml.kg.access.dao.TripleFixer
 import ir.ac.iust.dml.kg.access.entities.FkgTriple
+import ir.ac.iust.dml.kg.raw.utils.PageUtils
 import ir.ac.iust.dml.kg.raw.utils.PagedData
+import ir.ac.iust.dml.kg.raw.utils.PathWalker
 import ir.ac.iust.dml.kg.raw.utils.URIs
 import org.apache.commons.io.FileUtils
 import org.apache.log4j.Logger
@@ -19,6 +21,7 @@ import java.io.*
 import java.net.URLEncoder
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.math.min
 
 class FileFkgTripleDaoImpl(private val path: Path, private val flushSize: Int = 100) : FkgTripleDao() {
   private val logger = Logger.getLogger(this.javaClass)!!
@@ -38,7 +41,7 @@ class FileFkgTripleDaoImpl(private val path: Path, private val flushSize: Int = 
 
   override fun save(t: FkgTriple) {
     synchronized(notFlushedTriples) {
-      if (!TripleFixer.fix(t)) return
+      if (validate && !TripleFixer.fix(t)) return
       notFlushedTriples.getOrPut(t.subject!!, { mutableListOf() }).add(t)
       if (notFlushedTriples.size > flushSize) {
         flush()
@@ -79,9 +82,13 @@ class FileFkgTripleDaoImpl(private val path: Path, private val flushSize: Int = 
       val subjectPath = getPath(subject) ?: return@forEach
       val oldList = mutableListOf<FkgTriple>()
       if (Files.exists(subjectPath)) {
-        BufferedReader(InputStreamReader(FileInputStream(subjectPath.toFile()), "UTF8")).use {
-          val l: List<FkgTriple> = gson.fromJson(it, type)
-          oldList.addAll(l)
+        FileInputStream(subjectPath.toFile()).use {
+          InputStreamReader(it, "UTF-8").use {
+            BufferedReader(it).use {
+              val l: List<FkgTriple> = gson.fromJson(it, type)
+              oldList.addAll(l)
+            }
+          }
         }
       }
       oldList.addAll(triples)
@@ -110,12 +117,48 @@ class FileFkgTripleDaoImpl(private val path: Path, private val flushSize: Int = 
     TODO("not implemented")
   }
 
+  private val currentFiles = mutableListOf<Path>()
+  /**
+   * size of return objects are not working properly. page and page size is
+   * used in order of file (subject) not order of triples.
+   */
   override fun list(pageSize: Int, page: Int): PagedData<FkgTriple> {
-    throw UnsupportedOperationException("not implemented")
+    if (currentFiles.isEmpty())
+      currentFiles.addAll(PathWalker.getPath(path, Regex(".*\\.json")))
+    val start = page * pageSize
+    if (start >= currentFiles.size) return PageUtils.asPages(page, pageSize, mutableListOf())
+    val allSubjectsList = mutableListOf<FkgTriple>()
+    for (i in start until (min(pageSize * (page + 1), currentFiles.size)))
+      FileInputStream(currentFiles[i].toFile()).use {
+        InputStreamReader(it, "UTF-8").use {
+          BufferedReader(it).use {
+            val subjectList: List<FkgTriple> = gson.fromJson(it, type)
+            allSubjectsList.addAll(subjectList)
+          }
+        }
+      }
+    val totalSize = currentFiles.size.toLong()
+    val pageCount = (totalSize / pageSize) + (if (totalSize % pageSize == 0L) 0 else 1)
+    return PagedData(allSubjectsList, page, pageSize, pageCount, totalSize)
   }
 
   override fun read(subject: String?, predicate: String?, objekt: String?): MutableList<FkgTriple> {
-    throw UnsupportedOperationException("not implemented")
+    val subjectPath = getPath(subject!!) ?: return mutableListOf()
+    val oldList = mutableListOf<FkgTriple>()
+    if (Files.exists(subjectPath)) {
+      FileInputStream(subjectPath.toFile()).use {
+        InputStreamReader(it, "UTF-8").use {
+          BufferedReader(it).use {
+            val l: List<FkgTriple> = gson.fromJson(it, type)
+            oldList.addAll(l)
+          }
+        }
+      }
+    }
+    return oldList.filter {
+      it.predicate == predicate
+          && it.objekt == objekt
+    }.toMutableList()
   }
 
 }

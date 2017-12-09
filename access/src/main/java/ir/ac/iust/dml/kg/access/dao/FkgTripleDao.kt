@@ -12,6 +12,8 @@ import ir.ac.iust.dml.kg.raw.utils.URIs
 
 abstract class FkgTripleDao {
 
+  var validate = true
+
   abstract fun newVersion(module: String): Int
 
   abstract fun activateVersion(module: String, version: Int): Boolean
