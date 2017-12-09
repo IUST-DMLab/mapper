@@ -15,6 +15,7 @@ import ir.ac.iust.dml.kg.mapper.logic.utils.StoreProvider;
 import ir.ac.iust.dml.kg.mapper.logic.wiki.AmbiguityLogic;
 import ir.ac.iust.dml.kg.mapper.logic.wiki.RedirectLogic;
 import ir.ac.iust.dml.kg.mapper.logic.wiki.WikiTripleImporter;
+import ir.ac.iust.dml.kg.raw.utils.ConfigReader;
 import ir.ac.iust.dml.kg.raw.utils.Module;
 import ir.ac.iust.dml.kg.raw.utils.PagedData;
 import org.jetbrains.annotations.NotNull;
@@ -199,12 +200,16 @@ public class MappingHelperRestServices {
     knowledgeStore.setValidate(false);
     final FkgTripleDao fileStore = storeProvider.getStore(StoreType.file);
     int version = knowledgeStore.newVersion(Module.wiki.name());
-    int pageSize = 1000;
+    int pageSize = ConfigReader.INSTANCE.getInt("file.to.store.page.size", "10000");
     int page = 0;
     PagedData<FkgTriple> list = fileStore.list(pageSize, page);
     ProgressInformer informer = new ProgressInformer((int) list.getPageCount());
     while (true) {
-      list.getData().forEach(knowledgeStore::save);
+      list.getData().forEach(triple -> {
+            triple.setVersion(version);
+            knowledgeStore.save(triple);
+          }
+      );
       knowledgeStore.flush();
       if (list.getData().isEmpty()) break;
       list = fileStore.list(pageSize, ++page);
@@ -212,5 +217,10 @@ public class MappingHelperRestServices {
     }
     knowledgeStore.activateVersion(Module.wiki.name(), version);
     informer.done();
+  }
+
+  public void fastWikiUpdate() throws Exception {
+    completeDumpUpdate(StoreType.file, true);
+    fileToStore();
   }
 }
