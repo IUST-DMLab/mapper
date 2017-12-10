@@ -21,8 +21,8 @@ open class V3EntityViewer {
 
   //  private val ontologyApi: V1triplesApi
   private val THING = URIs.getFkgOntologyClassUri("Thing")
-  private val relatedPredicates = URIs.getFkgOntologyPropertyUri("relatedPredicates")
-  private val mainPredicate = URIs.getFkgOntologyPropertyUri("mainPredicate")
+  private val relatedPredicates = URIs.relatedPredicates
+  private val mainPredicate = URIs.mainPredicate
 
   private fun getLabel(url: String): String? {
     if (url.contains("/resource/")) return null
@@ -40,7 +40,7 @@ open class V3EntityViewer {
   private fun getPropertyLabel(url: String) = PropertyFilter.propertyLabelCache
       .getOrPut(url.substringAfterLast("/"), { getLabel(url) })
 
-  @Cacheable(value = *arrayOf("getEntityData"))
+  @Cacheable(value = ["getEntityData"])
   fun getEntityData(url: String, properties: Boolean = true): EntityData {
     if (connector == null) {
       connector = VirtuosoConnector(ConfigReader.getString("virtuoso.graph", URIs.defaultContext))
