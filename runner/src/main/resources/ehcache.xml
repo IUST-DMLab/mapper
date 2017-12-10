@@ -1,5 +1,21 @@
-<ehcache updateCheck="true" monitoring="autodetect" dynamicConfig="true" maxBytesLocalHeap="150M"
-         overflowToDisk="true">
-  <diskStore path="java.io.tmpdir"/>
-  <cache name="getEntityData" timeToLiveSeconds="60" maxElementsOnDisk="1000"/>
-</ehcache>
+<config xmlns='http://www.ehcache.org/v3'
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:jsr107="http://www.ehcache.org/v3/jsr107"
+        xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.0.xsd
+							http://www.ehcache.org/v3/jsr107 http://www.ehcache.org/schema/ehcache-107-ext-3.0.xsd">
+  <cache alias="viewer3">
+    <expiry>
+      <ttl unit="seconds">3600</ttl>
+    </expiry>
+    <heap unit="entries">100000</heap>
+    <jsr107:mbeans enable-statistics="true"/>
+  </cache>
+  <cache alias="viewer2">
+    <expiry>
+      <ttl unit="seconds">3600</ttl>
+    </expiry>
+    <heap unit="entries">100000</heap>
+    <jsr107:mbeans enable-statistics="true"/>
+  </cache>
+
+</config>

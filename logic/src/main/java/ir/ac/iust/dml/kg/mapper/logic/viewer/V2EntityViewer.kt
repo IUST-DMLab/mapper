@@ -14,10 +14,13 @@ import ir.ac.iust.dml.kg.services.client.swagger.V2ontologyApi
 import ir.ac.iust.dml.kg.services.client.swagger.V2subjectsApi
 import ir.ac.iust.dml.kg.services.client.swagger.model.TripleObject
 import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValue
+import org.springframework.cache.annotation.CacheConfig
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
 @Service
-class V2EntityViewer {
+@CacheConfig(cacheNames = ["viewer2"])
+open class V2EntityViewer {
   private val tripleApi: V2subjectsApi
   private val ontologyApi: V2ontologyApi
   //  private val ontologyApi: V1triplesApi
@@ -51,7 +54,8 @@ class V2EntityViewer {
       = ontologySearch(subject, predicate, null, false).data.filter { filter(it.`object`.value) }
       .firstOrNull()?.`object`?.value
 
-  fun getEntityData(url: String, properties: Boolean = true): EntityData {
+  @Cacheable
+  open fun getEntityData(url: String, properties: Boolean = true): EntityData {
     val result = EntityData()
     val subjectTriples = tripleApi.get1(null, url).triples!!
     val entityDefaultName = url.substringAfterLast("/").replace('_', ' ')
@@ -123,5 +127,6 @@ class V2EntityViewer {
     return null
   }
 
-  fun getEntities(entities: MutableList<String>) = entities.map { getEntityData(it, false) }
+  @Cacheable
+  open fun getEntities(entities: MutableList<String>) = entities.map { getEntityData(it, false) }
 }

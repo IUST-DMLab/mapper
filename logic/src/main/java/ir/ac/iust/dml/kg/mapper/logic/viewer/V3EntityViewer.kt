@@ -12,17 +12,17 @@ import ir.ac.iust.dml.kg.raw.utils.URIs
 import ir.ac.iust.dml.kg.virtuoso.connector.VirtuosoConnector
 import ir.ac.iust.dml.kg.virtuoso.connector.data.VirtuosoTripleObject
 import ir.ac.iust.dml.kg.virtuoso.connector.data.VirtuosoTripleType
+import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
 @Service
+@CacheConfig(cacheNames = ["viewer3"])
 open class V3EntityViewer {
   private var connector: VirtuosoConnector? = null
 
   //  private val ontologyApi: V1triplesApi
   private val THING = URIs.getFkgOntologyClassUri("Thing")
-  private val relatedPredicates = URIs.relatedPredicates
-  private val mainPredicate = URIs.mainPredicate
 
   private fun getLabel(url: String): String? {
     if (url.contains("/resource/")) return null
@@ -40,8 +40,8 @@ open class V3EntityViewer {
   private fun getPropertyLabel(url: String) = PropertyFilter.propertyLabelCache
       .getOrPut(url.substringAfterLast("/"), { getLabel(url) })
 
-  @Cacheable(value = ["getEntityData"])
-  fun getEntityData(url: String, properties: Boolean = true): EntityData {
+  @Cacheable
+  open fun getEntityData(url: String, properties: Boolean = true): EntityData {
     if (connector == null) {
       connector = VirtuosoConnector(ConfigReader.getString("virtuoso.graph", URIs.defaultContext))
     }
@@ -67,10 +67,10 @@ open class V3EntityViewer {
         PropertyFilter.filteredPredicates.none { it.matches(triple.key) }
             && triple.value[0].value != "no"
       }.forEach { triple ->
-        if (triple.key == relatedPredicates) {
+        if (triple.key == URIs.relatedPredicates) {
           for (it in triple.value) {
             val related = connector!!.getTriplesOfSubject(it.value.toString())
-            val mp = related.firstOrNull { it.predicate == mainPredicate } ?: continue
+            val mp = related.firstOrNull { it.predicate == URIs.mainPredicate } ?: continue
             val mpUrl = mp.`object`.value.toString()
             val propertyLabel = getPropertyLabel(mpUrl)
             if (propertyLabel != null) {
@@ -80,7 +80,7 @@ open class V3EntityViewer {
               values.add(v)
               val otherPredicates = related.filter {
                 it.predicate != URIs.type &&
-                    it.predicate != mainPredicate && it.predicate != mpUrl
+                    it.predicate != URIs.mainPredicate && it.predicate != mpUrl
               }
               otherPredicates.forEach {
                 val label = getPropertyLabel(it.predicate)
@@ -121,5 +121,6 @@ open class V3EntityViewer {
     return null
   }
 
-  fun getEntities(entities: MutableList<String>) = entities.map { getEntityData(it, false) }
+  @Cacheable
+  open fun getEntities(entities: MutableList<String>) = entities.map { getEntityData(it, false) }
 }

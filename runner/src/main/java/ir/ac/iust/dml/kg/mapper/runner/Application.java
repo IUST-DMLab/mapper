@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.Random;
 
-@EnableCaching
 @SpringBootApplication
 @ImportResource(value = {
     "classpath:access-context.xml",
@@ -29,6 +28,7 @@ import java.util.Random;
     DataSourceAutoConfiguration.class,
     DataSourceTransactionManagerAutoConfiguration.class,
     HibernateJpaAutoConfiguration.class})
+@EnableCaching
 public class Application {
 
   public static void main(String[] args) {
