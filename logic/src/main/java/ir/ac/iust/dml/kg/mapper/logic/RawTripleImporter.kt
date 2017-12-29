@@ -48,7 +48,7 @@ class RawTripleImporter {
 
   data class SubjectData(var subject: String, var ontologyClass: String? = null, var classDepth: Int = 0)
 
-  fun writeTriples(storeType: StoreType = StoreType.none) {
+  fun writeTriples(storeType: StoreType = StoreType.none, newSubject: Boolean = false) {
     val path = PathUtils.getPath("raw.folder.input", "~/raw/triples")
     val maxNumberOfTriples = TestUtils.getMaxTuples()
     val store = storeProvider.getStore(storeType)
@@ -80,7 +80,7 @@ class RawTripleImporter {
     }
 
     val newSubjects = mutableSetOf<String>()
-    val VERSION = 1
+    val version = 1
     val informer = ProgressInformer(result.size + 2)
 
     result.forEachIndexed { index, p ->
@@ -121,6 +121,7 @@ class RawTripleImporter {
               if (subject == null) {
                 subject = URIs.getFkgResourceUri(subjectLabel)
                 newSubjects.add(subject)
+                if (!newSubject) continue
               }
 
               val objekt = if (entityInfoLogic.resources.containsKey(triple.`object`))
@@ -152,7 +153,7 @@ class RawTripleImporter {
                     }
                 if (predicate == defaultProperty) notMappedPropertyHandler.addToNotMapped(triple.predicate)
               } else predicate = triple.predicate
-              store.save(triple.sourceUrl, subject, predicate, objekt, triple.module!!, VERSION,
+              store.save(triple.sourceUrl, subject, predicate, objekt, triple.module!!, version,
                   triple.rawText, triple.accuracy, triple.extractionTime)
             } catch (th: Throwable) {
               th.printStackTrace()
@@ -165,14 +166,15 @@ class RawTripleImporter {
       informer.stepDone(index + 1)
     }
 
-    newSubjects.forEach { subject ->
-      logger.info("new subject detected: $subject")
-      entityClassImporter.addResourceAsThing(subject, store, Module.raw_mapper_entity_adder.name, VERSION)
-    }
+    if (newSubject)
+      newSubjects.forEach { subject ->
+        logger.info("new subject detected: $subject")
+        entityClassImporter.addResourceAsThing(subject, store, Module.raw_mapper_entity_adder.name, version)
+      }
 
     store.flush()
     informer.stepDone(result.size + 1)
-    notMappedPropertyHandler.writeNotMappedProperties("raw", VERSION, true)
+    notMappedPropertyHandler.writeNotMappedProperties("raw", version, true)
     logger.info("new subjects has been added: ${newSubjects.joinToString("\n")}")
     informer.done()
   }

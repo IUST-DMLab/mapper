@@ -37,7 +37,7 @@ class Commander {
         "predicatesFast" -> services.predicates(false) // writes all predicates without ambiguation resolving
         "properties" -> services.properties(args[0]!!.toInt(), StoreType.valueOf(args[1]!!), true) // writes all not mapped properties
         "propertiesFast" -> services.properties(args[0]!!.toInt(), StoreType.valueOf(args[1]!!), false) // writes all not mapped properties without ambiguation resolving
-        "raw" -> services.raw(StoreType.valueOf(args[0]!!)) // writes all predicates
+        "raw" -> services.raw(StoreType.valueOf(args[0]!!), if (args.size > 1) args[1]!!.toBoolean() else null) // writes all predicates
         "dumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(args[0]!!), false) // all needed tasks in one place
         "completeDumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(args[0]!!), true) // all needed tasks in one place
         "fileToStore" -> services.fileToStore()

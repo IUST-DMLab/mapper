@@ -171,8 +171,8 @@ public class MappingHelperRestServices {
     informer.done();
   }
 
-  public boolean raw(@NotNull StoreType type) {
-    rawTripleImporter.writeTriples(type);
+  public boolean raw(@NotNull StoreType type, Boolean newSubject) {
+    rawTripleImporter.writeTriples(type, (newSubject != null) && newSubject);
     notMappedPropertyHandler.writeNotMappedProperties("raw", 1, true);
     return true;
   }
