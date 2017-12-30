@@ -101,7 +101,7 @@ class RawTripleImporter {
                 logger.warn("triple number is $tripleNumber. $index file is $p. " +
                     "time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
               val subjectLabel = if (triple.subject.contains("/")) triple.subject.substringAfterLast("/") else triple.subject
-              val subjects = mutableListOf(URIs.getFkgResourceUri(subjectLabel))
+              val subjects = mutableListOf(URIs.getFkgResourceUri(subjectLabel.replace("( ", "(").replace(" )", ")")))
               val subjectsData = subjects.map { subject ->
                 val subjectData = SubjectData(subject)
                 val subjectInfoBoxes = entityInfoLogic.resources[subject.substringAfterLast("/").replace('_', ' ')]
