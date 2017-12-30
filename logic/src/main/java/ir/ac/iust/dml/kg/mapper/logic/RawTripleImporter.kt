@@ -25,6 +25,11 @@ import ir.ac.iust.nlp.jhazm.Stemmer
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.io.BufferedWriter
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
+import java.nio.charset.StandardCharsets
+import java.nio.file.Path
 
 @Service
 class RawTripleImporter {
@@ -80,6 +85,7 @@ class RawTripleImporter {
     }
 
     val newSubjects = mutableSetOf<String>()
+    val writtenSubjects = mutableSetOf<String>()
     val version = 1
     val informer = ProgressInformer(result.size + 2)
 
@@ -153,6 +159,7 @@ class RawTripleImporter {
                     }
                 if (predicate == defaultProperty) notMappedPropertyHandler.addToNotMapped(triple.predicate)
               } else predicate = triple.predicate
+              writtenSubjects.add(subject)
               store.save(triple.sourceUrl, subject, predicate, objekt, triple.module!!, version,
                   triple.rawText, triple.accuracy, triple.extractionTime)
             } catch (th: Throwable) {
@@ -173,9 +180,23 @@ class RawTripleImporter {
       }
 
     store.flush()
+
+    write(path.resolve("writtenSubjects.text"), writtenSubjects)
+    write(path.resolve("newSubjects.text"), newSubjects)
+
     informer.stepDone(result.size + 1)
     notMappedPropertyHandler.writeNotMappedProperties("raw", version, true)
     logger.info("new subjects has been added: ${newSubjects.joinToString("\n")}")
     informer.done()
+  }
+
+  private fun write(path: Path, collection: Collection<String>) {
+    FileOutputStream(path.toFile()).use {
+      OutputStreamWriter(it, StandardCharsets.UTF_8).use {
+        BufferedWriter(it).use { writer ->
+          collection.forEach { writer.write(it + '\n') }
+        }
+      }
+    }
   }
 }
