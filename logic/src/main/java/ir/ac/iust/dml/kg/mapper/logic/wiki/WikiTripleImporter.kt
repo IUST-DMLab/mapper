@@ -227,7 +227,7 @@ class WikiTripleImporter {
       }
     }
 
-    val NOT_MAPPED_PREFIX = URIs.fkgNotMappedPropertyPrefix + ":"
+    val notMappedPrefix = URIs.fkgNotMappedPropertyPrefix + ":"
 
     DumpUtils.getTriples(
         if (TestUtils.isDebugMode()) PathUtils.getTriplesTestPath() else PathUtils.getTriplesPath(),
@@ -280,7 +280,7 @@ class WikiTripleImporter {
 //          val propertyMapping = templateMapping.properties!![PropertyNormaller.removeDigits(property)]
           val propertyRules = propertyMapping.rules.filter {
             // This filter just fixes wrong mappings which are mapped to not ontology maps.
-            it.predicate != null && !it.predicate!!.startsWith(NOT_MAPPED_PREFIX)
+            it.predicate != null && !(it.predicate?.startsWith(notMappedPrefix) ?: false)
           }
           if (propertyRules.isEmpty()) {
             if (!propertyMapping.recommendations.isEmpty()) {
@@ -353,7 +353,8 @@ class WikiTripleImporter {
           module = Module.wiki.name, version = version)
     }
     var type: ValueType? = null
-    if (rule.predicate == null || rule.predicate == "NULL") return null
+    if (rule.predicate == null || rule.predicate == "NULL")
+      return null
     val value = when {
       rule.transform != null -> {
         try {
