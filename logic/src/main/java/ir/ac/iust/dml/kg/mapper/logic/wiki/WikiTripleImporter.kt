@@ -44,7 +44,7 @@ class WikiTripleImporter {
   @Autowired private lateinit var entityClassImporter: EntityClassImporter
   @Autowired private lateinit var notMappedPropertyHandler: NotMappedPropertyHandler
   @Autowired private lateinit var redirectLogic: RedirectLogic
-  private val transformers = TransformService()
+  @Autowired private lateinit var transformers: TransformService
 
 
   fun writeAbstracts(version: Int, storeType: StoreType = StoreType.none) {

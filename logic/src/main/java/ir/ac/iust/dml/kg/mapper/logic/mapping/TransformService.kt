@@ -14,10 +14,11 @@ import javax.annotation.PostConstruct
 
 @Service
 class TransformService {
-  private val scanner = TransformScanner()
+  private lateinit var scanner: TransformScanner
 
   @PostConstruct
   fun init() {
+    scanner = TransformScanner()
     scanner.scan("ir.ac.iust.dml.kg.knowledge.core.transforms.impl")
   }
 
