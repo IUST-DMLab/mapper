@@ -49,6 +49,7 @@ class SameAsLogic {
     builder.setDefaultRequestConfig(RequestConfig.DEFAULT)
 
     val sameAs = URIs.sameAs
+    var numberOfSameAs = 0
     InputStreamReader(FileInputStream(path.toFile()), "UTF8").use {
       BufferedReader(it).use {
         val pages: Map<String, String> = gson.fromJson(it, type)
@@ -58,6 +59,7 @@ class SameAsLogic {
           val subject = URIs.getFkgResourceUri(page)
           val dbpediaAddress = "http://dbpedia.org/resource/${englishPage!!.replace(' ', '_')}"
           store.save(subject, sameAs, dbpediaAddress, Module.wiki.name, version)
+          numberOfSameAs++
           try {
             val dbpediaQuery = "http://dbpedia.org/sparql?default-graph-uri=http%3A%2F%2Fdbpedia.org" +
                 "&query=select+%3Fo+%7B%0D%0A%3C${UriEncoder.decode(dbpediaAddress)}%3E+" +
@@ -74,8 +76,10 @@ class SameAsLogic {
                 val json = EntityUtils.toString(result.entity, "UTF-8")
                 val response = gson.fromJson<VirtuosoJsonResponse>(json, VirtuosoJsonResponse::class.java)
                 response.results.bindings.forEach {
-                  if (it.o != null && it.o!!.value != null)
+                  if (it.o != null && it.o!!.value != null) {
                     store.save(subject, sameAs, it.o!!.value!!, Module.wiki.name, version)
+                    numberOfSameAs++
+                  }
                 }
               }
             } catch (e: Exception) {
@@ -84,7 +88,8 @@ class SameAsLogic {
           } catch (e: Throwable) {
             e.printStackTrace()
           }
-          logger.warn("$index file is $page. time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
+          logger.warn("$index file is $page ($numberOfSameAs same as triples)." +
+              " time elapsed is ${(System.currentTimeMillis() - startTime) / 1000} seconds")
         }
       }
     }
