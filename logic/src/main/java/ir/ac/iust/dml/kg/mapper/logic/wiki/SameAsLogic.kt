@@ -54,7 +54,6 @@ class SameAsLogic {
         val pages: Map<String, String> = gson.fromJson(it, type)
         for ((index, page) in pages.keys.withIndex()) {
           if (page.toLowerCase().contains("template")) continue
-          if (index > 10) break
           val englishPage = pages[page]
           val subject = URIs.getFkgResourceUri(page)
           val dbpediaAddress = "http://dbpedia.org/resource/${englishPage!!.replace(' ', '_')}"
