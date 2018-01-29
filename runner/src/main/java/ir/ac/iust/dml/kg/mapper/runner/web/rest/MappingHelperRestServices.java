@@ -14,6 +14,7 @@ import ir.ac.iust.dml.kg.mapper.logic.ontology.PredicateImporter;
 import ir.ac.iust.dml.kg.mapper.logic.utils.StoreProvider;
 import ir.ac.iust.dml.kg.mapper.logic.wiki.AmbiguityLogic;
 import ir.ac.iust.dml.kg.mapper.logic.wiki.RedirectLogic;
+import ir.ac.iust.dml.kg.mapper.logic.wiki.SameAsLogic;
 import ir.ac.iust.dml.kg.mapper.logic.wiki.WikiTripleImporter;
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader;
 import ir.ac.iust.dml.kg.raw.utils.Module;
@@ -41,6 +42,8 @@ public class MappingHelperRestServices {
   private AmbiguityLogic ambiguityLogic;
   @Autowired
   private KSMappingHolder ksMappingHolder;
+  @Autowired
+  private SameAsLogic sameAsLogic;
   @Autowired
   private WikiTripleImporter wikiTripleImporter;
   @Autowired
@@ -195,11 +198,11 @@ public class MappingHelperRestServices {
     wikiTripleImporter.createTestTriples(list.toArray(new String[list.size()]));
   }
 
-  public void fileToStore() {
+  public void fileToStore(Integer overrideVersion) {
     final FkgTripleDao knowledgeStore = storeProvider.getStore(StoreType.knowledgeStore);
     knowledgeStore.setValidate(false);
     final FkgTripleDao fileStore = storeProvider.getStore(StoreType.file);
-    int version = knowledgeStore.newVersion(Module.wiki.name());
+    int version = (overrideVersion != null) ? overrideVersion : knowledgeStore.newVersion(Module.wiki.name());
     int pageSize = ConfigReader.INSTANCE.getInt("file.to.store.page.size", "10000");
     int page = 0;
     PagedData<FkgTriple> list = fileStore.list(pageSize, page);
@@ -221,6 +224,10 @@ public class MappingHelperRestServices {
 
   public void fastWikiUpdate() throws Exception {
     completeDumpUpdate(StoreType.file, true);
-    fileToStore();
+    fileToStore(null);
+  }
+
+  public void sameAs(int version, @NotNull StoreType storeType) {
+    sameAsLogic.writeSameAs(version, storeType);
   }
 }

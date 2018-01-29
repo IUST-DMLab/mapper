@@ -24,6 +24,7 @@ class Commander {
         "createTestSet" -> services.createTestSet(if (args.isNotEmpty()) args[0] else "subjects.txt")
         "fix" -> services.fix(args)
         "ksMapLoad" -> services.ksMapLoad() // just for tests. can be removed.
+        "sameAs" -> services.sameAs(args[0]!!.toInt(), StoreType.valueOf(args[1]!!)) //write same as
         "triples" -> services.triples(args[0]!!.toInt(), StoreType.valueOf(args[1]!!)) //writes wikipedia triples
         "categoryTriples" -> services.categoryTriples(args[0]!!.toInt(), StoreType.valueOf(args[1]!!)) //writes wikipedia triples
         "abstracts" -> services.abstracts(args[0]!!.toInt(), StoreType.valueOf(args[1]!!)) // writes wikipedia abstracts
@@ -40,7 +41,7 @@ class Commander {
         "raw" -> services.raw(StoreType.valueOf(args[0]!!), if (args.size > 1) args[1]!!.toBoolean() else null) // writes all predicates
         "dumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(args[0]!!), false) // all needed tasks in one place
         "completeDumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(args[0]!!), true) // all needed tasks in one place
-        "fileToStore" -> services.fileToStore()
+        "fileToStore" -> services.fileToStore(if (args.isNotEmpty()) args[0]!!.toInt() else null)
         "fastWikiUpdate" -> services.fastWikiUpdate()
       }
     } catch (th: Throwable) {
