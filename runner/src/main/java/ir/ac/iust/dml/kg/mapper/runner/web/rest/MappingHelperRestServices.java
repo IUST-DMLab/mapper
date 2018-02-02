@@ -32,6 +32,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/helper")
@@ -207,12 +208,32 @@ public class MappingHelperRestServices {
     int page = 0;
     PagedData<FkgTriple> list = fileStore.list(pageSize, page);
     ProgressInformer informer = new ProgressInformer((int) list.getPageCount());
+    String skip = null;
+    String category = null;
     while (true) {
-      list.getData().forEach(triple -> {
-            triple.setVersion(version);
-            knowledgeStore.save(triple);
-          }
-      );
+      for (FkgTriple triple : list.getData()) {
+        if (triple.getSubject() == null || triple.getObjekt() == null) continue;
+        if (Objects.equals(triple.getSubject(), skip)) {
+          System.out.println("template subject skipped " + skip);
+          continue;
+        }
+        if (triple.getObjekt().toLowerCase().contains("template")) {
+          skip = triple.getSubject();
+          System.out.println("template subject detected: " + skip);
+          continue;
+        }
+        if (triple.getObjekt().toLowerCase().contains("category")) {
+          category = triple.getSubject();
+        }
+        skip = null;
+        triple.setVersion(version);
+        if (Objects.equals(triple.getSubject(), category)) {
+          System.out.println("converting " + triple.getSubject());
+          triple.setSubject(triple.getSubject().replace("/resource/", "/category/"));
+          System.out.println("to " + triple.getSubject());
+        }
+        knowledgeStore.save(triple);
+      }
       knowledgeStore.flush();
       if (list.getData().isEmpty()) break;
       list = fileStore.list(pageSize, ++page);
