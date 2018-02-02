@@ -41,7 +41,9 @@ class Commander {
         "raw" -> services.raw(StoreType.valueOf(args[0]!!), if (args.size > 1) args[1]!!.toBoolean() else null) // writes all predicates
         "dumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(args[0]!!), false) // all needed tasks in one place
         "completeDumpUpdate" -> services.completeDumpUpdate(StoreType.valueOf(args[0]!!), true) // all needed tasks in one place
-        "fileToStore" -> services.fileToStore(if (args.isNotEmpty()) args[0]!!.toInt() else null)
+        "fileToStore" -> services.fileToStore(
+            if (args.isNotEmpty()) args[0]!!.toInt() else null,
+            if (args.size > 1) args[1]!! else null)
         "fastWikiUpdate" -> services.fastWikiUpdate()
       }
     } catch (th: Throwable) {

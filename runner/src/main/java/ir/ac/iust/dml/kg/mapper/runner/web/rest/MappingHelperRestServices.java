@@ -19,6 +19,7 @@ import ir.ac.iust.dml.kg.mapper.logic.wiki.WikiTripleImporter;
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader;
 import ir.ac.iust.dml.kg.raw.utils.Module;
 import ir.ac.iust.dml.kg.raw.utils.PagedData;
+import ir.ac.iust.dml.kg.raw.utils.URIs;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -199,7 +200,7 @@ public class MappingHelperRestServices {
     wikiTripleImporter.createTestTriples(list.toArray(new String[list.size()]));
   }
 
-  public void fileToStore(Integer overrideVersion) {
+  public void fileToStore(Integer overrideVersion, String overrideModule) {
     final FkgTripleDao knowledgeStore = storeProvider.getStore(StoreType.knowledgeStore);
     knowledgeStore.setValidate(false);
     final FkgTripleDao fileStore = storeProvider.getStore(StoreType.file);
@@ -208,30 +209,34 @@ public class MappingHelperRestServices {
     int page = 0;
     PagedData<FkgTriple> list = fileStore.list(pageSize, page);
     ProgressInformer informer = new ProgressInformer((int) list.getPageCount());
-    String skip = null;
-    String category = null;
+    String templateResource = null;
+    String categoryResource = null;
+    final String sameAs = URIs.INSTANCE.getSameAs();
     while (true) {
       for (FkgTriple triple : list.getData()) {
-        if (triple.getSubject() == null || triple.getObjekt() == null) continue;
-        if (Objects.equals(triple.getSubject(), skip)) {
-          System.out.println("template subject skipped " + skip);
-          continue;
+        if (triple.getSubject() == null || triple.getObjekt() == null || triple.getPredicate() == null) continue;
+        if (triple.getPredicate().equals(sameAs)) {
+          if (Objects.equals(triple.getSubject(), templateResource)) {
+            System.out.println("template subject skipped " + templateResource);
+            continue;
+          }
+          if (triple.getObjekt().toLowerCase().contains("template:")) {
+            templateResource = triple.getSubject();
+            System.out.println("template subject detected: " + templateResource);
+            continue;
+          }
+          if (triple.getObjekt().toLowerCase().contains("category")) {
+            categoryResource = triple.getSubject();
+          }
+          templateResource = null;
+          if (Objects.equals(triple.getSubject(), categoryResource)) {
+            System.out.println("converting " + triple.getSubject());
+            triple.setSubject(triple.getSubject().replace("/resource/", "/category/"));
+            System.out.println("to " + triple.getSubject());
+          }
         }
-        if (triple.getObjekt().toLowerCase().contains("template")) {
-          skip = triple.getSubject();
-          System.out.println("template subject detected: " + skip);
-          continue;
-        }
-        if (triple.getObjekt().toLowerCase().contains("category")) {
-          category = triple.getSubject();
-        }
-        skip = null;
         triple.setVersion(version);
-        if (Objects.equals(triple.getSubject(), category)) {
-          System.out.println("converting " + triple.getSubject());
-          triple.setSubject(triple.getSubject().replace("/resource/", "/category/"));
-          System.out.println("to " + triple.getSubject());
-        }
+        if (overrideModule != null) triple.setModule(overrideModule);
         knowledgeStore.save(triple);
       }
       knowledgeStore.flush();
@@ -245,7 +250,7 @@ public class MappingHelperRestServices {
 
   public void fastWikiUpdate() throws Exception {
     completeDumpUpdate(StoreType.file, true);
-    fileToStore(null);
+    fileToStore(null, null);
   }
 
   public void sameAs(int version, @NotNull StoreType storeType) {

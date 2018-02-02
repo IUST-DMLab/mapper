@@ -58,7 +58,7 @@ class SameAsLogic {
           val englishPage = pages[page]
           val subject = URIs.getFkgResourceUri(page)
           val dbpediaAddress = "http://dbpedia.org/resource/${englishPage!!.replace(' ', '_')}"
-          store.save(subject, sameAs, dbpediaAddress, Module.wiki.name, version)
+          store.save(subject, sameAs, dbpediaAddress, Module.similar.name, version)
           numberOfSameAs++
           try {
             val dbpediaQuery = "http://dbpedia.org/sparql?default-graph-uri=http%3A%2F%2Fdbpedia.org" +
