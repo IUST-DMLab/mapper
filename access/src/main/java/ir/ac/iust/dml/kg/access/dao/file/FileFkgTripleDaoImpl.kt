@@ -132,8 +132,11 @@ class FileFkgTripleDaoImpl(private val path: Path, private val flushSize: Int = 
       FileInputStream(currentFiles[i].toFile()).use {
         InputStreamReader(it, "UTF-8").use {
           BufferedReader(it).use {
-            val subjectList: List<FkgTriple> = gson.fromJson(it, type)
-            allSubjectsList.addAll(subjectList)
+            try {
+              val subjectList: List<FkgTriple> = gson.fromJson(it, type)
+              allSubjectsList.addAll(subjectList)
+            } catch (th: Throwable) {
+            }
           }
         }
       }

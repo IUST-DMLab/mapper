@@ -209,42 +209,37 @@ public class MappingHelperRestServices {
     int page = 0;
     PagedData<FkgTriple> list = fileStore.list(pageSize, page);
     ProgressInformer informer = new ProgressInformer((int) list.getPageCount());
-    String templateResource = null;
     String categoryResource = null;
+    long numberOfTriples = 0;
     final String sameAs = URIs.INSTANCE.getSameAs();
     while (true) {
       for (FkgTriple triple : list.getData()) {
         if (triple.getSubject() == null || triple.getObjekt() == null || triple.getPredicate() == null) continue;
         if (triple.getPredicate().equals(sameAs)) {
-          if (Objects.equals(triple.getSubject(), templateResource)) {
-            System.out.println("template subject skipped " + templateResource);
-            continue;
-          }
-          if (triple.getObjekt().toLowerCase().contains("template:")) {
-            templateResource = triple.getSubject();
-            System.out.println("template subject detected: " + templateResource);
-            continue;
-          }
+          if (triple.getSubject().contains("الگو:") || triple.getSubject().contains("Template:")) continue;
           if (triple.getObjekt().toLowerCase().contains("category")) {
             categoryResource = triple.getSubject();
           }
-          templateResource = null;
           if (Objects.equals(triple.getSubject(), categoryResource)) {
-            System.out.println("converting " + triple.getSubject());
             triple.setSubject(triple.getSubject().replace("/resource/", "/category/"));
-            System.out.println("to " + triple.getSubject());
+            triple.setSource(triple.getSubject());
           }
         }
         triple.setVersion(version);
         if (overrideModule != null) triple.setModule(overrideModule);
+        numberOfTriples++;
         knowledgeStore.save(triple);
+        if (numberOfTriples % 10000 == 0)
+          System.out.println(numberOfTriples + " triples has been written.");
       }
       knowledgeStore.flush();
       if (list.getData().isEmpty()) break;
       list = fileStore.list(pageSize, ++page);
       informer.stepDone(page);
     }
-    knowledgeStore.activateVersion(Module.wiki.name(), version);
+    System.out.println(numberOfTriples + " triples has been written.");
+    if (overrideModule == null && overrideVersion == null)
+      knowledgeStore.activateVersion(Module.wiki.name(), version);
     informer.done();
   }
 
