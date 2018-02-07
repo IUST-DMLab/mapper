@@ -15,6 +15,7 @@ import ir.ac.iust.dml.kg.virtuoso.connector.data.VirtuosoTripleType
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 @CacheConfig(cacheNames = ["viewer3"])
@@ -108,7 +109,14 @@ open class V3EntityViewer {
   }
 
   private fun convert(data: VirtuosoTripleObject): EntityProperty? {
-    val strValue = data.value.toString()
+    val strValue =
+        if (data.type == VirtuosoTripleType.DateTime)
+          try {
+            Date(data.value.toString().toLong()).toString()
+          } catch (th: Throwable) {
+            data.value.toString()
+          }
+        else data.value.toString()
     if (data.type == VirtuosoTripleType.Resource) {
       val l = getLabel(strValue)
       return EntityProperty(EntityPropertyValue(
