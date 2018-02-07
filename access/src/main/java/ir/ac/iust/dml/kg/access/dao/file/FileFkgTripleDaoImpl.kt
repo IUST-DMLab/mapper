@@ -65,6 +65,7 @@ class FileFkgTripleDaoImpl(private val path: Path, private val flushSize: Int = 
         subjectPath = path.resolve("no-prefix").resolve(URLEncoder.encode(uri, "UTF-8") + ".json")
       }
     } catch (th: Throwable) {
+      th.printStackTrace()
       subjectPath = path.resolve("error").resolve(URLEncoder.encode(uri, "UTF-8") + ".json")
     }
     return try {
