@@ -6,6 +6,9 @@
 
 package ir.ac.iust.dml.kg.mapper.logic.viewer
 
+import com.ghasemkiani.util.icu.PersianCalendar
+import com.ibm.icu.text.DateFormat
+import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
 import ir.ac.iust.dml.kg.raw.utils.URIs
@@ -15,6 +18,7 @@ import ir.ac.iust.dml.kg.virtuoso.connector.data.VirtuosoTripleType
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 @CacheConfig(cacheNames = ["viewer3"])
@@ -107,8 +111,19 @@ open class V3EntityViewer {
     return result
   }
 
+  private val faLocale = Locale.forLanguageTag("fa")
+  private val tehranZone = com.ibm.icu.util.TimeZone.getTimeZone("Asia/Tehran")
+  private val pCal = PersianCalendar.getInstance(tehranZone, faLocale)
+  private val formatter = pCal.getDateTimeFormat(DateFormat.FULL, DateFormat.NONE, faLocale)
+
   private fun convert(data: VirtuosoTripleObject): EntityProperty? {
-    val strValue = data.value.toString()
+    val strValue =
+        if (data.type == VirtuosoTripleType.DateTime) {
+          synchronized(pCal) {
+            pCal.timeInMillis = (data.value as javax.xml.datatype.XMLGregorianCalendar).toGregorianCalendar().timeInMillis
+            formatter.format(pCal)
+          }
+        } else data.value.toString()
     if (data.type == VirtuosoTripleType.Resource) {
       val l = getLabel(strValue)
       return EntityProperty(EntityPropertyValue(

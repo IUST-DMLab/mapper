@@ -6,6 +6,8 @@
 
 package ir.ac.iust.dml.kg.mapper.logic.viewer
 
+import com.ghasemkiani.util.icu.PersianCalendar
+import com.ibm.icu.text.DateFormat
 import ir.ac.iust.dml.kg.raw.utils.ConfigReader
 import ir.ac.iust.dml.kg.raw.utils.LanguageChecker
 import ir.ac.iust.dml.kg.raw.utils.URIs
@@ -17,6 +19,7 @@ import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValue
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 @CacheConfig(cacheNames = ["viewer2"])
@@ -114,12 +117,23 @@ open class V2EntityViewer {
     return null
   }
 
+  private val faLocale = Locale.forLanguageTag("fa")
+  private val tehranZone = com.ibm.icu.util.TimeZone.getTimeZone("Asia/Tehran")
+  private val pCal = PersianCalendar.getInstance(tehranZone, faLocale)
+  private val formatter = pCal.getDateTimeFormat(DateFormat.FULL, DateFormat.NONE, faLocale)
+
   private fun convert(data: TypedValue): EntityProperty? {
     if (data.type == TypedValue.TypeEnum.RESOURCE) {
       val l = getLabel(data.value)
       return EntityProperty(EntityPropertyValue(
           l ?: data.value.substringAfterLast("/").replace('_', ' '),
           data.value, data.value.contains("upload.wikimedia.org")))
+    } else if (data.type == TypedValue.TypeEnum.DATE) {
+      synchronized(pCal) {
+        println("date here: " + data.value)
+        pCal.timeInMillis = data.value.toLong()
+        return EntityProperty(EntityPropertyValue(formatter.format(pCal)))
+      }
     } else {
       if (!LanguageChecker.multiLanguages(data.value))
         return EntityProperty(EntityPropertyValue(data.value))
