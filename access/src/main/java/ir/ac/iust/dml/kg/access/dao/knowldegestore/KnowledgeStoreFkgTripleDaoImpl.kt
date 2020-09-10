@@ -18,6 +18,7 @@ import ir.ac.iust.dml.kg.services.client.swagger.V2triplesApi
 import ir.ac.iust.dml.kg.services.client.swagger.model.TripleData
 import ir.ac.iust.dml.kg.services.client.swagger.model.TypedValueData
 import org.apache.log4j.Logger
+import java.util.*
 
 class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
 
@@ -37,7 +38,7 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
     while (buffer.isNotEmpty()) {
       try {
         logger.info("flushing ...")
-        if (tripleApi.batchInsert5(buffer)) buffer.clear()
+        writeBuffer()
       } catch (e: Throwable) {
         logger.error(e)
       }
@@ -74,12 +75,26 @@ class KnowledgeStoreFkgTripleDaoImpl : FkgTripleDao() {
 
     buffer.add(data)
     if (buffer.size > flushSize) {
-      try {
-        logger.info("batch insert ...")
-        if (tripleApi.batchInsert5(buffer)) buffer.clear()
-      } catch (th: Throwable) {
-        logger.error(th)
+      writeBuffer()
+    }
+  }
+
+  private fun writeBuffer() {
+    try {
+      logger.info("batch insert ...")
+      val rejected = tripleApi.batchInsert5(buffer)
+      if (rejected.size > (buffer.size * 10) / 100) {
+        logger.error("too many errors in batch insert ${buffer.size} records.")
+        logger.error("showing 100 errors:")
+        for (i in rejected)
+          if (i < 100) logger.error("error in writing ${buffer[i].subject}.")
+      } else {
+        logger.info("${buffer.size} record written in knowledge store in ${Date()}")
+        for (i in rejected) logger.error("error in writing ${buffer[i].subject}.")
+        buffer.clear()
       }
+    } catch (th: Throwable) {
+      logger.error(th)
     }
   }
 

@@ -9,7 +9,7 @@
     <relativePath>../</relativePath>
     <groupId>ir.ac.iust.dml.kg.mapping</groupId>
     <artifactId>mapping-parent</artifactId>
-    <version>0.9.0</version>
+    <version>0.9.1</version>
   </parent>
 
   <properties>
@@ -29,6 +29,12 @@
       <groupId>ir.ac.iust.dml.kg.raw</groupId>
       <artifactId>nlp-utils</artifactId>
       <version>0.2.2</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

@@ -8,7 +8,7 @@
     <relativePath>../</relativePath>
     <groupId>ir.ac.iust.dml.kg.mapping</groupId>
     <artifactId>mapping-parent</artifactId>
-    <version>0.9.0</version>
+    <version>0.9.1</version>
   </parent>
 
   <properties>
@@ -21,7 +21,7 @@
     <dependency>
       <groupId>ir.ac.iust.dml.kg.services</groupId>
       <artifactId>knowledge-store-client</artifactId>
-      <version>0.5.0</version>
+      <version>0.6.0</version>
       <exclusions>
         <exclusion>
           <groupId>io.swagger</groupId>
@@ -33,7 +33,7 @@
     <dependency>
       <groupId>ir.ac.iust.dml.kg.vituoso</groupId>
       <artifactId>connector</artifactId>
-      <version>0.2.5</version>
+      <version>0.2.6</version>
       <exclusions>
         <exclusion>
           <groupId>xerces</groupId>
